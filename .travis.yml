@@ -1,0 +1,26 @@
+dist: xenial
+sudo: require
+
+language: cpp
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-8
+      - cmake
+
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_BUILD_TYPE=Sanitizers -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON
+  - cmake --build . --parallel $(nproc)
+  - examples/cpparg-examples; true
+  - test/cpparg-test
