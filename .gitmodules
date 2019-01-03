@@ -1,3 +1,9 @@
 [submodule "third-party/cpparg"]
 	path = third-party/cpparg
 	url = git@github.com:BigRedEye/cpparg.git
+[submodule "third-party/json"]
+	path = third-party/json
+	url = git@github.com:nlohmann/json.git
+[submodule "third-party/termcolor"]
+	path = third-party/termcolor
+	url = git@github.com:ikalnytskyi/termcolor.git

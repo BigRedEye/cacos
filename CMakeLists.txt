@@ -44,5 +44,23 @@ target_sources(${PROJECT_NAME} PUBLIC
     ${HEADERS} ${SOURCES}
 )
 
+find_package(Threads)
+
+SET(Boost_USE_MULTITHREAD ON)
+find_package(Boost REQUIRED COMPONENTS system thread)
+target_include_directories(${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LINK_LIBS})
+
 add_subdirectory(third-party/cpparg)
-target_link_libraries(${PROJECT_NAME} cpparg)
+add_subdirectory(third-party/termcolor)
+
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(third-party/json)
+
+target_link_libraries(${PROJECT_NAME}
+    cpparg
+    termcolor::termcolor
+    nlohmann_json::nlohmann_json
+    Boost::system
+    ${CMAKE_THREAD_LIBS_INIT}
+)
