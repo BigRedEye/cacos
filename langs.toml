@@ -1,0 +1,104 @@
+[[lang]]
+name = "c"
+extensions = [ "c" ]
+
+[lang.compiler]
+exe = "clang"
+flags = [
+    "@source",
+    "-o",
+    "@binary",
+    "-xc",
+    "-std=gnu11",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wshadow",
+    "-Werror",
+    "-lm",
+]
+release = [
+    "-O2",
+]
+debug = [
+    "-O0",
+    "-ggdb",
+    "-fsanitize=address,undefined",
+]
+
+
+[[lang]]
+name = "c++"
+extensions = [ "cpp", "cxx", "cc" ]
+
+[lang.compiler]
+exe = "clang++"
+flags = [
+    "@source",
+    "-o",
+    "@binary",
+    "-std=c++17",
+    "-xc++",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wshadow",
+    "-Werror",
+]
+release = [
+    "-O2",
+]
+debug = [
+    "-O0",
+    "-ggdb",
+    "-fsanitize=address,undefined",
+]
+
+
+[[lang]]
+name = "asm"
+extensions = [ "s", "S" ]
+
+[lang.compiler]
+exe = "clang"
+flags = [
+    "@source",
+    "-o",
+    "@binary"
+]
+
+
+[[lang]]
+name = "rust"
+extensions = [ "rs" ]
+
+[lang.compiler]
+exe = "rustc"
+flags = [
+    "@source",
+    "-o",
+    "@binary",
+]
+release = [
+    "-O",
+]
+
+
+[[lang]]
+name = "bash"
+extensions = [ "sh" ]
+
+[lang.interpreter]
+exe = "bash"
+flags = [
+    "-e",
+    "@source",
+]
+
+
+[[lang]]
+name = "python"
+extensions = [ "py" ]
+
+[lang.interpreter]
+exe = "python3"

@@ -1,0 +1,5 @@
+[source]
+main = main.c
+language = c
+
+[test]
