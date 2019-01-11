@@ -24,10 +24,14 @@ file(GLOB SOURCES
     src/executable/executable.cpp
     src/executable/flags.cpp
 
+    src/executor/executor.cpp
+
     src/test/add.cpp
     src/test/generate.cpp
 
     src/util/split.cpp
+
+    src/cacos.cpp
 )
 
 file(GLOB HEADERS
@@ -41,11 +45,15 @@ file(GLOB HEADERS
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
 
+    include/cacos/executor/executor.h
+
     include/cacos/test/add.h
     include/cacos/test/generate.h
 
     include/cacos/util/split.h
     include/cacos/util/util.h
+
+    include/cacos.h
 )
 
 file(GLOB CONFIGS
