@@ -6,13 +6,14 @@
 
 ### Зависимости
 
++ Совместимый с С++17 компилятор
 + cmake
-+ gcc
 + boost
++ libcurl (опционально)
 
 ###### Arch Linux
 ```
-# pacman -S boost cmake
+# pacman -S boost cmake curl
 ```
 
 ### Сборка

@@ -5,9 +5,9 @@ extensions = [ "c" ]
 [lang.compiler]
 exe = "clang"
 flags = [
-    "@source",
+    "@{source}",
     "-o",
-    "@binary",
+    "@{binary}",
     "-xc",
     "-std=gnu11",
     "-Wall",
@@ -34,9 +34,9 @@ extensions = [ "cpp", "cxx", "cc" ]
 [lang.compiler]
 exe = "clang++"
 flags = [
-    "@source",
+    "@{source}",
     "-o",
-    "@binary",
+    "@{binary}",
     "-std=c++17",
     "-xc++",
     "-Wall",
@@ -62,9 +62,9 @@ extensions = [ "s", "S" ]
 [lang.compiler]
 exe = "clang"
 flags = [
-    "@source",
+    "@{source}",
     "-o",
-    "@binary"
+    "@{binary}"
 ]
 
 
@@ -75,9 +75,9 @@ extensions = [ "rs" ]
 [lang.compiler]
 exe = "rustc"
 flags = [
-    "@source",
+    "@{source}",
     "-o",
-    "@binary",
+    "@{binary}",
 ]
 release = [
     "-O",
@@ -92,7 +92,7 @@ extensions = [ "sh" ]
 exe = "bash"
 flags = [
     "-e",
-    "@source",
+    "@{source}",
 ]
 
 

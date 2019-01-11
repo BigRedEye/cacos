@@ -30,6 +30,7 @@ file(GLOB SOURCES
     src/test/generate.cpp
 
     src/util/split.cpp
+    src/util/inline_variables.cpp
 
     src/cacos.cpp
 )
@@ -52,6 +53,7 @@ file(GLOB HEADERS
 
     include/cacos/util/split.h
     include/cacos/util/util.h
+    include/cacos/util/inline_variables.h
 
     include/cacos.h
 )
@@ -60,36 +62,56 @@ file(GLOB CONFIGS
     langs.toml
 )
 
-add_library(${PROJECT_NAME}_lib STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
-add_executable(${PROJECT_NAME} src/main.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_lib)
+set(CACOS_LIB ${PROJECT_NAME}_lib)
 
-find_package(Threads)
+add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
 
+# Dependecies
+
+# Threads
+find_package(Threads REQUIRED)
+
+# CURL
+find_package(CURL)
+if (${CURL_FOUND})
+    target_link_libraries(${CACOS_LIB} PUBLIC CURL::libcurl)
+else()
+    message(STATUS " CURL was not found; compiling without its support")
+endif()
+
+
+# Boost
 SET(Boost_USE_MULTITHREAD ON)
 find_package(Boost REQUIRED COMPONENTS system thread)
 
+# cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
 set(CPPTOML_BUILD_EXAMPLES OFF CACHE "" INTERNAL)
 
-add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
-add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 add_subdirectory(third-party/toml EXCLUDE_FROM_ALL)
+
+# cpparg
+add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
+
+# termcolor
+add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
+
 target_compile_definitions(
-    ${PROJECT_NAME}_lib
+    ${CACOS_LIB}
     PUBLIC
     DEFAULT_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
+    CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
 )
 
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)
 
-target_include_directories(${PROJECT_NAME}_lib PUBLIC
+target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
     ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME}_lib PUBLIC
+target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
     cpptoml
@@ -97,6 +119,13 @@ target_link_libraries(${PROJECT_NAME}_lib PUBLIC
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}
 )
+
+# Executable
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CACOS_LIB})
+
+# Installation
 
 install(
     TARGETS ${PROJECT_NAME}

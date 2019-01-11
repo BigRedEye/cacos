@@ -9,6 +9,7 @@ include(DownloadGoogleTest)
 include(Sanitizers)
 
 file(GLOB SOURCES
+    inline_variables.cpp
     main.cpp
     split.cpp
 )

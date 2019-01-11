@@ -3,3 +3,10 @@ main = main.c
 language = c
 
 [test]
+stdin = 1.in
+stdout = 1.out
+exit_code = 0
+env = [
+    { home = "@{HOME}/home/" },
+    { cur = "@{CUR}" },
+]
