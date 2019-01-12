@@ -1,4 +1,5 @@
 #include "cacos/util/inline_variables.h"
+#include "cacos/util/string.h"
 
 #include <map>
 #include <vector>
@@ -87,11 +88,11 @@ InlineVariableParsingError::InlineVariableParsingError(const std::string& what)
     : std::runtime_error(what)
 {}
 
-void InlineVariablesParser::add(const std::string& key, const std::string& value) {
+void InlineVariables::set(const std::string& key, const std::string& value) {
     vars_[key] = value;
 }
 
-std::string InlineVariablesParser::parse(std::string_view str) {
+std::string InlineVariables::parse(std::string_view str) const {
     static TransitionTable table = initTransitionTable();
 
     ParsingState state = ParsingState::DEFAULT;
@@ -118,11 +119,11 @@ std::string InlineVariablesParser::parse(std::string_view str) {
         }
     }
 
-    std::string result(str.begin(), str.end());
+    std::string result = util::str(str);
     for (auto it = vars.rbegin(); it != vars.rend(); ++it) {
         auto [l, r] = *it;
         std::string_view keyView = str.substr(l + 2, r - l - 2);
-        std::string key(keyView.begin(), keyView.end());
+        std::string key = util::str(keyView);
         auto var = vars_.find(key);
         if (var == vars_.end()) {
             if (policy_ == UnknownVariablePolicy::IGNORE) {

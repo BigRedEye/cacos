@@ -3,6 +3,8 @@
 #include "cacos/common_args.h"
 #include "cacos/options.h"
 
+#include "cacos/util/logger.h"
+
 #include <cpparg/cpparg.h>
 #include <termcolor/termcolor.hpp>
 
@@ -34,7 +36,7 @@ int init(int argc, const char* argv[]) {
 
         return 0;
     } catch (const std::exception& ex) {
-        std::cerr << termcolor::red << ex.what() << std::endl;
+        Logger::error() << ex.what();
         return 1;
     }
 }

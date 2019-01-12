@@ -1,10 +1,10 @@
 #include "cacos/config.h"
-#include "cacos/test.h"
+#include "cacos/test/test.h"
 #include "cacos/util/util.h"
 #include "cacos/common_args.h"
 
-#include "cacos/test/generate.h"
-#include "cacos/test/add.h"
+#include "cacos/test/generate/generate.h"
+#include "cacos/test/add/add.h"
 
 #include <cpparg/cpparg.h>
 

@@ -14,23 +14,26 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
 
 file(GLOB SOURCES
-    src/config.cpp
     src/common_args.cpp
-    src/language.cpp
+    src/config.cpp
     src/init.cpp
-    src/test.cpp
+    src/language.cpp
     src/options.cpp
 
     src/executable/executable.cpp
     src/executable/flags.cpp
 
-    src/executor/executor.cpp
+    src/test/test.cpp
 
-    src/test/add.cpp
-    src/test/generate.cpp
+    src/test/add/add.cpp
+    src/test/generate/generate.cpp
+    src/test/generate/generator.cpp
 
-    src/util/split.cpp
     src/util/inline_variables.cpp
+    src/util/logger.cpp
+    src/util/split.cpp
+
+    src/util/mt/fixed_queue.cpp
 
     src/cacos.cpp
 )
@@ -40,20 +43,24 @@ file(GLOB HEADERS
     include/cacos/common_args.h
     include/cacos/language.h
     include/cacos/init.h
-    include/cacos/test.h
     include/cacos/options.h
 
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
 
-    include/cacos/executor/executor.h
 
+    include/cacos/test/test.h
     include/cacos/test/add.h
-    include/cacos/test/generate.h
+    include/cacos/test/generate/generate.h
+    include/cacos/test/generate/generator.h
 
-    include/cacos/util/split.h
-    include/cacos/util/util.h
     include/cacos/util/inline_variables.h
+    include/cacos/util/logger.h
+    include/cacos/util/split.h
+    include/cacos/util/string.h
+    include/cacos/util/util.h
+
+    include/cacos/util/mt/fixed_queue.h
 
     include/cacos.h
 )

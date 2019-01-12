@@ -22,15 +22,15 @@ enum class UnknownVariablePolicy {
     THROW
 };
 
-class InlineVariablesParser {
+class InlineVariables {
 public:
-    InlineVariablesParser(UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
+    InlineVariables(UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
         : policy_(policy)
     {}
 
-    void add(const std::string& key, const std::string& value);
+    void set(const std::string& key, const std::string& value);
 
-    std::string parse(std::string_view str);
+    std::string parse(std::string_view str) const;
 
 private:
     UnknownVariablePolicy policy_;

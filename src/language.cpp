@@ -1,4 +1,3 @@
-
 /*
     auto config = cpptoml::parse_file("/home/sergey/dev/cacos/cacos.toml");
     auto langs = config->get_table_array("lang");

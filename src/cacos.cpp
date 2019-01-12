@@ -1,6 +1,6 @@
 #include "cacos/init.h"
 #include "cacos/config.h"
-#include "cacos/test.h"
+#include "cacos/test/test.h"
 
 #include <cpparg/cpparg.h>
 
