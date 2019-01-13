@@ -13,11 +13,14 @@ Executable::Executable(const fs::path& exe, const std::vector<std::string>& flag
     , flags_(flags)
 {}
 
+ExecTask::~ExecTask() {
+}
+
 ExecPool::ExecPool(size_t workers)
     : workers_(workers)
 {}
 
-void ExecPool::push(ExecTask&& task) {
+void ExecPool::push(ExecTaskPtr&& task) {
     tasks_.push_back(std::move(task));
 }
 
@@ -28,8 +31,6 @@ void ExecPool::run() {
 
     auto task = tasks_.begin();
 
-    std::function<void()> pushTask;
-
     size_t runningTasks = 0;
 
     auto onExit = [&] (int, const std::error_code&) {
@@ -37,20 +38,12 @@ void ExecPool::run() {
     };
 
     std::vector<bp::child> child;
-    pushTask = [&] {
+    auto pushTask = [&] {
         if (task == tasks_.end()) {
             return false;
         }
 
-        bp::child c = task->exe.run(
-            task->args,
-            bp::std_in = task->input,
-            bp::std_out = task->output,
-            bp::std_err = bp::null,
-            bp::on_exit = onExit,
-            children,
-            ctx
-        );
+        bp::child c = (*task)->run(onExit, {children, ctx});
         ++task;
         ++runningTasks;
 

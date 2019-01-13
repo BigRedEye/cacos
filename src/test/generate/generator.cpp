@@ -17,6 +17,21 @@ Generator::Generator(GeneratorOptions&& opts)
     : opts_(std::move(opts)) {
 }
 
+template<typename T>
+class FutureRef {
+public:
+    FutureRef(std::future<T>& future)
+        : future_(future)
+    {}
+
+    operator std::future<T>&() {
+        return future_;
+    }
+
+private:
+    std::future<T>& future_;
+};
+
 void Generator::run() {
     executable::Executable exe(opts_.workspace / opts_.generator);
 
@@ -28,19 +43,19 @@ void Generator::run() {
     executable::ExecPool pool;
 
     std::vector<std::unique_ptr<std::string>> input;
-    std::vector<std::unique_ptr<std::string>> output;
+    std::vector<std::unique_ptr<std::future<std::string>>> output;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
-        // std::string name = vars.parse(opts_.testName);
         auto res = flags.build(vars);
         input.emplace_back(std::make_unique<std::string>(vars.parse(opts_.input)));
-        output.emplace_back(std::make_unique<std::string>(4096, '\0'));
+        output.emplace_back(std::make_unique<std::future<std::string>>());
 
-        executable::ExecTask task {
+        auto task = executable::makeTask(
             exe,
+            res,
             bp::buffer(std::as_const(*input.back())),
-            bp::buffer(*output.back()),
-            res
-        };
+            FutureRef(*output.back()),
+            bp::null
+        );
 
         pool.push(std::move(task));
     });
@@ -48,7 +63,7 @@ void Generator::run() {
     pool.run();
 
     for (size_t i = 0; i < input.size(); ++i) {
-        std::cout << *input[i] << ": " << *output[i] << std::endl;
+        std::cout << *input[i] << ": " << (*output[i]).get() << std::endl;
     }
 }
 
