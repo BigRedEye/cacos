@@ -47,7 +47,7 @@ struct ExecTask {
 
 class ExecPool {
 public:
-    ExecPool(size_t workers = std::thread::hardware_concurrency() * 2);
+    ExecPool(size_t workers = std::thread::hardware_concurrency());
 
     void push(ExecTask&& task);
     void run();
