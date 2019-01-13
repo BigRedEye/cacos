@@ -7,6 +7,8 @@
 
 #include <boost/asio.hpp>
 
+#include <boost/container/stable_vector.hpp>
+
 namespace cacos::test {
 
 Generator::Generator(const GeneratorOptions& opts)
@@ -42,18 +44,18 @@ void Generator::run() {
     executable::Flags flags(opts_.args);
     executable::ExecPool pool;
 
-    std::vector<std::unique_ptr<std::string>> input;
-    std::vector<std::unique_ptr<std::future<std::string>>> output;
+    boost::container::stable_vector<std::string> input;
+    boost::container::stable_vector<std::future<std::string>> output;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
         auto res = flags.build(vars);
-        input.emplace_back(std::make_unique<std::string>(vars.parse(opts_.input)));
-        output.emplace_back(std::make_unique<std::future<std::string>>());
+        input.emplace_back(vars.parse(opts_.input));
+        output.emplace_back();
 
         auto task = executable::makeTask(
             exe,
             res,
-            bp::buffer(std::as_const(*input.back())),
-            FutureRef(*output.back()),
+            bp::buffer(std::as_const(input.back())),
+            FutureRef(output.back()),
             bp::null
         );
 
@@ -63,7 +65,7 @@ void Generator::run() {
     pool.run();
 
     for (size_t i = 0; i < input.size(); ++i) {
-        std::cout << *input[i] << ": " << (*output[i]).get() << std::endl;
+        std::cout << input[i] << ": " << output[i].get() << std::endl;
     }
 }
 
