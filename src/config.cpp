@@ -21,7 +21,7 @@ Config::Config(const fs::path& ws, std::string_view filename) {
 }
 
 fs::path Config::defaultConfig() {
-    return "/etc/cacos/config.toml";
+    return fs::path(DEFAULT_CONFIG_PREFIX) / "cacos" / "config.toml";
 }
 
 }

@@ -20,5 +20,6 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Sanitizers
+  - cmake .. -DCMAKE_BUILD_TYPE=Sanitizers -DCACOS_BUILD_TESTS=ON
   - cmake --build . --parallel $(nproc)
+  - test/cacos_test

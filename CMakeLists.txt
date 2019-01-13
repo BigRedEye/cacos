@@ -1,9 +1,11 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.9)
 
 project(cacos)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+option(CACOS_BUILD_TESTS "Build tests" OFF)
 
 set(CACOS_CONFIGS_PREFIX "/etc/" CACHE PATH "Where to place the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
@@ -12,15 +14,28 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
 
 file(GLOB SOURCES
-    src/config.cpp
     src/common_args.cpp
-    src/language.cpp
+    src/config.cpp
     src/init.cpp
-    src/main.cpp
-    src/test.cpp
+    src/language.cpp
     src/options.cpp
+
     src/executable/executable.cpp
     src/executable/flags.cpp
+
+    src/test/test.cpp
+
+    src/test/add/add.cpp
+    src/test/generate/generate.cpp
+    src/test/generate/generator.cpp
+
+    src/util/inline_variables.cpp
+    src/util/logger.cpp
+    src/util/split.cpp
+
+    src/util/mt/fixed_queue.cpp
+
+    src/cacos.cpp
 )
 
 file(GLOB HEADERS
@@ -28,50 +43,82 @@ file(GLOB HEADERS
     include/cacos/common_args.h
     include/cacos/language.h
     include/cacos/init.h
-    include/cacos/test.h
-    include/cacos/util.h
     include/cacos/options.h
+
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
+
+
+    include/cacos/test/test.h
+    include/cacos/test/add.h
+    include/cacos/test/generate/generate.h
+    include/cacos/test/generate/generator.h
+
+    include/cacos/util/inline_variables.h
+    include/cacos/util/logger.h
+    include/cacos/util/split.h
+    include/cacos/util/string.h
+    include/cacos/util/util.h
+
+    include/cacos/util/mt/fixed_queue.h
+
+    include/cacos.h
 )
 
 file(GLOB CONFIGS
     langs.toml
 )
 
-add_executable(${PROJECT_NAME})
+set(CACOS_LIB ${PROJECT_NAME}_lib)
 
-target_sources(${PROJECT_NAME} PUBLIC
-    ${HEADERS} ${SOURCES} ${CONFIGS}
-)
+add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
+
+# Dependecies
+
+# Threads
+find_package(Threads REQUIRED)
+
+# CURL
+find_package(CURL)
+if (${CURL_FOUND})
+    target_link_libraries(${CACOS_LIB} PUBLIC CURL::libcurl)
+else()
+    message(STATUS " CURL was not found; compiling without its support")
+endif()
 
 
-find_package(Threads)
-
+# Boost
 SET(Boost_USE_MULTITHREAD ON)
 find_package(Boost REQUIRED COMPONENTS system thread)
 
+# cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
 set(CPPTOML_BUILD_EXAMPLES OFF CACHE "" INTERNAL)
 
-add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
-add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 add_subdirectory(third-party/toml EXCLUDE_FROM_ALL)
+
+# cpparg
+add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
+
+# termcolor
+add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
+
 target_compile_definitions(
-    ${PROJECT_NAME}
-    PRIVATE
+    ${CACOS_LIB}
+    PUBLIC
     DEFAULT_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
+    CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
 )
 
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)
 
-target_include_directories(${PROJECT_NAME} PRIVATE
+target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
     ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
     cpptoml
@@ -79,6 +126,26 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}
 )
+
+# Executable
+
+add_executable(${PROJECT_NAME} src/main.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CACOS_LIB})
+
+# LTO
+
+cmake_policy(SET CMP0069 NEW)
+include(CheckIPOSupported)
+check_ipo_supported(RESULT result OUTPUT output)
+if(result)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+  set_property(TARGET ${CACOS_LIB} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+  message(WARNING "LPO is not supported: ${output}")
+endif()
+
+
+# Installation
 
 install(
     TARGETS ${PROJECT_NAME}
@@ -92,3 +159,7 @@ install(
     COMPONENT configs
 )
 
+if (${CACOS_BUILD_TESTS})
+    enable_testing()
+    add_subdirectory(test)
+endif()
