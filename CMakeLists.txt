@@ -10,8 +10,23 @@ option(CACOS_BUILD_TESTS "Build tests" OFF)
 set(CACOS_CONFIGS_PREFIX "/etc/" CACHE PATH "Where to place the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
+# Sanitizers build type
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
+
+# Detect platform
+
+set(CACOS_OS "CACOS_OS_UNDEFINED")
+if (WIN32)
+    set(CACOS_OS "CACOS_OS_WINDOWS")
+elseif (APPLE)
+    set(CACOS_OS "CACOS_OS_MACOS")
+elseif (UNIX)
+    set(CACOS_OS "CACOS_OS_UNIX")
+endif()
+
+# Sources
 
 file(GLOB SOURCES
     src/common_args.cpp
@@ -28,6 +43,9 @@ file(GLOB SOURCES
     src/test/add/add.cpp
     src/test/generate/generate.cpp
     src/test/generate/generator.cpp
+
+    src/process/unix/process.cpp
+    src/process/result.cpp
 
     src/util/inline_variables.cpp
     src/util/logger.cpp
@@ -53,6 +71,10 @@ file(GLOB HEADERS
     include/cacos/test/add.h
     include/cacos/test/generate/generate.h
     include/cacos/test/generate/generator.h
+
+    include/cacos/process/limits.h
+    include/cacos/process/process.h
+    include/cacos/process/result.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
@@ -109,6 +131,7 @@ target_compile_definitions(
     DEFAULT_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
+    ${CACOS_OS}=1
 )
 
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)

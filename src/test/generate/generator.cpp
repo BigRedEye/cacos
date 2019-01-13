@@ -42,7 +42,10 @@ void Generator::run() {
     std::vector<bp::child> children(std::thread::hardware_concurrency());
 
     executable::Flags flags(opts_.args);
-    executable::ExecPool pool;
+    executable::ExecPool pool(process::Limits{
+        process::Limits::unlimited<bytes>,
+        seconds(0.3)
+    });
 
     boost::container::stable_vector<std::string> input;
     boost::container::stable_vector<std::future<std::string>> output;
@@ -51,8 +54,20 @@ void Generator::run() {
         input.emplace_back(vars.parse(opts_.input));
         output.emplace_back();
 
+        auto callback = [] (process::Result res, std::optional<process::Info>&& info) {
+            if (res.status != process::status::OK) {
+                Logger::warning() << "Exit status: " << process::status::serialize(res.status);
+            }
+            Logger::log()
+                << "Return code = "
+                << res.returnCode
+                << ", cpu time = " << info->cpuTime.count()
+                << ", real time = " << info->realTime.count()
+                << ", max rss = " << info->maxRss / (1024. * 1024.) << "mb";
+        };
         auto task = executable::makeTask(
             exe,
+            callback,
             res,
             bp::buffer(std::as_const(input.back())),
             FutureRef(output.back()),

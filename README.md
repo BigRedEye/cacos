@@ -6,7 +6,7 @@
 
 ### Зависимости
 
-+ Совместимый с С++17 компилятор
++ Компилятор с поддержкой С++17
 + cmake 3.9 или выше
 + boost
 + libcurl (опционально)
@@ -34,13 +34,13 @@ $ cmake --build . --parallel $(nproc)
 
 ### Инициализация проекта
 ```sh
-$ cacos new sm-xx/yy
+$ cacos init sm-xx/yy
 ```
 Создаст новый проект для задачи sm-xx/yy. Аналогично
 ```sh
 $ mkdir -p sm-xx/yy
 $ cd sm-xx/yy
-$ cacos new .
+$ cacos init .
 ```
 
 ### Создание тестов

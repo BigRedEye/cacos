@@ -20,6 +20,4 @@ private:
     fs::path main;
 };
 
-std::optional<toml::toml> find_config(const std::vector<std::string>& paths, std::string_view filename);
-
 }

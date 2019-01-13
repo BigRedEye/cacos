@@ -1,6 +1,11 @@
 #include "cacos/executable/executable.h"
+#include "cacos/process/process.h"
+
+#include "cacos/util/logger.h"
 
 #include <boost/asio.hpp>
+
+#include <unordered_map>
 
 namespace cacos::executable {
 
@@ -16,8 +21,15 @@ Executable::Executable(const fs::path& exe, const std::vector<std::string>& flag
 ExecTask::~ExecTask() {
 }
 
-ExecPool::ExecPool(size_t workers)
+void ExecTask::onExit(process::Result res, std::optional<process::Info>&& info) {
+    if (callback_) {
+        callback_(res, std::move(info));
+    }
+}
+
+ExecPool::ExecPool(process::Limits limits, size_t workers)
     : workers_(workers)
+    , limits_(limits)
 {}
 
 void ExecPool::push(ExecTaskPtr&& task) {
@@ -27,53 +39,79 @@ void ExecPool::push(ExecTaskPtr&& task) {
 void ExecPool::run() {
     boost::asio::io_context ctx;
 
-    bp::group children;
-
     auto task = tasks_.begin();
 
     size_t runningTasks = 0;
 
-    auto onExit = [&] (int, const std::error_code&) {
-        --runningTasks;
-    };
-
-    std::vector<bp::child> child;
+    std::unordered_map<ui64, process::Process> running;
+    ui64 id = 0;
     auto pushTask = [&] {
         if (task == tasks_.end()) {
             return false;
         }
 
-        bp::child c = (*task)->run(onExit, {children, ctx});
+        auto onExit = [&, id, task=(*task).get()] (int exitCode, const std::error_code&) {
+            auto it = running.find(id);
+            std::optional<process::Info> info;
+            if (it != running.end()) {
+                info = it->second.cachedInfo();
+            }
+            process::Result res {
+                info ? info->result : process::status::UNDEFINED,
+                exitCode
+            };
+            task->onExit(res, std::move(info));
+
+            if (it != running.end()) {
+                running.erase(it);
+            }
+
+            --runningTasks;
+        };
+
+        bp::child c = (*task)->run(onExit, {ctx});
+
+        running.emplace(id, std::move(c));
+
         ++task;
         ++runningTasks;
+        ++id;
 
-        child.push_back(std::move(c));
         return true;
+    };
+
+    auto pollInfo = [&] {
+        for (auto&& [i, c] : running) {
+            process::Info info = c.info();
+            if (limits_.tl != process::Limits::unlimited<seconds> && info.cpuTime > limits_.tl) {
+                c.terminate(process::status::TL);
+            }
+            if (limits_.ml != process::Limits::unlimited<bytes> && info.maxRss > limits_.ml) {
+                c.terminate(process::status::ML);
+            }
+        }
+    };
+
+    auto poll = [&] (std::chrono::microseconds timeout) {
+        ctx.restart();
+        ctx.run_for(timeout);
+        pollInfo();
     };
 
     while (task != tasks_.end()) {
         pushTask();
 
         while (runningTasks >= workers_) {
-            ctx.restart();
-            ctx.run_for(std::chrono::milliseconds(1));
-            std::error_code errc;
-            children.wait_for(std::chrono::milliseconds(1), errc);
+            poll(defaultTimeout);
         }
     }
 
-    ctx.restart();
-    ctx.run();
-
-    for (auto&& c : child) {
-        if (c.running()) {
-            c.wait();
-        }
+    while (runningTasks > 0) {
+        poll(defaultTimeout);
     }
 
-    if (children.joinable()) {
-        std::error_code errc;
-        children.wait(errc);
+    if (running.size()) {
+        Logger::warning() << "Running tasks " << running.size() << " != 0: ";
     }
 
     tasks_.clear();

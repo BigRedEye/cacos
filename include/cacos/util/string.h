@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -42,6 +43,17 @@ inline bool ends_with(std::string_view str, std::string_view suffix) {
 template<typename... Args>
 inline std::string join(Args&&... args) {
     return ("" + ... + to_string(args));
+}
+
+inline std::string readFile(std::ifstream& in) {
+    std::string result;
+    std::string buffer(4096, '\0');
+    do {
+        in.read(buffer.data(), buffer.size());
+        size_t bytes = in.gcount();
+        result.append(buffer.data(), bytes);
+    } while (in);
+    return result;
 }
 
 } // namespace cacos
