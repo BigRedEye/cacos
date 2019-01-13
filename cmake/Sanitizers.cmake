@@ -1,8 +1,8 @@
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    SET( CMAKE_CXX_FLAGS_SANITIZERS "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=thread -fsanitize-undefined-trap-on-error"
+    SET( CMAKE_CXX_FLAGS_SANITIZERS "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address -fsanitize-undefined-trap-on-error"
         CACHE STRING "Flags for C++ with UBSan and ASan enabled."
         FORCE)
-    SET( CMAKE_C_FLAGS_SANITIZERS "${CMAKE_C_FLAGS_DEBUG} -fsanitize=thread -fsanitize-undefined-trap-on-error"
+    SET( CMAKE_C_FLAGS_SANITIZERS "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address -fsanitize-undefined-trap-on-error"
         CACHE STRING "Flags for C with UBSan and ASan enabled."
         FORCE)
     SET( CMAKE_EXE_LINKER_FLAGS_SANITIZERS

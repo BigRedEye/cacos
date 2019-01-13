@@ -70,6 +70,13 @@ int generate(int argc, const char* argv[]) {
         .description("Stdin for generator")
         .store(opts.input);
 
+    parser
+        .add('t', "test")
+        .optional()
+        .value_type("STRING")
+        .description("Test name")
+        .store(opts.testName);
+
     parser.parse(argc, argv);
 
     Generator generator(opts);

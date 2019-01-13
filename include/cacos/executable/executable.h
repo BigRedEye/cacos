@@ -5,6 +5,8 @@
 #include "cacos/util/util.h"
 #include "cacos/util/inline_variables.h"
 
+#include <variant>
+
 namespace cacos::executable {
 
 class Executable {
@@ -31,6 +33,28 @@ public:
 private:
     fs::path executable_;
     Flags flags_;
+};
+
+using InputBuffer = std::variant<boost::asio::const_buffer, fs::path>;
+using OutputBuffer = std::variant<boost::asio::mutable_buffer, fs::path>;
+
+struct ExecTask {
+    Executable& exe;
+    boost::asio::const_buffer input;
+    boost::asio::mutable_buffer output;
+    std::vector<std::string> args;
+};
+
+class ExecPool {
+public:
+    ExecPool(size_t workers = std::thread::hardware_concurrency() * 2);
+
+    void push(ExecTask&& task);
+    void run();
+
+private:
+    size_t workers_;
+    std::vector<ExecTask> tasks_;
 };
 
 }

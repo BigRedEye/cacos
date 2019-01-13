@@ -21,9 +21,10 @@ struct GeneratorOptions : public Options {
     using Variables = std::map<std::string, Range<int>>;
 
     std::string generator;
-    std::vector<std::string> args;
-    std::string input;
     Variables vars;
+    std::string input;
+    std::string testName;
+    std::vector<std::string> args;
 };
 
 class Generator {

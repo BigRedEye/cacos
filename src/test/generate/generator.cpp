@@ -2,7 +2,6 @@
 
 #include "cacos/executable/executable.h"
 
-#include "cacos/util/mt/fixed_queue.h"
 #include "cacos/util/logger.h"
 #include "cacos/util/string.h"
 
@@ -21,41 +20,36 @@ Generator::Generator(GeneratorOptions&& opts)
 void Generator::run() {
     executable::Executable exe(opts_.workspace / opts_.generator);
 
-    mt::FixedQueue queue;
-
     InlineVariables vars;
 
-    std::mutex mtx;
+    std::vector<bp::child> children(std::thread::hardware_concurrency());
 
+    executable::Flags flags(opts_.args);
+    executable::ExecPool pool;
+
+    std::vector<std::unique_ptr<std::string>> input;
+    std::vector<std::unique_ptr<std::string>> output;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
-        executable::Flags flags(opts_.args);
-        std::string in = vars.parse(opts_.input);
+        // std::string name = vars.parse(opts_.testName);
         auto res = flags.build(vars);
-        queue.add([&, args = std::move(res), input = std::move(in)] {
+        input.emplace_back(std::make_unique<std::string>(vars.parse(opts_.input)));
+        output.emplace_back(std::make_unique<std::string>(4096, '\0'));
 
-            // std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 2000));
-            static thread_local boost::asio::io_service ios;
+        executable::ExecTask task {
+            exe,
+            bp::buffer(std::as_const(*input.back())),
+            bp::buffer(*output.back()),
+            res
+        };
 
-            // std::cout << "Running, input = " << input << ", id = 0x" << std::hex << std::this_thread::get_id() << std::endl;
-            std::string out(128, '\0');
-            mtx.lock();
-            auto child = exe.run(args, bp::std_in < bp::buffer(input), bp::std_out > bp::buffer(out), bp::std_err > bp::null, ios);
-            mtx.unlock();
-            // std::cout << "Running ios, id = 0x" << std::hex << std::this_thread::get_id() << std::endl;
-            ios.restart();
-            ios.run();
-            // std::cout << "Joining child, id = 0x" << std::hex << std::this_thread::get_id() << std::endl;
-            if (child.joinable()) {
-                child.join();
-            }
-
-            // std::unique_lock<std::mutex> lock(mtx);
-            // std::cout << input << ": " << out << std::endl;
-        });
+        pool.push(std::move(task));
     });
 
-    queue.run();
-    queue.wait();
+    pool.run();
+
+    for (size_t i = 0; i < input.size(); ++i) {
+        std::cout << *input[i] << ": " << *output[i] << std::endl;
+    }
 }
 
 void Generator::traverse(VarsIterator it, InlineVariables& vars, const std::function<void(const InlineVariables& vars)>& callback) {
