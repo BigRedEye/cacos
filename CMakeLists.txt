@@ -66,7 +66,6 @@ file(GLOB HEADERS
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
 
-
     include/cacos/test/test.h
     include/cacos/test/add.h
     include/cacos/test/generate/generate.h
@@ -75,6 +74,9 @@ file(GLOB HEADERS
     include/cacos/process/limits.h
     include/cacos/process/process.h
     include/cacos/process/result.h
+
+    include/cacos/lang/lang.h
+    include/cacos/lang/translator.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
