@@ -8,7 +8,8 @@ namespace cacos {
 
 struct Options {
     fs::path workspace;
-    std::string config;
+    fs::path config;
+    fs::path langs;
 };
 
 }

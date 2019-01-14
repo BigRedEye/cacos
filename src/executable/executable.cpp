@@ -16,10 +16,8 @@ Executable::Executable(const fs::path& exe)
 {}
 
 Executable::Executable(const fs::path& exe, const std::vector<std::string>& flags)
-    : flags_(flags) {
-    Executable runnable = lang::runnable(exe);
-    executable_ = std::move(runnable.executable_);
-    flags_.prepend(runnable.flags_);
+    : executable_(exe)
+    , flags_(flags) {
 }
 
 ExecTask::~ExecTask() {

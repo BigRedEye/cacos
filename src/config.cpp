@@ -2,26 +2,81 @@
 
 #include <cpptoml.h>
 
+#include "cacos/util/logger.h"
+
+#include <cstdlib>
 #include <fstream>
 #include <string_view>
 
-namespace cacos {
+#ifdef CACOS_OS_UNIX
+#include <sys/types.h>
+#include <pwd.h>
+#endif
 
-int config(int argc, const char* argv[]) {
-    return !!argv[argc];
+namespace cacos::config {
+
+ConfigError::ConfigError(const std::string& what)
+    : std::runtime_error(what) {
 }
 
-Config::Config(const fs::path& ws, std::string_view filename) {
-    fs::path path = ws / filename;
-    cpptoml::parse_file(path);
-    std::shared_ptr<cpptoml::table> table;
-    if (!fs::exists(path)) {
-        table = cpptoml::parse_file(path);
+fs::path Config::defaultDir() {
+    return fs::path(CACOS_CONFIG_PREFIX) / "cacos";
+}
+
+namespace {
+fs::path homeDir() {
+#ifdef CACOS_OS_UNIX
+    struct passwd* pass = getpwuid(getuid());
+    if (pass && pass->pw_dir) {
+        return fs::path(pass->pw_dir);
     }
+#endif
+
+    static const char* vars[] = { "HOME", "HOMEPATH", "HOMESHARE", "USERPROFILE", "HOMEDRIVE" };
+    for (auto var : vars) {
+        const char* path;
+        if ((path = getenv(var))) {
+            return fs::path(path);
+        }
+    }
+    Logger::warning() << "Cannot determine user home dir";
+    return fs::current_path();
+}
 }
 
-fs::path Config::defaultConfig() {
-    return fs::path(DEFAULT_CONFIG_PREFIX) / "cacos" / "config.toml";
+fs::path Config::userDir() {
+    return homeDir() / ".config";
+}
+
+namespace {
+
+std::optional<fs::path> find(const std::vector<fs::path>& alternatives) {
+    for (auto&& path : alternatives) {
+        if (!fs::exists(path)) {
+            return path;
+        }
+    }
+
+    return {};
+}
+
+}
+
+Config::Config(const Options& opts) {
+    auto langs = find({ opts.langs, userDir() / "langs.toml", defaultDir() / "langs.toml" });
+    auto config = find({ opts.langs, userDir() / "cacos.toml", defaultDir() / "cacos.toml" });
+
+    if (!langs) {
+        throw ConfigError("Cannot find langs file");
+    }
+
+    auto table = cpptoml::parse_file(*langs);
+
+    if (table) {
+        langs_ = lang::LanguageTable(*table);
+    } else {
+        throw ConfigError("Cannot parse langs file");
+    }
 }
 
 }

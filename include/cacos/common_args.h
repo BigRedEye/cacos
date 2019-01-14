@@ -13,6 +13,7 @@ namespace options {
 enum Mask : ui64 {
     WORKSPACE = 0x0001,
     CONFIG    = 0x0002,
+    LANGS     = 0x0004,
     ALL       = std::numeric_limits<ui64>::max(),
 };
 }

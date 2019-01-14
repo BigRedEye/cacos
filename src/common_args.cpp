@@ -1,5 +1,7 @@
 #include "cacos/common_args.h"
 
+#include "cacos/default_config.h"
+
 namespace cacos {
 
 cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, options::Mask mask) {
@@ -19,10 +21,24 @@ cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, options:
         parser
             .add('c', "config")
             .optional()
-            .description("Config file")
-            .value_type("CFG")
-            .default_value("cacos.toml")
-            .store(opts.config);
+            .description("Config file relative to the workspace directory")
+            .value_type("FILE")
+            .default_value(config::defaultDir() / "cacos.toml")
+            .handler([&](std::string_view path) {
+                opts.config = path;
+            });
+    }
+
+    if (mask & options::CONFIG) {
+        parser
+            .add('l', "langs")
+            .optional()
+            .description("Langs file relative to the workspace directory")
+            .value_type("FILE")
+            .default_value(config::defaultDir() / "langs.toml")
+            .handler([&](std::string_view path) {
+                opts.langs = path;
+            });
     }
 
     parser

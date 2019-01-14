@@ -2,22 +2,37 @@
 
 #include "cacos/executable/executable.h"
 
+#include "cacos/options.h"
+
+#include "cacos/lang/lang.h"
+
 #include <cpptoml.h>
 
 #include <string_view>
 
-namespace cacos {
+
+namespace cacos::config {
+
+class ConfigError : public std::runtime_error {
+public:
+    ConfigError(const std::string& err);
+};
 
 class Config {
 public:
+    Config(const Options& opts);
 
-    Config(const fs::path& ws, std::string_view filename = DEFAULT_FILENAME);
+    fs::path workspace() const;
 
-    static fs::path defaultConfig();
-    static constexpr std::string_view DEFAULT_FILENAME = "cacos.toml";
+    const lang::LanguageTable& langs() const;
+
+    static fs::path defaultDir();
+    static fs::path userDir();
+    fs::path binaryDir();
 
 private:
-    fs::path main;
+    fs::path main_;
+    lang::LanguageTable langs_;
 };
 
 }

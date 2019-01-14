@@ -49,9 +49,6 @@ public:
         double uptime = parseUptime();
 
         bytes rss = stats.rss * getpagesize();
-        if (rss & (ui64(1) << 63)) {
-            rss = 0;
-        }
         cachedInfo_.maxRss = std::max<ui64>(cachedInfo_.maxRss, rss);
         cachedInfo_.cpuTime = seconds(total / static_cast<double>(ticks));
         cachedInfo_.realTime = seconds(uptime - stats.starttime / static_cast<double>(ticks));

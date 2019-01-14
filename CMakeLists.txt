@@ -47,6 +47,11 @@ file(GLOB SOURCES
     src/process/unix/process.cpp
     src/process/result.cpp
 
+    src/lang/compiler.cpp
+    src/lang/interpreter.cpp
+    src/lang/lang.cpp
+    src/lang/translator.cpp
+
     src/util/inline_variables.cpp
     src/util/logger.cpp
     src/util/split.cpp
@@ -76,6 +81,8 @@ file(GLOB HEADERS
     include/cacos/process/result.h
 
     include/cacos/lang/lang.h
+    include/cacos/lang/compiler.h
+    include/cacos/lang/interpreter.h
     include/cacos/lang/translator.h
 
     include/cacos/util/inline_variables.h
@@ -130,7 +137,7 @@ add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 target_compile_definitions(
     ${CACOS_LIB}
     PUBLIC
-    DEFAULT_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
+    CACOS_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
     ${CACOS_OS}=1

@@ -14,6 +14,9 @@ public:
 
     std::vector<std::string> build(const InlineVariables& vars) const;
 
+    void prepend(const std::vector<std::string>& flags);
+    void append(const std::vector<std::string>& flags);
+
 private:
     std::vector<std::string> flags_;
 };
