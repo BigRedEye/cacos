@@ -1,6 +1,8 @@
 #include "cacos/executable/executable.h"
 #include "cacos/process/process.h"
 
+#include "cacos/lang/lang.h"
+
 #include "cacos/util/logger.h"
 
 #include <boost/asio.hpp>
@@ -15,8 +17,12 @@ Executable::Executable(const fs::path& exe)
 
 Executable::Executable(const fs::path& exe, const std::vector<std::string>& flags)
     : executable_(exe)
-    , flags_(flags)
-{}
+    , flags_(flags) {
+}
+
+const fs::path& Executable::path() const {
+    return executable_;
+}
 
 ExecTask::~ExecTask() {
 }
@@ -109,6 +115,9 @@ void ExecPool::run() {
     while (runningTasks > 0) {
         poll(defaultTimeout);
     }
+
+    ctx.restart();
+    ctx.run();
 
     if (running.size()) {
         Logger::warning() << "Running tasks " << running.size() << " != 0: ";

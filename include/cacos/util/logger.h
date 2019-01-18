@@ -18,11 +18,16 @@ public:
     Logger& flush(bool flush);
 
     template<typename T>
-    inline Logger& operator<<(const T& msg) {
+    Logger& operator<<(const T& msg) {
         os_ << msg;
         if (delim_) {
             os_ << delim_;
         }
+        return *this;
+    }
+
+    Logger& operator<<(std::ostream& (*manip)(std::ostream&)) {
+        os_ << manip;
         return *this;
     }
 

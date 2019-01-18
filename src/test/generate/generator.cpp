@@ -5,41 +5,26 @@
 #include "cacos/util/logger.h"
 #include "cacos/util/string.h"
 
+#include "cacos/lang/lang.h"
+
 #include <boost/asio.hpp>
 
 #include <boost/container/stable_vector.hpp>
 
+#include <functional>
+
 namespace cacos::test {
 
-Generator::Generator(const GeneratorOptions& opts)
-    : opts_(opts) {
+Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
+    : config_(cfg)
+    , opts_(opts) {
 }
-
-Generator::Generator(GeneratorOptions&& opts)
-    : opts_(std::move(opts)) {
-}
-
-template<typename T>
-class FutureRef {
-public:
-    FutureRef(std::future<T>& future)
-        : future_(future)
-    {}
-
-    operator std::future<T>&() {
-        return future_;
-    }
-
-private:
-    std::future<T>& future_;
-};
 
 void Generator::run() {
-    executable::Executable exe(opts_.workspace / opts_.generator);
+    executable::Executable exe =
+        config_.langs().runnable(opts_.workspace / opts_.generator);
 
     InlineVariables vars;
-
-    std::vector<bp::child> children(std::thread::hardware_concurrency());
 
     executable::Flags flags(opts_.args);
     executable::ExecPool pool(process::Limits{
@@ -58,8 +43,7 @@ void Generator::run() {
             if (res.status != process::status::OK) {
                 Logger::warning() << "Exit status: " << process::status::serialize(res.status);
             }
-            Logger::log()
-                << "Return code = "
+            Logger::log() << "Return code = "
                 << res.returnCode
                 << ", cpu time = " << info->cpuTime.count()
                 << ", real time = " << info->realTime.count()
@@ -70,7 +54,7 @@ void Generator::run() {
             callback,
             res,
             bp::buffer(std::as_const(input.back())),
-            FutureRef(output.back()),
+            std::ref(output.back()),
             bp::null
         );
 
@@ -80,7 +64,7 @@ void Generator::run() {
     pool.run();
 
     for (size_t i = 0; i < input.size(); ++i) {
-        std::cout << input[i] << ": " << output[i].get() << std::endl;
+        Logger::info() << input[i] << ": " << output[i].get();
     }
 }
 

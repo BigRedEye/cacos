@@ -71,6 +71,7 @@ Logger::~Logger() {
     } else {
         *this << '\n';
     }
+    os_.flush();
 }
 
 Logger& Logger::delimer(char delim) {

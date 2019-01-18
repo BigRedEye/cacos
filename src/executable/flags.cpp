@@ -16,4 +16,13 @@ std::vector<std::string> Flags::build(const InlineVariables& vars) const {
     return result;
 }
 
+void Flags::prepend(const Flags& flags) {
+    flags_.insert(flags_.begin(), flags.flags_.begin(), flags.flags_.end());
+}
+
+void Flags::append(const Flags& flags) {
+    flags_.reserve(flags.flags_.size() + flags_.size());
+    flags_.insert(flags_.end(), flags.flags_.begin(), flags.flags_.end());
+}
+
 } // namespace cacos::executable

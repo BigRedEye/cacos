@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12)
 
 project(cacos)
 
@@ -47,6 +47,11 @@ file(GLOB SOURCES
     src/process/unix/process.cpp
     src/process/result.cpp
 
+    src/lang/compiler.cpp
+    src/lang/interpreter.cpp
+    src/lang/lang.cpp
+    src/lang/translator.cpp
+
     src/util/inline_variables.cpp
     src/util/logger.cpp
     src/util/split.cpp
@@ -66,7 +71,6 @@ file(GLOB HEADERS
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
 
-
     include/cacos/test/test.h
     include/cacos/test/add.h
     include/cacos/test/generate/generate.h
@@ -75,6 +79,11 @@ file(GLOB HEADERS
     include/cacos/process/limits.h
     include/cacos/process/process.h
     include/cacos/process/result.h
+
+    include/cacos/lang/lang.h
+    include/cacos/lang/compiler.h
+    include/cacos/lang/interpreter.h
+    include/cacos/lang/translator.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
@@ -110,13 +119,18 @@ endif()
 
 
 # Boost
-SET(Boost_USE_MULTITHREAD ON)
-find_package(Boost REQUIRED COMPONENTS system thread)
+set(Boost_USE_MULTITHREAD ON)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS system thread filesystem)
+if (NOT Boost_FOUND)
+    # download boost
+    add_subdirectory(third-party/boost-cmake)
+endif()
+
 
 # cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
 set(CPPTOML_BUILD_EXAMPLES OFF CACHE "" INTERNAL)
-
 add_subdirectory(third-party/toml EXCLUDE_FROM_ALL)
 
 # cpparg
@@ -125,10 +139,13 @@ add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
 # termcolor
 add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 
+# fmt
+#add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
+
 target_compile_definitions(
     ${CACOS_LIB}
     PUBLIC
-    DEFAULT_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
+    CACOS_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
     ${CACOS_OS}=1
@@ -144,8 +161,10 @@ target_include_directories(${CACOS_LIB} PUBLIC
 target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
+#    fmt::fmt
+    Boost::boost
+    Boost::filesystem
     cpptoml
-    ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}
 )

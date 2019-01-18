@@ -5,6 +5,7 @@
 #include "cacos/common_args.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
+#include "cacos/config.h"
 
 #include <cpparg/cpparg.h>
 
@@ -26,6 +27,7 @@ int generate(int argc, const char* argv[]) {
         .value_type("SOURCE")
         .description("Generator executable or source")
         .store(opts.generator);
+
     parser
         .add('v', "var")
         .optional()
@@ -42,10 +44,10 @@ int generate(int argc, const char* argv[]) {
                 splitted.push_back("1");
             }
 
-            Range<int> range {
-                util::from_string<int>(splitted[1]),
-                util::from_string<int>(splitted[2]),
-                util::from_string<int>(splitted[3]),
+            Range<i64> range {
+                util::from_string<i64>(splitted[1]),
+                util::from_string<i64>(splitted[2]),
+                util::from_string<i64>(splitted[3]),
             };
 
             opts.vars[name] = range;
@@ -79,7 +81,8 @@ int generate(int argc, const char* argv[]) {
 
     parser.parse(argc, argv);
 
-    Generator generator(opts);
+    config::Config cfg(opts);
+    Generator generator(cfg, opts);
     generator.run();
 
     return 0;
