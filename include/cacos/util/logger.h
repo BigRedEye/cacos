@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+
 namespace cacos {
 
 class Logger {
@@ -23,6 +26,12 @@ public:
         if (delim_) {
             os_ << delim_;
         }
+        return *this;
+    }
+
+    template<typename ...Args>
+    Logger& print(Args&& ...args) {
+        fmt::print(os_, std::forward<Args>(args)...);
         return *this;
     }
 

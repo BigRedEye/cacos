@@ -43,11 +43,12 @@ void Generator::run() {
             if (res.status != process::status::OK) {
                 Logger::warning() << "Exit status: " << process::status::serialize(res.status);
             }
-            Logger::log() << "Return code = "
-                << res.returnCode
-                << ", cpu time = " << info->cpuTime.count()
-                << ", real time = " << info->realTime.count()
-                << ", max rss = " << info->maxRss / (1024. * 1024.) << "mb";
+            Logger::log().print(
+                "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                res.returnCode,
+                info->cpuTime.count(),
+                info->maxRss / (1024. * 1024.)
+            );
         };
         auto task = executable::makeTask(
             exe,

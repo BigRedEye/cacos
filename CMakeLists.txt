@@ -140,7 +140,7 @@ add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
 add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 
 # fmt
-#add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
+add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 
 target_compile_definitions(
     ${CACOS_LIB}
@@ -161,7 +161,7 @@ target_include_directories(${CACOS_LIB} PUBLIC
 target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
-#    fmt::fmt
+    fmt::fmt
     Boost::boost
     Boost::filesystem
     cpptoml
