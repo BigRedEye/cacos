@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.12)
 
 project(cacos)
 
@@ -119,13 +119,18 @@ endif()
 
 
 # Boost
-SET(Boost_USE_MULTITHREAD ON)
-find_package(Boost REQUIRED COMPONENTS system thread)
+set(Boost_USE_MULTITHREAD ON)
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS system thread)
+if (NOT Boost_FOUND)
+    # download boost
+    add_subdirectory(third-party/boost-cmake)
+endif()
+
 
 # cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
 set(CPPTOML_BUILD_EXAMPLES OFF CACHE "" INTERNAL)
-
 add_subdirectory(third-party/toml EXCLUDE_FROM_ALL)
 
 # cpparg
@@ -133,6 +138,9 @@ add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
 
 # termcolor
 add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
+
+# fmt
+add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 
 target_compile_definitions(
     ${CACOS_LIB}
@@ -153,8 +161,9 @@ target_include_directories(${CACOS_LIB} PUBLIC
 target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
+    fmt::fmt
+    Boost::boost
     cpptoml
-    ${Boost_LIBRARIES}
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}
 )

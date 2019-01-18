@@ -5,6 +5,7 @@
 #include "cacos/common_args.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
+#include "cacos/config.h"
 
 #include <cpparg/cpparg.h>
 
@@ -80,7 +81,8 @@ int generate(int argc, const char* argv[]) {
 
     parser.parse(argc, argv);
 
-    Generator generator(opts);
+    config::Config cfg(opts);
+    Generator generator(cfg, opts);
     generator.run();
 
     return 0;

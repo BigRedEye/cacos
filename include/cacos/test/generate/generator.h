@@ -2,6 +2,8 @@
 
 #include "cacos/options.h"
 
+#include "cacos/config.h"
+
 #include "cacos/util/inline_variables.h"
 
 #include <functional>
@@ -18,7 +20,7 @@ struct Range {
 };
 
 struct GeneratorOptions : public Options {
-    using Variables = std::map<std::string, Range<int>>;
+    using Variables = std::map<std::string, Range<i64>>;
 
     std::string generator;
     Variables vars;
@@ -29,8 +31,7 @@ struct GeneratorOptions : public Options {
 
 class Generator {
 public:
-    Generator(const GeneratorOptions& opts);
-    Generator(GeneratorOptions&& opts);
+    Generator(const config::Config& cfg, const GeneratorOptions& opts);
 
     void run();
 
@@ -43,6 +44,7 @@ private:
         const std::function<void(const InlineVariables& vars)>& callback);
 
 private:
+    const config::Config& config_;
     GeneratorOptions opts_;
 };
 

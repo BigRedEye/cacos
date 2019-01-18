@@ -18,20 +18,30 @@ public:
     ConfigError(const std::string& err);
 };
 
+enum class DirectoryType {
+    workspace,
+    binary,
+    test,
+    cache
+};
+
 class Config {
 public:
     Config(const Options& opts);
 
+    fs::path directory(DirectoryType type) const;
     fs::path workspace() const;
 
     const lang::LanguageTable& langs() const;
 
     static fs::path defaultDir();
     static fs::path userDir();
-    fs::path binaryDir();
 
 private:
-    fs::path main_;
+    void parseLangs(const fs::path& langs);
+
+private:
+    fs::path workspace_;
     lang::LanguageTable langs_;
 };
 

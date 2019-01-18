@@ -50,9 +50,46 @@ fs::path Config::userDir() {
 
 namespace {
 
-std::optional<fs::path> find(const std::vector<fs::path>& alternatives) {
+fs::path createIfNotExists(const fs::path& path) {
+    if (!fs::is_directory(path)) {
+        std::error_code errc;
+        fs::create_directories(path, errc);
+        if (errc) {
+            throw ConfigError(errc.message());
+        }
+    }
+    return path;
+}
+
+}
+
+fs::path Config::directory(DirectoryType type) const {
+    fs::path result;
+    switch (type) {
+    case DirectoryType::workspace:
+        result = workspace();
+        break;
+    case DirectoryType::binary:
+        result = workspace() / "bin";
+        break;
+    case DirectoryType::test:
+        result = workspace() / "test";
+        break;
+    case DirectoryType::cache:
+        result = workspace() / "cacos";
+        break;
+    default:
+        break;
+    }
+
+    return createIfNotExists(result);
+}
+
+namespace {
+
+std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives) {
     for (auto&& path : alternatives) {
-        if (!fs::exists(path)) {
+        if (fs::exists(path)) {
             return path;
         }
     }
@@ -63,19 +100,13 @@ std::optional<fs::path> find(const std::vector<fs::path>& alternatives) {
 }
 
 Config::Config(const Options& opts) {
-    auto langs = find({ opts.langs, userDir() / "langs.toml", defaultDir() / "langs.toml" });
-    auto config = find({ opts.langs, userDir() / "cacos.toml", defaultDir() / "cacos.toml" });
+    auto config = findConfigFile({ opts.config, userDir() / "cacos.toml", defaultDir() / "cacos.toml" });
+    auto langs = findConfigFile({ opts.langs, userDir() / "langs.toml", defaultDir() / "langs.toml" });
 
-    if (!langs) {
-        throw ConfigError("Cannot find langs file");
-    }
-
-    auto table = cpptoml::parse_file(*langs);
-
-    if (table) {
-        langs_ = lang::LanguageTable(*table);
+    if (langs) {
+        parseLangs(*langs);
     } else {
-        throw ConfigError("Cannot parse langs file");
+        throw ConfigError("Cannot find langs file");
     }
 }
 
