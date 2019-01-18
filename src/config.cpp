@@ -45,7 +45,11 @@ fs::path homeDir() {
 }
 
 fs::path Config::userDir() {
-    return homeDir() / ".config";
+    fs::path path = homeDir() / ".config" / "cacos";
+    if (!fs::exists(path)) {
+        fs::create_directories(path);
+    }
+    return path;
 }
 
 namespace {
@@ -101,11 +105,19 @@ std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives
     return {};
 }
 
+std::optional<fs::path> findConfig(const fs::path& overriden, const fs::path& config, const fs::path& pdefault) {
+    if (!fs::exists(config) && fs::exists(pdefault)) {
+        fs::copy(pdefault, config);
+    }
+
+    return findConfigFile({overriden, config, pdefault});
+}
+
 }
 
 Config::Config(const Options& opts) {
-    auto config = findConfigFile({ opts.config, userDir() / "cacos.toml", defaultDir() / "cacos.toml" });
-    auto langs = findConfigFile({ opts.langs, userDir() / "langs.toml", defaultDir() / "langs.toml" });
+    auto config = findConfig(opts.config, userDir() / "cacos.toml", defaultDir() / "cacos.toml");
+    auto langs = findConfig(opts.langs, userDir() / "langs.toml", defaultDir() / "langs.toml");
 
     if (langs) {
         parseLangs(*langs);

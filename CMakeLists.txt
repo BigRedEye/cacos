@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(CACOS_BUILD_TESTS "Build tests" OFF)
 
-set(CACOS_CONFIGS_PREFIX "/etc/" CACHE PATH "Where to place the default configs")
+set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to place the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
 # Sanitizers build type
