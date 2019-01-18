@@ -4,9 +4,9 @@
 #include <stdexcept>
 
 int main(int argc, const char* argv[]) {
-    try {
+    //try {
         return cacos::main(argc, argv);
-    } catch (const std::exception& e) {
+    /*} catch (const std::exception& e) {
         cacos::Logger::fatal() << "Got exception: " << e.what();
-    }
+    }*/
 }

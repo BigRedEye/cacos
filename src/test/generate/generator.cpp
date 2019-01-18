@@ -33,29 +33,48 @@ void Generator::run() {
     });
 
     boost::container::stable_vector<std::string> input;
-    boost::container::stable_vector<std::future<std::string>> output;
+    boost::container::stable_vector<fs::path> output;
+
+    size_t doneTasks = 0;
+    size_t totalTasks = 0;
+
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
+        ++totalTasks;
+
         auto res = flags.build(vars);
         input.emplace_back(vars.parse(opts_.input));
-        output.emplace_back();
+        output.emplace_back(
+            config_.directory(config::DirectoryType::test) / vars.parse(opts_.testName));
 
-        auto callback = [] (process::Result res, std::optional<process::Info>&& info) {
+        auto callback = [&] (process::Result res, std::optional<process::Info>&& info) {
             if (res.status != process::status::OK) {
-                Logger::warning() << "Exit status: " << process::status::serialize(res.status);
+                Logger::warning().print("Exit status: {}", process::status::serialize(res.status));
+                Logger::log().print(
+                    "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                    res.returnCode,
+                    info->cpuTime.count(),
+                    info->maxRss / (1024. * 1024.)
+                );
             }
-            Logger::log().print(
-                "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
-                res.returnCode,
-                info->cpuTime.count(),
-                info->maxRss / (1024. * 1024.)
-            );
+
+            ++doneTasks;
+            Logger::info().print("Done {} / {} ({:.1f}%)", doneTasks, totalTasks, doneTasks * 100. / totalTasks);
+        };
+
+        std::vector<std::string> args;
+        args.reserve(opts_.args.size());
+        for (auto&& s : opts_.args) {
+            args.push_back(vars.parse(s));
+        }
+
+        executable::ExecTaskContext ctx {
+            args, boost::this_process::environment(), callback
         };
         auto task = executable::makeTask(
             exe,
-            callback,
-            res,
+            std::move(ctx),
             bp::buffer(std::as_const(input.back())),
-            std::ref(output.back()),
+            output.back().string(),
             bp::null
         );
 
@@ -63,10 +82,6 @@ void Generator::run() {
     });
 
     pool.run();
-
-    for (size_t i = 0; i < input.size(); ++i) {
-        Logger::info() << input[i] << ": " << output[i].get();
-    }
 }
 
 void Generator::traverse(VarsIterator it, InlineVariables& vars, const std::function<void(const InlineVariables& vars)>& callback) {
@@ -74,7 +89,7 @@ void Generator::traverse(VarsIterator it, InlineVariables& vars, const std::func
         callback(vars);
     } else {
         auto next = std::next(it);
-        for (int i = it->second.from; i < it->second.to; i += it->second.step) {
+        for (i64 i = it->second.from; i < it->second.to; i += it->second.step) {
             vars.set(it->first, util::to_string(i));
             traverse(next, vars, callback);
         }

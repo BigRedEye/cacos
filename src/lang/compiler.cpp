@@ -19,12 +19,12 @@ executable::Executable Compiler::process(const fs::path& source) const {
     vars.set("source", source);
     vars.set("binary", binary);
 
-    std::future<std::string> stdOut;
-    std::future<std::string> stdErr;
-
     executable::Flags flags = common_;
     flags.append(debug_);
     auto args = flags.build(vars);
+
+    std::future<std::string> stdOut;
+    std::future<std::string> stdErr;
 
     boost::asio::io_context ctx;
     bp::child child = exe_.run(
@@ -36,7 +36,7 @@ executable::Executable Compiler::process(const fs::path& source) const {
     );
 
     // TODO: fixme
-    ctx.run_for(std::chrono::seconds(2));
+    ctx.run_for(std::chrono::seconds(3));
 
     if (child.running()) {
         child.terminate();

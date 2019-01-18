@@ -74,7 +74,7 @@ int generate(int argc, const char* argv[]) {
 
     parser
         .add('t', "test")
-        .optional()
+        .required()
         .value_type("STRING")
         .description("Test name")
         .store(opts.testName);

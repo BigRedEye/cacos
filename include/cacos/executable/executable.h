@@ -42,31 +42,31 @@ private:
 };
 
 struct ExecTaskContext {
-    boost::asio::io_context& ctx;
+    using Callback = std::function<void(process::Result, std::optional<process::Info>&&)>;
+
+    std::vector<std::string> args{};
+    bp::environment env{};
+    Callback callback{};
 };
 
 class ExecTask {
 public:
-    using Callback = std::function<void(process::Result, std::optional<process::Info>&&)>;
-
-    ExecTask(Executable& exe, Callback&& callback = {}, std::vector<std::string> args = {})
+    ExecTask(Executable& exe, ExecTaskContext&& ctx = {})
         : exe_(exe)
-        , callback_(std::move(callback))
-        , args_(std::move(args))
+        , ctx_(ctx)
     {}
 
     virtual ~ExecTask();
 
     virtual bp::child run(
         const std::function<void(int, const std::error_code&)>& exitCallback,
-        const ExecTaskContext& ctx) = 0;
+        boost::asio::io_context& ctx) = 0;
 
     void onExit(process::Result result, std::optional<process::Info>&& info);
 
 protected:
     Executable& exe_;
-    Callback callback_;
-    std::vector<std::string> args_;
+    ExecTaskContext ctx_;
 };
 
 using ExecTaskPtr = std::unique_ptr<ExecTask>;
@@ -74,15 +74,8 @@ using ExecTaskPtr = std::unique_ptr<ExecTask>;
 template<typename StdIn = bp::detail::null_t, typename StdOut = bp::detail::null_t, typename StdErr = bp::detail::null_t>
 class ExecTaskImpl final : public ExecTask {
 public:
-    ExecTaskImpl(Executable& exe, Callback&& callback, std::vector<std::string> args, StdIn in, StdOut out, StdErr err)
-        : ExecTask(exe, std::move(callback), std::move(args))
-        , stdin_(in)
-        , stdout_(out)
-        , stderr_(err)
-    {}
-
-    ExecTaskImpl(Executable& exe, std::vector<std::string> args, StdIn in, StdOut out, StdErr err)
-        : ExecTask(exe, {}, std::move(args))
+    ExecTaskImpl(Executable& exe, ExecTaskContext&& ctx, StdIn in, StdOut out, StdErr err)
+        : ExecTask(exe, std::move(ctx))
         , stdin_(in)
         , stdout_(out)
         , stderr_(err)
@@ -90,14 +83,15 @@ public:
 
     bp::child run(
         const std::function<void(int, const std::error_code&)>& exitCallback,
-        const ExecTaskContext& ctx) override {
+        boost::asio::io_context& ioctx) override {
         return exe_.run(
-            args_,
+            ctx_.args,
+            ctx_.env,
             bp::std_in = stdin_,
             bp::std_out = stdout_,
             bp::std_err = stderr_,
             bp::on_exit = exitCallback,
-            ctx.ctx
+            ioctx
         );
     }
 
@@ -108,17 +102,18 @@ private:
 };
 
 /*
- * gcc sucks
+ * gcc bug
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81486
  */
 template<typename ...Args>
-ExecTaskPtr makeTask(Executable& exe, const std::vector<std::string>& args, Args&&... rest) {
-    return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, args, std::forward<Args>(rest)...));
+ExecTaskPtr makeTask(Executable& exe, ExecTaskContext&& ctx, Args&&... rest) {
+    return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, std::move(ctx), std::forward<Args>(rest)...));
 }
 
 template<typename ...Args>
-ExecTaskPtr makeTask(Executable& exe, ExecTask::Callback callback, const std::vector<std::string>& args, Args&&... rest) {
-    return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, std::move(callback), args, std::forward<Args>(rest)...));
+ExecTaskPtr makeTask(Executable& exe, const ExecTaskContext& ctx, Args&&... rest) {
+    ExecTaskContext copy = ctx;
+    return maskTask(exe, std::move(copy), std::forward<Args>(rest)...);
 }
 
 class ExecPool {

@@ -25,7 +25,7 @@ int init(int argc, const char* argv[]) {
 
         parser.parse(argc, argv);
 
-        std::vector<std::string_view> required_dirs = { ".bin", ".test" };
+        std::vector<std::string_view> required_dirs = { "bin", "test" };
 
         for (auto sv : required_dirs) {
             if (!fs::create_directories(opts.workspace / sv)) {

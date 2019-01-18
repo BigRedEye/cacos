@@ -28,8 +28,8 @@ ExecTask::~ExecTask() {
 }
 
 void ExecTask::onExit(process::Result res, std::optional<process::Info>&& info) {
-    if (callback_) {
-        callback_(res, std::move(info));
+    if (ctx_.callback) {
+        ctx_.callback(res, std::move(info));
     }
 }
 
