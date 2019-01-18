@@ -12,6 +12,9 @@
 namespace cacos {
 
 int main(int argc, const char* argv[]) {
+    // IO hangs by default at tty (sync inside asio callback fails)
+    std::ios_base::sync_with_stdio(false);
+
     cpparg::command_parser parser("cacos");
     parser.title("CAOS testing utility");
     parser.command("init").description("Initialize new workspace").handle(cacos::commands::init);
