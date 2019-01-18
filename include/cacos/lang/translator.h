@@ -11,10 +11,11 @@ public:
     Translator(const cpptoml::table& table);
     virtual ~Translator() = default;
 
-    virtual executable::Executable process(const fs::path& source) = 0;
+    virtual executable::Executable process(const fs::path& source) const = 0;
 
 protected:
     executable::Executable exe_;
+    executable::Flags common_;
     executable::Flags debug_;
     executable::Flags release_;
 };

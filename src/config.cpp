@@ -85,6 +85,10 @@ fs::path Config::directory(DirectoryType type) const {
     return createIfNotExists(result);
 }
 
+fs::path Config::workspace() const {
+    return workspace_;
+}
+
 namespace {
 
 std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives) {
@@ -108,6 +112,20 @@ Config::Config(const Options& opts) {
     } else {
         throw ConfigError("Cannot find langs file");
     }
+}
+
+void Config::parseLangs(const fs::path& langs) {
+    auto table = cpptoml::parse_file(langs);
+
+    if (table) {
+        langs_ = lang::LanguageTable(*table, directory(DirectoryType::binary));
+    } else {
+        throw ConfigError("Cannot parse langs file");
+    }
+}
+
+const lang::LanguageTable& Config::langs() const {
+    return langs_;
 }
 
 }

@@ -15,16 +15,14 @@
 
 namespace cacos::test {
 
-Generator::Generator(const GeneratorOptions& opts)
-    : opts_(opts) {
-}
-
-Generator::Generator(GeneratorOptions&& opts)
-    : opts_(std::move(opts)) {
+Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
+    : config_(cfg)
+    , opts_(opts) {
 }
 
 void Generator::run() {
-    executable::Executable exe = lang::create(opts_.workspace / opts_.generator, opts_.langs);
+    executable::Executable exe =
+        config_.langs().runnable(opts_.workspace / opts_.generator);
 
     InlineVariables vars;
 
@@ -45,8 +43,7 @@ void Generator::run() {
             if (res.status != process::status::OK) {
                 Logger::warning() << "Exit status: " << process::status::serialize(res.status);
             }
-            Logger::log()
-                << "Return code = "
+            Logger::log() << "Return code = "
                 << res.returnCode
                 << ", cpu time = " << info->cpuTime.count()
                 << ", real time = " << info->realTime.count()
@@ -67,7 +64,7 @@ void Generator::run() {
     pool.run();
 
     for (size_t i = 0; i < input.size(); ++i) {
-        std::cout << input[i] << ": " << output[i].get() << std::endl;
+        Logger::info() << input[i] << ": " << output[i].get();
     }
 }
 

@@ -1,6 +1,6 @@
 [[lang]]
 name = "c"
-extensions = [ "c" ]
+extensions = [ ".c" ]
 
 [lang.compiler]
 exe = "clang"
@@ -29,7 +29,7 @@ debug = [
 
 [[lang]]
 name = "c++"
-extensions = [ "cpp", "cxx", "cc" ]
+extensions = [ ".cpp", ".cxx", ".cc" ]
 
 [lang.compiler]
 exe = "clang++"
@@ -57,7 +57,7 @@ debug = [
 
 [[lang]]
 name = "asm"
-extensions = [ "s", "S" ]
+extensions = [ ".s", ".S" ]
 
 [lang.compiler]
 exe = "clang"
@@ -70,7 +70,7 @@ flags = [
 
 [[lang]]
 name = "rust"
-extensions = [ "rs" ]
+extensions = [ ".rs" ]
 
 [lang.compiler]
 exe = "rustc"
@@ -86,7 +86,7 @@ release = [
 
 [[lang]]
 name = "bash"
-extensions = [ "sh" ]
+extensions = [ ".sh" ]
 
 [lang.interpreter]
 exe = "bash"
@@ -98,7 +98,7 @@ flags = [
 
 [[lang]]
 name = "python"
-extensions = [ "py" ]
+extensions = [ ".py" ]
 
 [lang.interpreter]
 exe = "python3"

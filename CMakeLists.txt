@@ -121,7 +121,7 @@ endif()
 # Boost
 set(Boost_USE_MULTITHREAD ON)
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system thread)
+find_package(Boost COMPONENTS system thread filesystem)
 if (NOT Boost_FOUND)
     # download boost
     add_subdirectory(third-party/boost-cmake)
@@ -140,7 +140,7 @@ add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
 add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 
 # fmt
-add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
+#add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 
 target_compile_definitions(
     ${CACOS_LIB}
@@ -161,8 +161,9 @@ target_include_directories(${CACOS_LIB} PUBLIC
 target_link_libraries(${CACOS_LIB} PUBLIC
     cpparg
     termcolor::termcolor
-    fmt::fmt
+#    fmt::fmt
     Boost::boost
+    Boost::filesystem
     cpptoml
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}

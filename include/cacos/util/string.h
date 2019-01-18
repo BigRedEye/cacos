@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 
+#include "cacos/util/util.h"
+
 namespace cacos::util {
 
 inline std::string str(std::string_view view) {
@@ -54,6 +56,11 @@ inline std::string readFile(std::ifstream& in) {
         result.append(buffer.data(), bytes);
     } while (in);
     return result;
+}
+
+inline std::string readFile(const fs::path& path) {
+    std::ifstream ifs(path);
+    return readFile(ifs);
 }
 
 } // namespace cacos

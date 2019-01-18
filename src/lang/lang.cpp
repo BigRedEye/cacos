@@ -20,6 +20,30 @@ Language::Language(const cpptoml::table& config, const fs::path& binaryDir) {
     if (interpreter) {
         interpreter_ = Interpreter(*interpreter);
     }
+
+    auto exts = config.get_array_of<std::string>("extensions");
+    if (!exts) {
+        throw config::ConfigError("Cannot find extensions for language");
+    }
+    std::copy(exts->begin(), exts->end(), std::back_inserter(extensions_));
+}
+
+executable::Executable Language::process(const fs::path& source) const {
+    fs::path compiled = source;
+    if (compiler_) {
+        compiled = compiler_->process(source).path();
+    }
+    executable::Executable result;
+    if (interpreter_) {
+        result = interpreter_->process(result.path());
+    } else {
+        result = compiled;
+    }
+    return result;
+}
+
+const std::vector<std::string>& Language::extensions() const {
+    return extensions_;
 }
 
 LanguageTable::LanguageTable(const cpptoml::table& table, const fs::path& binaryDir) {
@@ -35,7 +59,7 @@ LanguageTable::LanguageTable(const cpptoml::table& table, const fs::path& binary
     }
 }
 
-executable::Executable LanguageTable::runnable(const fs::path& path) {
+executable::Executable LanguageTable::runnable(const fs::path& path) const {
     bool isExecutable = !bp::search_path(path.string()).empty();
     isExecutable = isExecutable || !bp::search_path(path.string(), { path.parent_path().string() }).empty();
     if (isExecutable) {
@@ -44,6 +68,7 @@ executable::Executable LanguageTable::runnable(const fs::path& path) {
 
     std::string extension = path.extension();
     auto it = langByExtension_.find(extension);
+
     if (it == langByExtension_.end()) {
         throw LanguageError("Cannot determine language");
     }

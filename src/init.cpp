@@ -6,7 +6,6 @@
 #include "cacos/util/logger.h"
 
 #include <cpparg/cpparg.h>
-#include <termcolor/termcolor.hpp>
 
 #include <string>
 #include <fstream>

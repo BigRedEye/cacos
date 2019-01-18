@@ -39,7 +39,7 @@ public:
     LanguageTable() = default;
     LanguageTable(const cpptoml::table& table, const fs::path& binaryDir);
 
-    executable::Executable runnable(const fs::path& path);
+    executable::Executable runnable(const fs::path& path) const;
 
 private:
     std::unordered_map<std::string, Language*> langByExtension_;

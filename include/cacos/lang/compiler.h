@@ -8,7 +8,7 @@ class Compiler : public Translator {
 public:
     Compiler(const cpptoml::table& t, const fs::path& binaryDir_);
 
-    executable::Executable process(const fs::path& source) override;
+    executable::Executable process(const fs::path& source) const override;
 
 private:
     fs::path binaryDir_;

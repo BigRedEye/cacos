@@ -20,6 +20,10 @@ Executable::Executable(const fs::path& exe, const std::vector<std::string>& flag
     , flags_(flags) {
 }
 
+const fs::path& Executable::path() const {
+    return executable_;
+}
+
 ExecTask::~ExecTask() {
 }
 
@@ -111,6 +115,9 @@ void ExecPool::run() {
     while (runningTasks > 0) {
         poll(defaultTimeout);
     }
+
+    ctx.restart();
+    ctx.run();
 
     if (running.size()) {
         Logger::warning() << "Running tasks " << running.size() << " != 0: ";

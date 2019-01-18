@@ -14,13 +14,14 @@ namespace cacos::executable {
 
 class Executable {
 public:
+    Executable() = default;
     Executable(const fs::path& exe);
     Executable(const fs::path& exe, const std::vector<std::string>& flags);
 
     template<typename ...Args>
     bp::child run(
         const InlineVariables& vars,
-        Args&&... args) {
+        Args&&... args) const {
         bp::child result(bp::exe = executable_.string(), bp::args += flags_.build(vars), std::forward<Args>(args)...);
         return result;
     }
@@ -28,18 +29,17 @@ public:
     template<typename ...Args>
     bp::child run(
         const std::vector<std::string>& flags,
-        Args&&... args) {
+        Args&&... args) const {
         bp::child result(bp::exe = executable_.string(), bp::args += flags, std::forward<Args>(args)...);
         return result;
     }
+
+    const fs::path& path() const;
 
 private:
     fs::path executable_;
     Flags flags_;
 };
-
-using InputBuffer = std::variant<boost::asio::const_buffer, fs::path>;
-using OutputBuffer = std::variant<boost::asio::mutable_buffer, fs::path>;
 
 struct ExecTaskContext {
     boost::asio::io_context& ctx;
@@ -107,14 +107,18 @@ private:
     StdErr stderr_;
 };
 
+/*
+ * gcc sucks
+ * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81486
+ */
 template<typename ...Args>
 ExecTaskPtr makeTask(Executable& exe, const std::vector<std::string>& args, Args&&... rest) {
-    return ExecTaskPtr(new ExecTaskImpl(exe, args, std::forward<Args>(rest)...));
+    return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, args, std::forward<Args>(rest)...));
 }
 
 template<typename ...Args>
 ExecTaskPtr makeTask(Executable& exe, ExecTask::Callback callback, const std::vector<std::string>& args, Args&&... rest) {
-    return ExecTaskPtr(new ExecTaskImpl(exe, std::move(callback), args, std::forward<Args>(rest)...));
+    return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, std::move(callback), args, std::forward<Args>(rest)...));
 }
 
 class ExecPool {
