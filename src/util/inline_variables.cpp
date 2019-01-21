@@ -2,26 +2,28 @@
 #include "cacos/util/string.h"
 
 #include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace cacos {
 
 namespace  {
 
-static constexpr char PREFIX = '@';
 static constexpr char OPEN_BRACE = '{';
 static constexpr char CLOSE_BRACE = '}';
 
-enum class ParsingState {
+namespace state {
+enum ParsingState : ui64 {
     DEFAULT = 0,
-    PREFIX,
     VARIABLE,
     VARIABLE_BEGIN,
     VARIABLE_END,
+    PREFIX,
 };
+}
 
 struct ParsingValue {
-    ParsingState state;
+    state::ParsingState state;
     char c;
 };
 
@@ -33,24 +35,24 @@ class TransitionTable {
 public:
     TransitionTable() = default;
 
-    ParsingState next(ParsingValue current) const {
+    state::ParsingState next(ParsingValue current) const {
         auto it = tr_.find(current);
         if (it == tr_.end()) {
-            return ParsingState::DEFAULT;
+            return state::DEFAULT;
         } else {
             return it->second;
         }
     }
 
-    ParsingState next(ParsingState state, char c) const {
+    state::ParsingState next(state::ParsingState state, char c) const {
         return next(ParsingValue{state, c});
     }
 
-    void add(ParsingState from, char c, ParsingState to) {
+    void add(state::ParsingState from, char c, state::ParsingState to) {
         tr_[ParsingValue{from, c}] = to;
     }
 
-    void add(ParsingState from, ParsingState to) {
+    void add(state::ParsingState from, state::ParsingState to) {
         unsigned char c = 0;
         do {
             add(from, static_cast<char>(c), to);
@@ -58,24 +60,48 @@ public:
     }
 
 private:
-    using Table = std::map<ParsingValue, ParsingState>;
+    using Table = std::map<ParsingValue, state::ParsingState>;
 
     Table tr_;
 };
 
-TransitionTable initTransitionTable() {
+TransitionTable initTransitionTable(std::string_view prefix) {
     TransitionTable result;
 
-    result.add(ParsingState::VARIABLE_END, ParsingState::DEFAULT);
-    result.add(ParsingState::VARIABLE_END, PREFIX, ParsingState::PREFIX);
-    result.add(ParsingState::DEFAULT, PREFIX, ParsingState::PREFIX);
-    result.add(ParsingState::PREFIX, OPEN_BRACE, ParsingState::VARIABLE_BEGIN);
-    result.add(ParsingState::VARIABLE_BEGIN, ParsingState::VARIABLE);
-    result.add(ParsingState::VARIABLE_BEGIN, CLOSE_BRACE, ParsingState::VARIABLE_END);
-    result.add(ParsingState::VARIABLE, ParsingState::VARIABLE);
-    result.add(ParsingState::VARIABLE, CLOSE_BRACE, ParsingState::VARIABLE_END);
+    result.add(state::VARIABLE_END, state::DEFAULT);
+    result.add(state::VARIABLE_END, prefix[0], static_cast<state::ParsingState>(state::PREFIX + 1));
+    result.add(state::DEFAULT, prefix[0], static_cast<state::ParsingState>(state::PREFIX + 1));
+
+    for (size_t i = 1; i < prefix.size(); ++i) {
+        result.add(
+            static_cast<state::ParsingState>(state::PREFIX + i),
+            prefix[i],
+            static_cast<state::ParsingState>(state::PREFIX + i + 1));
+    }
+
+    result.add(
+        static_cast<state::ParsingState>(state::PREFIX + prefix.size()),
+        OPEN_BRACE,
+        state::VARIABLE_BEGIN
+    );
+
+    result.add(state::VARIABLE_BEGIN, state::VARIABLE);
+    result.add(state::VARIABLE_BEGIN, CLOSE_BRACE, state::VARIABLE_END);
+    result.add(state::VARIABLE, state::VARIABLE);
+    result.add(state::VARIABLE, CLOSE_BRACE, state::VARIABLE_END);
 
     return result;
+}
+
+const TransitionTable& tableForPrefix(std::string_view prefix) {
+    static std::unordered_map<std::string, TransitionTable> tables;
+
+    auto it = tables.find(util::str(prefix));
+    if (it == tables.end()) {
+        it = tables.emplace(util::str(prefix), initTransitionTable(prefix)).first;
+    }
+
+    return it->second;
 }
 
 }
@@ -93,21 +119,21 @@ void InlineVariables::set(const std::string& key, const std::string& value) {
 }
 
 std::string InlineVariables::parse(std::string_view str) const {
-    static TransitionTable table = initTransitionTable();
+    const TransitionTable& table = tableForPrefix(prefix_);
 
-    ParsingState state = ParsingState::DEFAULT;
+    state::ParsingState state = state::DEFAULT;
     std::vector<std::pair<size_t, size_t>> vars;
     size_t firstPos = std::string::npos;
     for (size_t i = 0; i < str.size(); ++i) {
         state = table.next(state, str[i]);
         switch (state) {
-        case ParsingState::VARIABLE_BEGIN:
-            if (i == 0) {
+        case state::VARIABLE_BEGIN:
+            if (i < prefix_.size()) {
                 throw std::out_of_range("Invalid index");
             }
-            firstPos = i - 1;
+            firstPos = i - prefix_.size();
             break;
-        case ParsingState::VARIABLE_END:
+        case state::VARIABLE_END:
             if (firstPos == std::string::npos) {
                 InlineVariableParsingError("Cannot parse inline variables");
             }
@@ -122,7 +148,8 @@ std::string InlineVariables::parse(std::string_view str) const {
     std::string result = util::str(str);
     for (auto it = vars.rbegin(); it != vars.rend(); ++it) {
         auto [l, r] = *it;
-        std::string_view keyView = str.substr(l + 2, r - l - 2);
+        size_t keyBegin = l + prefix_.length() + 1;
+        std::string_view keyView = str.substr(keyBegin, r - keyBegin);
         std::string key = util::str(keyView);
         auto var = vars_.find(key);
         if (var == vars_.end()) {
