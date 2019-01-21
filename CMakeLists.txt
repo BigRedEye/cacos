@@ -34,6 +34,7 @@ file(GLOB SOURCES
     src/init.cpp
     src/language.cpp
     src/options.cpp
+    src/status.cpp
 
     src/executable/executable.cpp
     src/executable/flags.cpp
@@ -67,6 +68,7 @@ file(GLOB HEADERS
     include/cacos/language.h
     include/cacos/init.h
     include/cacos/options.h
+    include/cacos/status.h
 
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
@@ -142,6 +144,9 @@ add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
 # fmt
 add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 
+# myhtml
+# add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
+
 target_compile_definitions(
     ${CACOS_LIB}
     PUBLIC
@@ -165,6 +170,7 @@ target_link_libraries(${CACOS_LIB} PUBLIC
     Boost::boost
     Boost::filesystem
     cpptoml
+#    myhtml_static
     ${CMAKE_THREAD_LIBS_INIT}
     ${CXX_FILESYSTEM_LIBRARY}
 )
@@ -180,10 +186,9 @@ cmake_policy(SET CMP0069 NEW)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT result OUTPUT output)
 if(result)
-  set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  set_property(TARGET ${CACOS_LIB} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()
-  message(WARNING "LPO is not supported: ${output}")
+    message(WARNING "LPO is not supported: ${output}")
 endif()
 
 
