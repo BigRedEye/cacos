@@ -1,12 +1,5 @@
-[source]
-main = main.c
-language = c
-
-[test]
-stdin = 1.in
-stdout = 1.out
-exit_code = 0
-env = [
-    { home = "@{HOME}/home/" },
-    { cur = "@{CUR}" },
-]
+[ejudge]
+url = 'https://caos.ejudge.ru'
+password = 'password'
+login = 'login'
+contest_id = 72

@@ -19,7 +19,7 @@ int generate(int argc, const char* argv[]) {
     parser.title("Generate new tests");
 
     GeneratorOptions opts;
-    setCommonOptions(parser, opts);
+    setCommonOptions(parser, opts, options::WORKSPACE | options::CONFIG | options::CONFIG);
 
     parser
         .add('g', "generator")

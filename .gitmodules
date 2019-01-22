@@ -1,15 +1,18 @@
 [submodule "third-party/cpparg"]
 	path = third-party/cpparg
-	url = git@github.com:BigRedEye/cpparg.git
+	url = https://github.com/BigRedEye/cpparg.git
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
-	url = git@github.com:ikalnytskyi/termcolor.git
+	url = https://github.com/ikalnytskyi/termcolor.git
 [submodule "third-party/toml"]
 	path = third-party/toml
-	url = git@github.com:skystrife/cpptoml.git
+	url = https://github.com/skystrife/cpptoml.git
 [submodule "third-party/boost-cmake"]
 	path = third-party/boost-cmake
-	url = git@github.com:Orphis/boost-cmake.git
+	url = https://github.com/Orphis/boost-cmake.git
 [submodule "third-party/fmt"]
 	path = third-party/fmt
-	url = git@github.com:fmtlib/fmt.git
+	url = https://github.com/fmtlib/fmt.git
+[submodule "third-party/myhtml"]
+	path = third-party/myhtml
+	url = https://github.com/lexborisov/myhtml.git

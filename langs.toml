@@ -18,7 +18,8 @@ flags = [
     "-lm",
 ]
 release = [
-    "-O2",
+    "-O3",
+    "-march=native"
 ]
 debug = [
     "-O0",

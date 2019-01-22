@@ -5,19 +5,18 @@
 
 #include <cpparg/cpparg.h>
 
-#include <numeric>
-
 namespace cacos {
 
 namespace options {
 enum Mask : ui64 {
-    WORKSPACE = 0x0001,
-    CONFIG    = 0x0002,
-    LANGS     = 0x0004,
-    ALL       = std::numeric_limits<ui64>::max(),
+    WORKSPACE = ui64{1} << 1,
+    CONFIG    = ui64{1} << 2,
+    LANGS     = ui64{1} << 3,
+    EJUDGE    = ui64{1} << 4,
+    ALL       = ~ui64{0},
 };
 }
 
-cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, options::Mask mask = options::ALL);
+cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mask = options::ALL);
 
 }

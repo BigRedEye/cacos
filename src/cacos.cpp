@@ -1,6 +1,7 @@
 #include "cacos/init.h"
 #include "cacos/config.h"
 #include "cacos/test/test.h"
+#include "cacos/ejudge/status.h"
 
 #include <cpparg/cpparg.h>
 
@@ -20,6 +21,8 @@ int main(int argc, const char* argv[]) {
     parser.command("init").description("Initialize new workspace").handle(cacos::commands::init);
     parser.command("test").description("Manage tests").handle(cacos::commands::test);
     parser.command("run").description("Compile and run").handle(cacos::commands::run);
+    parser.command("status").description("Ejudge contest status").handle(cacos::ejudge::commands::status);
+
     return parser.parse(argc, argv);
 }
 

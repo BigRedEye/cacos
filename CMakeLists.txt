@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(CACOS_BUILD_TESTS "Build tests" OFF)
+option(CACOS_DOWNLOAD_BOOST "Do not use system boost" OFF)
 
 set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to place the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
@@ -34,7 +35,6 @@ file(GLOB SOURCES
     src/init.cpp
     src/language.cpp
     src/options.cpp
-    src/status.cpp
 
     src/executable/executable.cpp
     src/executable/flags.cpp
@@ -53,6 +53,9 @@ file(GLOB SOURCES
     src/lang/lang.cpp
     src/lang/translator.cpp
 
+    src/ejudge/http/client.cpp
+    src/ejudge/status.cpp
+
     src/util/inline_variables.cpp
     src/util/logger.cpp
     src/util/split.cpp
@@ -68,7 +71,6 @@ file(GLOB HEADERS
     include/cacos/language.h
     include/cacos/init.h
     include/cacos/options.h
-    include/cacos/status.h
 
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
@@ -86,6 +88,9 @@ file(GLOB HEADERS
     include/cacos/lang/compiler.h
     include/cacos/lang/interpreter.h
     include/cacos/lang/translator.h
+
+    include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
@@ -108,44 +113,53 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
 
 # Dependecies
 
-# Threads
-find_package(Threads REQUIRED)
+set(CACOS_LIBS)
 
-# CURL
+## Threads
+find_package(Threads REQUIRED)
+list(APPEND CACOS_LIBS ${CMAKE_THREAD_LIBS_INIT})
+
+
+## CURL
 find_package(CURL)
 if (${CURL_FOUND})
-    target_link_libraries(${CACOS_LIB} PUBLIC CURL::libcurl)
+    list(APPEND CACOS_LIBS CURL::libcurl)
 else()
     message(STATUS " CURL was not found; compiling without its support")
 endif()
 
-
-# Boost
+## Boost
 set(Boost_USE_MULTITHREAD ON)
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system thread filesystem)
-if (NOT Boost_FOUND)
-    # download boost
+if (CACOS_DOWNLOAD_BOOST)
+    message(STATUS " Downloading boost")
     add_subdirectory(third-party/boost-cmake)
+else()
+    find_package(Boost COMPONENTS system thread filesystem REQUIRED)
 endif()
+list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 
-
-# cpptoml
+## cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
 set(CPPTOML_BUILD_EXAMPLES OFF CACHE "" INTERNAL)
 add_subdirectory(third-party/toml EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS cpptoml)
 
-# cpparg
+## cpparg
 add_subdirectory(third-party/cpparg EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS cpparg)
 
-# termcolor
+## termcolor
 add_subdirectory(third-party/termcolor EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS termcolor::termcolor)
 
-# fmt
+## fmt
 add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS fmt::fmt)
 
-# myhtml
-# add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
+## myhtml
+add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS myhtml_static)
 
 target_compile_definitions(
     ${CACOS_LIB}
@@ -157,28 +171,19 @@ target_compile_definitions(
 )
 
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)
+list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${Boost_INCLUDE_DIRS}
 )
 
-target_link_libraries(${CACOS_LIB} PUBLIC
-    cpparg
-    termcolor::termcolor
-    fmt::fmt
-    Boost::boost
-    Boost::filesystem
-    cpptoml
-#    myhtml_static
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${CXX_FILESYSTEM_LIBRARY}
-)
+target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
 
 # Executable
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CACOS_LIB})
+
 
 # LTO
 
