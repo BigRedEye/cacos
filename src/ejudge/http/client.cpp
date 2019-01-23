@@ -87,15 +87,12 @@ public:
         }
         curl_easy_setopt(curl_, CURLOPT_COOKIE, "FLUSH");
 
-        std::cerr << params.url.data() << std::endl;
-
         perform();
 
         return result;
     }
 
 private:
-
     void perform() const {
         CURLcode err = curl_easy_perform(curl_);
         if (err != CURLE_OK) {

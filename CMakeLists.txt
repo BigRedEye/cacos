@@ -53,6 +53,8 @@ file(GLOB SOURCES
     src/lang/lang.cpp
     src/lang/translator.cpp
 
+    src/ejudge/html/myhtml.cpp
+    src/ejudge/html/parser.cpp
     src/ejudge/http/client.cpp
     src/ejudge/status.cpp
 
@@ -89,11 +91,14 @@ file(GLOB HEADERS
     include/cacos/lang/interpreter.h
     include/cacos/lang/translator.h
 
+    include/cacos/ejudge/html/myhtml.h
+    include/cacos/ejudge/html/parser.h
     include/cacos/ejudge/http/client.h
     include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
+    include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
     include/cacos/util/util.h
@@ -175,6 +180,7 @@ list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${MYHTML_INCLUDE_DIRS}
 )
 
 target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
