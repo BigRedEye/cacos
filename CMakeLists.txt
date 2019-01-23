@@ -54,8 +54,8 @@ file(GLOB SOURCES
     src/lang/translator.cpp
 
     src/ejudge/html/myhtml.cpp
-    src/ejudge/html/parser.cpp
     src/ejudge/http/client.cpp
+    src/ejudge/parser.cpp
     src/ejudge/status.cpp
 
     src/util/inline_variables.cpp
@@ -92,8 +92,8 @@ file(GLOB HEADERS
     include/cacos/lang/translator.h
 
     include/cacos/ejudge/html/myhtml.h
-    include/cacos/ejudge/html/parser.h
     include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/parser.h
     include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h
