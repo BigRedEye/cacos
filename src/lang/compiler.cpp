@@ -1,6 +1,6 @@
 #include "cacos/lang/compiler.h"
 
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include "cacos/util/inline_variables.h"
 

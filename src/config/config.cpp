@@ -206,7 +206,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .add("token")
             .optional()
             .description("Ejudge session token from url")
-            .default_value("config{ejudge.token")
+            .default_value("config{ejudge.token}")
             .handle([&](auto sv) {
                 ejudge_.session.token = argOrConfig<std::string>(util::str(sv), "ejudge.token");
             });
@@ -224,7 +224,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .add("url")
             .optional()
             .description("Ejudge login page")
-            .default_value("https://caos.ejudge.ru/ej/client?config{contest_id}")
+            .default_value("config{ejudge.url}")
             .handle([&](auto url) {
                 ejudge_.url = argOrConfig<std::string>(util::str(url), "ejudge.url", ConfigError("Invalid ejudge url"));
             });
@@ -242,6 +242,29 @@ Config::Config(cpparg::parser& parser, ui64 mask)
 
     parser
         .add_help('h', "help");
+}
+
+void Config::setImpl(std::string_view path, const std::shared_ptr<cpptoml::base>& value, ConfigType type) const {
+    std::shared_ptr<cpptoml::table> cfg = (type == ConfigType::global ? globalConfig_ : taskConfig_);
+    if (!cfg) {
+        throw BadWorkspace();
+    }
+
+    std::vector<std::string_view> tables = util::split(path, ".");
+
+    std::string_view key = tables.back();
+    tables.pop_back();
+
+    for (auto keyView : tables) {
+        std::string key = util::str(keyView);
+        if (!cfg->contains(key)) {
+            cfg->insert(key, cpptoml::make_table());
+        }
+        auto node = cfg->get_table(key);
+        cfg = node;
+    }
+
+    cfg->insert(util::str(key), value);
 }
 
 void Config::parseLangs(const fs::path& langs) {
@@ -268,7 +291,7 @@ void Config::dump(ConfigType type) const {
         throw ConfigError("Cannot save config");
     }
 
-    std::ofstream out(dir(type == ConfigType::global ? DirType::config : DirType::task));
+    std::ofstream out(dir(type == ConfigType::global ? DirType::config : DirType::task) / CONFIG_FILE);
     out << *cfg;
 }
 

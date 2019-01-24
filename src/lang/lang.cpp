@@ -1,6 +1,6 @@
 #include "cacos/lang/lang.h"
 
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include "cacos/util/util.h"
 

@@ -6,6 +6,8 @@
 #include "cacos/lang/opts.h"
 #include "cacos/ejudge/opts.h"
 
+#include "cacos/util/split.h"
+
 #include <cpparg/cpparg.h>
 
 #include <cpptoml.h>
@@ -57,17 +59,14 @@ public:
     const opts::EjudgeOpts& ejudge() const;
 
     template<typename T>
-    void set(const std::string& key, T&& value, ConfigType type = ConfigType::global) {
-        auto& cfg = (type == ConfigType::global ? globalConfig_ : taskConfig_);
-        if (!cfg) {
-            throw BadWorkspace();
-        }
-        cfg->insert(key, std::forward<T>(value));
+    void set(std::string_view path, T&& value, ConfigType type = ConfigType::global) {
+        setImpl(path, cpptoml::make_value(std::forward<T>(value)), type);
     }
 
     void dump(ConfigType type) const;
 
 private:
+    void setImpl(std::string_view path, const std::shared_ptr<cpptoml::base>& value, ConfigType type) const;
     void parseLangs(const fs::path& langs);
 
     template<typename T>

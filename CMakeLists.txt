@@ -17,6 +17,12 @@ set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
 
+# Debug
+set(CACOS_DEBUG OFF)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Sanitizers")
+    set(CACOS_DEBUG ON)
+endif()
+
 # Detect platform
 
 set(CACOS_OS "CACOS_OS_UNDEFINED")
@@ -31,8 +37,6 @@ endif()
 # Sources
 
 file(GLOB SOURCES
-    src/common_args.cpp
-
     src/config/config.cpp
 
     src/commands/init.cpp
@@ -70,7 +74,6 @@ file(GLOB SOURCES
 )
 
 file(GLOB HEADERS
-    include/cacos/common_args.h
     include/cacos/options.h
 
     include/cacos/config/config.h
@@ -180,6 +183,7 @@ target_compile_definitions(
     CACOS_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
+    CACOS_DEBUG=$<BOOL:${CACOS_DEBUG}>
     ${CACOS_OS}=1
 )
 

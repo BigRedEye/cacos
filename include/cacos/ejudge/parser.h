@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 namespace cacos::ejudge {
 

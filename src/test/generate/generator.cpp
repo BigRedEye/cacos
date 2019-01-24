@@ -22,7 +22,7 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 
 void Generator::run() {
     executable::Executable exe =
-        config_.langs().runnable(opts_.workspace / opts_.generator);
+        config_.langs().runnable(opts_.generator);
 
     InlineVariables vars;
 

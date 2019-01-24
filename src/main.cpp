@@ -14,6 +14,9 @@ void printException(const std::exception& e, size_t depth = 1) noexcept {
 }
 
 int main(int argc, const char* argv[]) {
+#if CACOS_DEBUG
+    return cacos::main(argc, argv);
+#else
     try {
         return cacos::main(argc, argv);
     } catch (const std::exception& e) {
@@ -21,4 +24,5 @@ int main(int argc, const char* argv[]) {
         printException(e);
         return 1;
     }
+#endif
 }

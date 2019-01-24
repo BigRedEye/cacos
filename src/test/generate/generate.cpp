@@ -2,10 +2,9 @@
 #include "cacos/test/generate/generator.h"
 
 #include "cacos/options.h"
-#include "cacos/common_args.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include <cpparg/cpparg.h>
 

@@ -16,53 +16,37 @@ int config(int argc, const char* argv[]) {
         .optional()
         .description("Ejudge login")
         .handle([&](auto sv) {
-            cfg.set(sv, "ejudge.login");
+            cfg.set("ejudge.login", util::str(sv));
         });
 
     parser
         .add("password")
         .optional()
         .description("Ejudge password")
-        .default_value("config{ejudge.password}")
-        .handle([&, this](auto sv) {
-            cfg.set(sv, "ejudge.login");
-        });
-
-    parser
-        .add("cookie")
-        .optional()
-        .description("Ejudge cookie (EJSID=...)")
-        .default_value("config{ejudge.cookie}")
         .handle([&](auto sv) {
-            ejudge_.session.ejsid = argOrConfig<std::string>(util::str(sv), "ejudge.cookie");
-        });
-
-    parser
-        .add("token")
-        .optional()
-        .description("Ejudge session token from url")
-        .default_value("config{ejudge.token")
-        .handle([&](auto sv) {
-            ejudge_.session.token = argOrConfig<std::string>(util::str(sv), "ejudge.token");
+            cfg.set("ejudge.password", util::str(sv));
         });
 
     parser
         .add("contest_id")
         .optional()
         .description("Ejudge contest_id")
-        .default_value("config{ejudge.contest_id}")
         .handle([&](auto sv) {
-            ejudge_.contestId = argOrConfig<i32>(util::str(sv), "ejudge.contest_id", ConfigError("Invalid contest_id"));
+            cfg.set("ejudge.contest_id", util::from_string<i32>(sv));
         });
 
     parser
         .add("url")
         .optional()
         .description("Ejudge login page")
-        .default_value("https://caos.ejudge.ru/ej/client?config{contest_id}")
-        .handle([&](auto url) {
-            ejudge_.url = argOrConfig<std::string>(util::str(url), "ejudge.url", ConfigError("Invalid ejudge url"));
+        .handle([&](auto sv) {
+            cfg.set("ejudge.url", util::str(sv));
         });
+
+    parser.add_help('h', "help");
+    parser.parse(argc, argv);
+
+    cfg.dump(config::ConfigType::global);
 
     return 0;
 }

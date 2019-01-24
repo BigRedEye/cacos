@@ -2,12 +2,11 @@
 #include "cacos/ejudge/http/client.h"
 #include "cacos/ejudge/html/myhtml.h"
 
+#include "cacos/config/config.h"
+#include "cacos/options.h"
+
 #include "cacos/util/split.h"
 #include "cacos/util/ranges.h"
-
-#include "cacos/common_args.h"
-#include "cacos/config.h"
-#include "cacos/options.h"
 
 #include <cpparg/cpparg.h>
 
@@ -17,6 +16,13 @@
 #include <cpptoml.h>
 
 namespace cacos::ejudge::commands {
+
+class AuthenticationError : public std::runtime_error {
+public:
+    AuthenticationError(const std::string& what)
+        : std::runtime_error(what) {
+    }
+};
 
 int status(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge status");
@@ -28,7 +34,7 @@ int status(int argc, const char* argv[]) {
 
     http::Client client("cookies.txt");
 
-    InlineVariables vars;
+    InlineVariables vars("config");
     vars.set("contest_id", util::to_string(cfg.ejudge().contestId));
 
     std::string loginPage = client.post(
@@ -37,6 +43,12 @@ int status(int argc, const char* argv[]) {
     );
 
     html::Html page(loginPage);
+    html::Collection titles = page.tags("title");
+    for (auto node : titles) {
+        if (node.child()->text().find("Permission denied") != std::string_view::npos) {
+            throw AuthenticationError("Invalid session");
+        }
+    }
     html::Collection tags = page.attrs("href");
     std::optional<std::string> url;
     for (auto node : tags) {
