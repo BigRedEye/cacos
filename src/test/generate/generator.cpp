@@ -29,7 +29,8 @@ void Generator::run() {
     executable::Flags flags(opts_.args);
     executable::ExecPool pool(process::Limits{
         process::Limits::unlimited<bytes>,
-        seconds(0.3)
+        seconds(0.3),
+        seconds(1.0)
     });
 
     boost::container::stable_vector<std::string> input;

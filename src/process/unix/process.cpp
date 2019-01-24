@@ -18,6 +18,8 @@ namespace proc::stat {
 enum {
     UTIME = 13,
     STIME = 14,
+    CUTIME = 15,
+    CSTIME = 16,
     STARTTIME = 21,
     RSS = 23,
 };
@@ -31,6 +33,8 @@ InfoError::InfoError(const std::string& msg)
 struct ProcessStats {
     ui64 utime;
     ui64 stime;
+    ui64 cutime;
+    ui64 cstime;
     ui64 starttime;
     ui64 rss;
 };
@@ -44,7 +48,7 @@ public:
     Info info() const {
         ProcessStats stats = parseStats();
 
-        ui64 total = stats.stime + stats.utime;
+        ui64 total = stats.stime + stats.utime + stats.cstime + stats.cutime;
         static const long ticks = sysconf(_SC_CLK_TCK);
         double uptime = parseUptime();
 
@@ -98,6 +102,8 @@ private:
         stats.rss = util::from_string<ui64>(tokens[proc::stat::RSS]);
         stats.utime = util::from_string<ui64>(tokens[proc::stat::UTIME]);
         stats.stime = util::from_string<ui64>(tokens[proc::stat::STIME]);
+        stats.cutime = util::from_string<ui64>(tokens[proc::stat::CUTIME]);
+        stats.cstime = util::from_string<ui64>(tokens[proc::stat::CSTIME]);
         stats.starttime = util::from_string<ui64>(tokens[proc::stat::STARTTIME]);
 
         return stats;

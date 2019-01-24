@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <thread>
 
 namespace cacos {
 
@@ -69,6 +70,9 @@ Logger::Logger(Logger::MessagePriority priority)
         break;
     }
     *this << " ] ";
+    if (priority <= Logger::DEBUG) {
+        *this << "[ 0x" << std::hex << std::this_thread::get_id() << std::dec << " ] ";
+    }
 }
 
 Logger::~Logger() {

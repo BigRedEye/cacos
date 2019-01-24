@@ -89,8 +89,17 @@ void ExecPool::run() {
     auto pollInfo = [&] {
         for (auto&& [i, c] : running) {
             process::Info info = c.info();
-            if (limits_.tl != process::Limits::unlimited<seconds> && info.cpuTime > limits_.tl) {
+            Logger::debug().print(
+                "cpu time = {:.3f} s, real time = {:.3f} s, max rss = {:.3f} mb",
+                info.cpuTime.count(),
+                info.realTime.count(),
+                info.maxRss / (1024. * 1024.)
+            );
+            if (limits_.cpu != process::Limits::unlimited<seconds> && info.cpuTime > limits_.cpu) {
                 c.terminate(process::status::TL);
+            }
+            if (limits_.real != process::Limits::unlimited<seconds> && info.realTime > limits_.real) {
+                c.terminate(process::status::IL);
             }
             if (limits_.ml != process::Limits::unlimited<bytes> && info.maxRss > limits_.ml) {
                 c.terminate(process::status::ML);

@@ -8,6 +8,7 @@ enum Status {
     OK,
     RE,
     TL,
+    IL,
     ML,
     UNDEFINED,
 };
