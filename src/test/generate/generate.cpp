@@ -20,14 +20,14 @@ int generate(int argc, const char* argv[]) {
     GeneratorOptions opts;
 
     parser
-        .add('g', "generator")
+        .add("generator")
         .required()
         .value_type("SOURCE")
         .description("Generator executable or source")
         .store(opts.generator);
 
     parser
-        .add('v', "var")
+        .add("var")
         .optional()
         .repeatable()
         .value_type("VAR:FROM:TO:STEP")
@@ -52,7 +52,7 @@ int generate(int argc, const char* argv[]) {
         });
 
     parser
-        .add('a', "args")
+        .add("args")
         .optional()
         .value_type("ARGS")
         .description("Arguments for generator, separated with spaces")
@@ -64,14 +64,14 @@ int generate(int argc, const char* argv[]) {
         });
 
     parser
-        .add('i', "stdin")
+        .add("stdin")
         .optional()
         .value_type("STRING")
         .description("Stdin for generator")
         .store(opts.input);
 
     parser
-        .add('t', "test")
+        .add("test")
         .required()
         .value_type("STRING")
         .description("Test name")
