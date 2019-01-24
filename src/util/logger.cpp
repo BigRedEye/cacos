@@ -10,6 +10,8 @@
 
 namespace cacos {
 
+Logger::MessagePriority Logger::verbosity_ = Logger::INFO;
+
 namespace  {
 
 std::ostream& boldRed(std::ostream& os) {
@@ -18,6 +20,8 @@ std::ostream& boldRed(std::ostream& os) {
 
 auto colorForPriority(Logger::MessagePriority priority) {
     switch (priority) {
+    case Logger::DEBUG:
+        return termcolor::dark;
     case Logger::LOG:
         return termcolor::white;
     case Logger::INFO:
@@ -43,6 +47,9 @@ Logger::Logger(Logger::MessagePriority priority)
     *this << termcolor::reset << colorForPriority(priority) << "[ ";
 
     switch (priority) {
+    case Logger::DEBUG:
+        *this << "DEBUG";
+        break;
     case Logger::LOG:
         *this << "LOG";
         break;
@@ -65,13 +72,12 @@ Logger::Logger(Logger::MessagePriority priority)
 }
 
 Logger::~Logger() {
-    os_ << termcolor::reset;
+    *this << termcolor::reset;
     if (flush_ || prior_ >= ERROR) {
-        os_ << std::endl;
+        *this << std::endl;
     } else {
         *this << '\n';
     }
-    os_.flush();
 }
 
 Logger& Logger::delimer(char delim) {
@@ -82,6 +88,10 @@ Logger& Logger::delimer(char delim) {
 Logger& Logger::flush(bool flush) {
     flush_ = flush;
     return *this;
+}
+
+void Logger::increaseVerbosity(int delta) {
+    verbosity_ = static_cast<MessagePriority>(std::min<int>(verbosity_ - delta, DEBUG));
 }
 
 } // namespace cacos

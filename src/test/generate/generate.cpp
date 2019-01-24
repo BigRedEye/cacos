@@ -19,7 +19,6 @@ int generate(int argc, const char* argv[]) {
     parser.title("Generate new tests");
 
     GeneratorOptions opts;
-    setCommonOptions(parser, opts, options::WORKSPACE | options::CONFIG | options::CONFIG);
 
     parser
         .add('g', "generator")
@@ -79,9 +78,9 @@ int generate(int argc, const char* argv[]) {
         .description("Test name")
         .store(opts.testName);
 
-    parser.parse(argc, argv);
+    config::Config cfg(parser, config::LANGS);
 
-    config::Config cfg(opts);
+    parser.parse(argc, argv);
     Generator generator(cfg, opts);
     generator.run();
 

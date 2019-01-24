@@ -48,4 +48,8 @@ private:
 
 executable::Executable runnable(const fs::path& path);
 
+struct LangOpts {
+    lang::LanguageTable langs;
+};
+
 }

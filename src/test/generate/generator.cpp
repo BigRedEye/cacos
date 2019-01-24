@@ -44,7 +44,7 @@ void Generator::run() {
         auto res = flags.build(vars);
         input.emplace_back(vars.parse(opts_.input));
         output.emplace_back(
-            config_.directory(config::DirectoryType::test) / vars.parse(opts_.testName));
+            config_.dir(config::DirType::test) / vars.parse(opts_.testName));
 
         auto callback = [&] (process::Result res, std::optional<process::Info>&& info) {
             if (res.status != process::status::OK) {

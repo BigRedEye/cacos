@@ -1,7 +1,7 @@
 #include "cacos/common_args.h"
 
 #include "cacos/config.h"
-
+#ifdef qweqweqwe
 namespace cacos {
 
 cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mask) {
@@ -23,7 +23,7 @@ cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mas
             .optional()
             .description("Config file relative to the workspace directory")
             .value_type("FILE")
-            .default_value(config::Config::userDir() / "cacos.toml")
+            .default_value(config::Config::userConfigDir() / "cacos.toml")
             .handle([&](std::string_view path) {
                 opts.config = path;
             });
@@ -35,7 +35,7 @@ cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mas
             .optional()
             .description("Langs file relative to the workspace directory")
             .value_type("FILE")
-            .default_value(config::Config::userDir() / "langs.toml")
+            .default_value(config::Config::userConfigDir() / "langs.toml")
             .handle([&](std::string_view path) {
                 opts.langs = path;
             });
@@ -84,3 +84,4 @@ cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mas
 }
 
 }
+#endif // qweqweqwe

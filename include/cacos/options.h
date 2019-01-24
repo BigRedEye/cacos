@@ -36,7 +36,6 @@ struct Ejudge {
 
 }
 
-
 struct Options {
     fs::path workspace;
     fs::path config;

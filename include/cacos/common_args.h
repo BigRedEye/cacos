@@ -7,7 +7,8 @@
 
 namespace cacos {
 
-namespace options {
+// namespace options {
+/*
 enum Mask : ui64 {
     WORKSPACE = ui64{1} << 1,
     CONFIG    = ui64{1} << 2,
@@ -16,7 +17,7 @@ enum Mask : ui64 {
     ALL       = ~ui64{0},
 };
 }
-
-cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mask = options::ALL);
+*/
+// cpparg::parser& setCommonOptions(cpparg::parser& parser, Options& opts, ui64 mask = options::ALL);
 
 }

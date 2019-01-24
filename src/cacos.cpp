@@ -1,5 +1,5 @@
-#include "cacos/init.h"
-#include "cacos/config.h"
+#include "cacos/commands/init.h"
+#include "cacos/commands/config.h"
 #include "cacos/test/test.h"
 #include "cacos/ejudge/status.h"
 
@@ -22,6 +22,7 @@ int main(int argc, const char* argv[]) {
     parser.command("test").description("Manage tests").handle(cacos::commands::test);
     parser.command("run").description("Compile and run").handle(cacos::commands::run);
     parser.command("status").description("Ejudge contest status").handle(cacos::ejudge::commands::status);
+    parser.command("status").description("Manage config").handle(cacos::commands::config);
 
     return parser.parse(argc, argv);
 }

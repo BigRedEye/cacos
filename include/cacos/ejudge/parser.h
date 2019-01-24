@@ -1,12 +1,12 @@
 #pragma once
 
-#include "cacos/options.h"
+#include "cacos/config.h"
 
 namespace cacos::ejudge {
 
 class Parser {
 public:
-    Parser(const Options& opts);
+    Parser(const config::Config& cfg);
 
 private:
     std::string cookie;

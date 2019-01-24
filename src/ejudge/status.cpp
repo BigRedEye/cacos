@@ -14,27 +14,26 @@
 #include <fmt/format.h>
 #include <termcolor/termcolor.hpp>
 
+#include <cpptoml.h>
+
 namespace cacos::ejudge::commands {
 
 int status(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge status");
     parser.title("Get ejudge contest status");
 
-    Options opts;
-    setCommonOptions(parser, opts, options::EJUDGE | options::CONFIG);
+    config::Config cfg(parser, config::EJUDGE);
 
     parser.parse(argc, argv);
-
-    config::Config cfg(opts);
 
     http::Client client("cookies.txt");
 
     InlineVariables vars;
-    vars.set("contest_id", util::to_string(opts.ejudge.contestId));
+    vars.set("contest_id", util::to_string(cfg.ejudge().contestId));
 
     std::string loginPage = client.post(
-        vars.parse(opts.ejudge.url),
-        util::join("login=", *opts.ejudge.loginPassword.login, "&password=", *opts.ejudge.loginPassword.password)
+        vars.parse(cfg.ejudge().url),
+        util::join("login=", cfg.ejudge().login.login.value(), "&password=", cfg.ejudge().login.password.value())
     );
 
     html::Html page(loginPage);
@@ -61,7 +60,7 @@ int status(int argc, const char* argv[]) {
         throw std::runtime_error("Cannot parse ejudge responce: weird token");
     }
 
-    std::string baseUrl = vars.parse(opts.ejudge.url);
+    std::string baseUrl = vars.parse(cfg.ejudge().url);
     std::string_view prefix = util::split(baseUrl, "?")[0];
 
     std::string res = client.get(util::join(prefix, "/view-problem-summary/", token));
