@@ -30,7 +30,7 @@ public:
     bp::child run(
         const std::vector<std::string>& flags,
         Args&&... args) const {
-        bp::child result(bp::exe = executable_.string(), bp::args += flags, std::forward<Args>(args)...);
+        bp::child result(bp::exe = executable_.string(), bp::args += flags_.build({}), bp::args += flags, std::forward<Args>(args)...);
         return result;
     }
 

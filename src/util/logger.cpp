@@ -91,7 +91,7 @@ Logger& Logger::flush(bool flush) {
 }
 
 void Logger::increaseVerbosity(int delta) {
-    verbosity_ = static_cast<MessagePriority>(std::min<int>(verbosity_ - delta, DEBUG));
+    verbosity_ = static_cast<MessagePriority>(std::max<int>(verbosity_ - delta, DEBUG));
 }
 
 } // namespace cacos

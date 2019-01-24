@@ -17,6 +17,7 @@ executable::Executable Interpreter::process(const fs::path& source) const {
 
     executable::Flags flags = common_;
     flags.append(debug_);
+
     return executable::Executable(exe_.path(), flags.build(vars));
 }
 

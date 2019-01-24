@@ -22,7 +22,7 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 
 void Generator::run() {
     executable::Executable exe =
-        config_.langs().runnable(opts_.generator);
+        config_.langs().runnable(fs::current_path() / opts_.generator);
 
     InlineVariables vars;
 
@@ -49,13 +49,14 @@ void Generator::run() {
         auto callback = [&] (process::Result res, std::optional<process::Info>&& info) {
             if (res.status != process::status::OK) {
                 Logger::warning().print("Exit status: {}", process::status::serialize(res.status));
-                Logger::log().print(
-                    "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
-                    res.returnCode,
-                    info->cpuTime.count(),
-                    info->maxRss / (1024. * 1024.)
-                );
             }
+
+            Logger::log().print(
+                "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                res.returnCode,
+                info->cpuTime.count(),
+                info->maxRss / (1024. * 1024.)
+            );
 
             ++doneTasks;
             Logger::info().print("Done {} / {} ({:.1f}%)", doneTasks, totalTasks, doneTasks * 100. / totalTasks);

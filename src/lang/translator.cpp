@@ -12,6 +12,8 @@ Translator::Translator(const cpptoml::table& table) {
     auto flags = table.get_array_of<std::string>("flags");
     if (flags) {
         common_ = *flags;
+    } else {
+        throw std::runtime_error("Cannot find flags for " + *exe);
     }
 }
 

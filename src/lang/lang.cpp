@@ -33,11 +33,9 @@ executable::Executable Language::process(const fs::path& source) const {
     if (compiler_) {
         compiled = compiler_->process(source).path();
     }
-    executable::Executable result;
+    executable::Executable result = compiled;
     if (interpreter_) {
         result = interpreter_->process(result.path());
-    } else {
-        result = compiled;
     }
     return result;
 }
