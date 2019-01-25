@@ -1,7 +1,6 @@
 #include "cacos/test/generate/generate.h"
 #include "cacos/test/generate/generator.h"
 
-#include "cacos/options.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
 #include "cacos/config/config.h"

@@ -1,6 +1,5 @@
 #include "cacos/commands/init.h"
 #include "cacos/config/config.h"
-#include "cacos/options.h"
 
 #include "cacos/util/logger.h"
 

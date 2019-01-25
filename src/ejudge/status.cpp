@@ -1,9 +1,9 @@
 #include "cacos/ejudge/status.h"
 #include "cacos/ejudge/http/client.h"
 #include "cacos/ejudge/html/myhtml.h"
+#include "cacos/ejudge/session.h"
 
 #include "cacos/config/config.h"
-#include "cacos/options.h"
 
 #include "cacos/util/split.h"
 #include "cacos/util/ranges.h"
@@ -17,13 +17,6 @@
 
 namespace cacos::ejudge::commands {
 
-class AuthenticationError : public std::runtime_error {
-public:
-    AuthenticationError(const std::string& what)
-        : std::runtime_error(what) {
-    }
-};
-
 int status(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge status");
     parser.title("Get ejudge contest status");
@@ -32,51 +25,10 @@ int status(int argc, const char* argv[]) {
 
     parser.parse(argc, argv);
 
-    http::Client client("cookies.txt");
+    http::Client client(cfg.file(config::FileType::cookies));
+    Session session(client, cfg);
 
-    InlineVariables vars("config");
-    vars.set("contest_id", util::to_string(cfg.ejudge().contestId));
-
-    std::string loginPage = client.post(
-        vars.parse(cfg.ejudge().url),
-        util::join("login=", cfg.ejudge().login.login.value(), "&password=", cfg.ejudge().login.password.value())
-    );
-
-    html::Html page(loginPage);
-    html::Collection titles = page.tags("title");
-    for (auto node : titles) {
-        if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Invalid session");
-        }
-    }
-    html::Collection tags = page.attrs("href");
-    std::optional<std::string> url;
-    for (auto node : tags) {
-        url = node.attr("href").value();
-    }
-
-    if (!url) {
-        throw std::runtime_error("Cannot parse ejudge responce: href not found");
-    }
-
-    // https://caos.ejudge.ru/ej/client/main-page/Sa1a9fcc0f19fe4a1?lt=1
-    //                                            ^^^^^^^^^^^^^^^^^
-    auto tokens = util::split(*url, "/?");
-    if (tokens.size() < 2) {
-        throw std::runtime_error("Cannot parse ejudge responce: weird link");
-    }
-    std::string_view token = tokens[tokens.size() - 2];
-    // std::string_view token = "S87b69b1354f650d3";
-    // TODO: check for " []: Error: Invalid session"
-    if (token.size() != 17) { // Triggered
-        throw std::runtime_error("Cannot parse ejudge responce: weird token");
-    }
-
-    std::string baseUrl = vars.parse(cfg.ejudge().url);
-    std::string_view prefix = util::split(baseUrl, "?")[0];
-
-    std::string res = client.get(util::join(prefix, "/view-problem-summary/", token));
-    html::Html summary(res);
+    html::Html summary = session.get("view-problem-summary");
 
     for (auto table : summary.attrs("class", "table")) {
         for (auto row : util::skip(*util::select(table, 1).begin(), 1)) {

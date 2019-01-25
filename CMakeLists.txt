@@ -62,6 +62,7 @@ file(GLOB SOURCES
     src/ejudge/html/myhtml.cpp
     src/ejudge/http/client.cpp
     src/ejudge/parser.cpp
+    src/ejudge/session.cpp
     src/ejudge/status.cpp
 
     src/util/inline_variables.cpp
@@ -101,9 +102,10 @@ file(GLOB HEADERS
 
     include/cacos/ejudge/html/myhtml.h
     include/cacos/ejudge/http/client.h
-    include/cacos/ejudge/parser.h
-    include/cacos/ejudge/status.h
     include/cacos/ejudge/opts.h
+    include/cacos/ejudge/parser.h
+    include/cacos/ejudge/session.h
+    include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h

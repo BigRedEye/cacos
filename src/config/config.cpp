@@ -119,6 +119,23 @@ fs::path Config::dir(DirType type) const {
     return createIfNotExists(result);
 }
 
+fs::path Config::file(FileType type) const {
+    switch (type) {
+    case FileType::config:
+        return dir(DirType::config) / CONFIG_FILE;
+    case FileType::langs:
+        return dir(DirType::config) / LANGS_FILE;
+    case FileType::token:
+        return dir(DirType::config) / TOKEN_FILE;
+    case FileType::cookies:
+        return dir(DirType::config) / COOKIES_FILE;
+    case FileType::taskConfig:
+        return dir(DirType::task) / CONFIG_FILE;
+    default:
+        return {};
+    }
+}
+
 fs::path Config::workspace() const {
     if (!fs::exists(workspace_ / ".cacos")) {
         throw BadWorkspace();
@@ -130,7 +147,7 @@ Config::Config()
     : workspace_(fs::current_path()) {
     fs::path config;
     try {
-        config = findConfig("", dir(DirType::config) / CONFIG_FILE, {defaultDir() / CONFIG_FILE}).value();
+        config = findConfig("", file(FileType::config), {defaultDir() / CONFIG_FILE}).value();
     } catch (...) {
         std::throw_with_nested(
             ConfigError("Cannot find main config file; you may consider reinstall the program."));
@@ -139,7 +156,7 @@ Config::Config()
     globalConfig_ = cpptoml::parse_file(config);
 
     try {
-        fs::path taskConfig = dir(DirType::task) / CONFIG_FILE;
+        fs::path taskConfig = file(FileType::taskConfig);
         if (fs::exists(taskConfig)) {
             taskConfig_ = cpptoml::parse_file(taskConfig);
         }
@@ -155,7 +172,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .add("langs")
             .optional()
             .description("Langs file")
-            .default_value(dir(DirType::config) / LANGS_FILE)
+            .default_value(file(FileType::langs))
             .value_type("FILE")
             .handle([this](std::string_view path) {
                 fs::path langs;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cacos/executable/executable.h"
-#include "cacos/options.h"
 
 #include "cacos/lang/opts.h"
 #include "cacos/ejudge/opts.h"
@@ -36,6 +35,14 @@ enum class DirType {
     task,
 };
 
+enum class FileType {
+    config,
+    langs,
+    token,
+    cookies,
+    taskConfig,
+};
+
 enum class ConfigType {
     global,
     task,
@@ -53,6 +60,7 @@ public:
     Config(cpparg::parser& parser, ui64 opts);
 
     fs::path dir(DirType type) const;
+    fs::path file(FileType type) const;
     fs::path workspace() const;
 
     const lang::LanguageTable& langs() const;
@@ -105,6 +113,8 @@ private:
 
     static constexpr std::string_view CONFIG_FILE = "cacos.toml";
     static constexpr std::string_view LANGS_FILE = "langs.toml";
+    static constexpr std::string_view TOKEN_FILE = "session.txt";
+    static constexpr std::string_view COOKIES_FILE = "cookies.txt";
 
 private:
     fs::path workspace_;

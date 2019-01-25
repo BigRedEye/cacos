@@ -25,6 +25,11 @@ struct Params<Type::POST> {
 };
 }
 
+class Error : public std::runtime_error {
+public:
+    Error(const std::string& what);
+};
+
 class Client {
 public:
     Client();
@@ -48,6 +53,8 @@ public:
     std::string post(const std::string& url, const std::string& data) const {
         return request(request::Params<request::Type::POST>{url, data});
     }
+
+    void cookie(std::string_view netscape) const;
 
 private:
     class Impl;
