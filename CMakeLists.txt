@@ -180,6 +180,10 @@ list(APPEND CACOS_LIBS termcolor::termcolor)
 add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS fmt::fmt)
 
+## dtl
+add_subdirectory(third-party/dtl EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS dtl::dtl)
+
 ## myhtml
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)

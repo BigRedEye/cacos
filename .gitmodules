@@ -16,3 +16,6 @@
 [submodule "third-party/myhtml"]
 	path = third-party/myhtml
 	url = https://github.com/lexborisov/myhtml.git
+[submodule "third-party/dtl/dtl"]
+	path = third-party/dtl/dtl
+	url = https://github.com/cubicdaiya/dtl.git
