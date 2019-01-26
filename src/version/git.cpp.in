@@ -1,0 +1,19 @@
+#include "cacos/version/git.h"
+
+#include <string_view>
+
+namespace cacos::version::git {
+
+std::string_view commit(size_t digits) {
+    return std::string_view("@GIT_HEAD_SHA1@").substr(0, digits);
+}
+
+bool dirty() {
+    return @GIT_IS_DIRTY@;
+}
+
+bool hasGitState() {
+    return @GIT_RETRIEVED_STATE@;
+}
+
+} // namespace cacos::version

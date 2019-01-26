@@ -19,3 +19,6 @@
 [submodule "third-party/dtl/dtl"]
 	path = third-party/dtl/dtl
 	url = https://github.com/cubicdaiya/dtl.git
+[submodule "third-party/cmake-git-version-tracking"]
+	path = third-party/cmake-git-version-tracking
+	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git

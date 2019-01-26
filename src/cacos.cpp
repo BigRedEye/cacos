@@ -6,6 +6,8 @@
 #include "cacos/ejudge/solution.h"
 #include "cacos/ejudge/status.h"
 
+#include "cacos/version/version.h"
+
 #include <cpparg/cpparg.h>
 
 #include <iostream>
@@ -49,6 +51,11 @@ int main(int argc, const char* argv[]) {
         .command("solution")
         .description("Manage ejudge solutions")
         .handle(cacos::ejudge::commands::solution);
+
+    parser
+        .command("version")
+        .description("Print cacos version")
+        .handle(cacos::commands::version);
     // clang-format on
 
     return parser.parse(argc, argv);

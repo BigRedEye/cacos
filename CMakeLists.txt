@@ -12,9 +12,12 @@ option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
 set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to install the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
-# Sanitizers build type
+# Modules
+list(APPEND CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/cmake-git-version-tracking)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Sanitizers build type
 include(Sanitizers)
 
 # Debug
@@ -67,6 +70,8 @@ file(GLOB SOURCES
     src/ejudge/solution.cpp
     src/ejudge/status.cpp
 
+    src/version/version.cpp
+
     src/util/inline_variables.cpp
     src/util/logger.cpp
     src/util/split.cpp
@@ -112,6 +117,9 @@ file(GLOB HEADERS
     include/cacos/ejudge/solution.h
     include/cacos/ejudge/status.h
 
+    include/cacos/version/git.h
+    include/cacos/version/version.h
+
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
     include/cacos/util/ranges.h
@@ -129,6 +137,12 @@ file(GLOB CONFIGS
     cacos.toml
     langs.toml
 )
+
+# Include git version
+set(PRE_CONFIGURE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/version/git.cpp.in)
+set(POST_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/git.cpp)
+include(git_watcher)
+list(APPEND SOURCES ${POST_CONFIGURE_FILE})
 
 set(CACOS_LIB ${PROJECT_NAME}_lib)
 
