@@ -5,12 +5,12 @@
 namespace cacos::ejudge::parser {
 
 ParserError::ParserError(const std::string& what)
-    : std::runtime_error(what)
-{}
+    : std::runtime_error(what) {
+}
 
 Parser::Parser(const config::Config& cfg)
-    : session_(cfg)
-{}
+    : session_(cfg) {
+}
 
 std::vector<Task> Parser::tasks() const {
     html::Html summary = session_.getPage("view-problem-summary");
@@ -28,7 +28,9 @@ std::vector<Task> Parser::tasks() const {
                 children.push_back(child);
             }
             if (children.size() != 13) {
-                throw ParserError("Cannot parse ejudge responce: weird summary table size " + util::to_string(children.size()));
+                throw ParserError(
+                    "Cannot parse ejudge responce: weird summary table size " +
+                    util::to_string(children.size()));
             }
 
             auto get = [](auto&& opt) -> auto& {
@@ -100,9 +102,8 @@ enum {
 }
 
 std::vector<Solution> Parser::solutions(i32 taskId) const {
-    html::Html page = session_.getPage(
-        "view-problem-submit",
-        util::join("prob_id=", util::to_string(taskId)));
+    html::Html page =
+        session_.getPage("view-problem-submit", util::join("prob_id=", util::to_string(taskId)));
 
     std::vector<Solution> result;
 
@@ -149,7 +150,8 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
 }
 
 std::string_view Parser::source(i32 solutionId) const {
-    std::string_view result = session_.getRaw("download-run", util::join("run_id=", util::to_string(solutionId)));
+    std::string_view result =
+        session_.getRaw("download-run", util::join("run_id=", util::to_string(solutionId)));
 
     html::Html page(result);
     for (auto node : page.tags("title")) {
@@ -161,4 +163,4 @@ std::string_view Parser::source(i32 solutionId) const {
     return result;
 }
 
-}
+} // namespace cacos::ejudge::parser

@@ -14,7 +14,7 @@ enum Status {
 };
 
 std::string serialize(Status status);
-}
+} // namespace status
 
 struct Result {
     status::Status status;

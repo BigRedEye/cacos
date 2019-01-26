@@ -8,4 +8,4 @@ struct LangOpts {
     lang::LanguageTable langs;
 };
 
-}
+} // namespace cacos::opts

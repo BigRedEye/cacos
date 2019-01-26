@@ -2,8 +2,8 @@
 
 #include "cacos/ejudge/http/client.h"
 
-#include "cacos/util/string.h"
 #include "cacos/util/logger.h"
+#include "cacos/util/string.h"
 
 #include "curl/curl.h"
 
@@ -145,6 +145,6 @@ void Client::cookie(std::string_view netscape) const {
     return impl_->cookie(netscape);
 }
 
-}
+} // namespace cacos::http
 
 #endif // CACOS_HAS_CURL

@@ -13,7 +13,7 @@ namespace cacos {
 
 Logger::MessagePriority Logger::verbosity_ = Logger::INFO;
 
-namespace  {
+namespace {
 
 std::ostream& boldRed(std::ostream& os) {
     return termcolor::bold(termcolor::red(os));
@@ -38,7 +38,7 @@ auto colorForPriority(Logger::MessagePriority priority) {
     }
 }
 
-}
+} // namespace
 
 Logger::Logger(Logger::MessagePriority priority)
     : os_(std::cerr)

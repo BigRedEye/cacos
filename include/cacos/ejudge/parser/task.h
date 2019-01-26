@@ -24,4 +24,4 @@ struct Solution {
     Result result;
 };
 
-}
+} // namespace cacos::ejudge::parser

@@ -3,8 +3,8 @@
 namespace cacos::mt {
 
 FixedQueue::FixedQueue(size_t threads)
-    : threads_(threads)
-{}
+    : threads_(threads) {
+}
 
 void FixedQueue::add(const Task& task) {
     tasks_.push_back(task);
@@ -17,9 +17,7 @@ void FixedQueue::add(Task&& task) {
 void FixedQueue::run() {
     next_.store(0);
     for (size_t i = 0; i < std::min(tasks_.size(), threads_); ++i) {
-        workers_.emplace_back([this] {
-            worker();
-        });
+        workers_.emplace_back([this] { worker(); });
     }
 }
 

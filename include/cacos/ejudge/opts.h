@@ -2,8 +2,8 @@
 
 #include "cacos/util/ints.h"
 
-#include <string>
 #include <optional>
+#include <string>
 
 namespace cacos::opts {
 
@@ -26,4 +26,4 @@ struct EjudgeOpts {
     Session session;
 };
 
-}
+} // namespace cacos::opts

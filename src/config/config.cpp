@@ -9,8 +9,8 @@
 #include <string_view>
 
 #ifdef CACOS_OS_UNIX
-#include <sys/types.h>
 #include <pwd.h>
+#include <sys/types.h>
 #endif
 
 namespace cacos::config {
@@ -28,7 +28,7 @@ fs::path homeDir() {
     }
 #endif
 
-    static const char* vars[] = { "HOME", "HOMEPATH", "HOMESHARE", "USERPROFILE", "HOMEDRIVE" };
+    static const char* vars[] = {"HOME", "HOMEPATH", "HOMESHARE", "USERPROFILE", "HOMEDRIVE"};
     for (auto var : vars) {
         const char* path;
         if ((path = getenv(var))) {
@@ -68,7 +68,10 @@ std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives
     return {};
 }
 
-std::optional<fs::path> findConfig(const fs::path& overriden, const fs::path& config, const std::vector<fs::path>& defaults) {
+std::optional<fs::path> findConfig(
+    const fs::path& overriden,
+    const fs::path& config,
+    const std::vector<fs::path>& defaults) {
     auto firstDefault = findConfigFile(defaults);
     if (!fs::exists(config) && firstDefault) {
         try {
@@ -81,7 +84,7 @@ std::optional<fs::path> findConfig(const fs::path& overriden, const fs::path& co
     return findConfigFile({overriden, config});
 }
 
-}
+} // namespace
 
 ConfigError::ConfigError(const std::string& what)
     : std::runtime_error(what) {
@@ -167,6 +170,7 @@ Config::Config()
 
 Config::Config(cpparg::parser& parser, ui64 mask)
     : Config() {
+    // clang-format off
     if (mask & LANGS) {
         parser
             .add("langs")
@@ -259,10 +263,15 @@ Config::Config(cpparg::parser& parser, ui64 mask)
 
     parser
         .add_help('h', "help");
+    // clang-format on
 }
 
-void Config::setImpl(std::string_view path, const std::shared_ptr<cpptoml::base>& value, ConfigType type) const {
-    std::shared_ptr<cpptoml::table> cfg = (type == ConfigType::global ? globalConfig_ : taskConfig_);
+void Config::setImpl(
+    std::string_view path,
+    const std::shared_ptr<cpptoml::base>& value,
+    ConfigType type) const {
+    std::shared_ptr<cpptoml::table> cfg =
+        (type == ConfigType::global ? globalConfig_ : taskConfig_);
     if (!cfg) {
         throw BadWorkspace();
     }
@@ -308,8 +317,9 @@ void Config::dump(ConfigType type) const {
         throw ConfigError("Cannot save config");
     }
 
-    std::ofstream out(dir(type == ConfigType::global ? DirType::config : DirType::task) / CONFIG_FILE);
+    std::ofstream out(
+        dir(type == ConfigType::global ? DirType::config : DirType::task) / CONFIG_FILE);
     out << *cfg;
 }
 
-}
+} // namespace cacos::config

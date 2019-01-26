@@ -2,8 +2,8 @@
 
 #include "cacos/config/config.h"
 
-#include "cacos/ejudge/http/client.h"
 #include "cacos/ejudge/html/myhtml.h"
+#include "cacos/ejudge/http/client.h"
 
 #include "cacos/util/logger.h"
 
@@ -69,4 +69,4 @@ private:
     mutable std::unique_ptr<Cache> cache_;
 };
 
-}
+} // namespace cacos::ejudge

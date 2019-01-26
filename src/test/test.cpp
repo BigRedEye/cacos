@@ -1,9 +1,9 @@
-#include "cacos/config/config.h"
 #include "cacos/test/test.h"
+#include "cacos/config/config.h"
 #include "cacos/util/util.h"
 
-#include "cacos/test/generate/generate.h"
 #include "cacos/test/add/add.h"
+#include "cacos/test/generate/generate.h"
 
 #include <cpparg/cpparg.h>
 
@@ -29,4 +29,4 @@ int run(int argc, const char* argv[]) {
     return 0;
 }
 
-}
+} // namespace cacos::commands

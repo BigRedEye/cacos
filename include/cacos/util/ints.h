@@ -14,4 +14,4 @@ using ui16 = uint16_t;
 using ui32 = uint32_t;
 using ui64 = uint64_t;
 
-}
+} // namespace cacos

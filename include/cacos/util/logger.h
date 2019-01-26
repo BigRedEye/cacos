@@ -31,8 +31,8 @@ public:
         return *this;
     }
 
-    template<typename ...Args>
-    Logger& print(Args&& ...args) {
+    template<typename... Args>
+    Logger& print(Args&&... args) {
         if (verbosity_ <= prior_) {
             fmt::print(os_, std::forward<Args>(args)...);
         }

@@ -19,21 +19,20 @@ public:
     InlineVariableParsingError(const std::string& what);
 };
 
-enum class UnknownVariablePolicy {
-    IGNORE,
-    THROW
-};
+enum class UnknownVariablePolicy { IGNORE, THROW };
 
 class InlineVariables {
 public:
-    InlineVariables(std::string_view prefix, UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
+    InlineVariables(
+        std::string_view prefix,
+        UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
         : prefix_(util::str(prefix))
-        , policy_(policy)
-    {}
+        , policy_(policy) {
+    }
 
     InlineVariables(UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
-        : InlineVariables(DEFAULT_PREFIX, policy)
-    {}
+        : InlineVariables(DEFAULT_PREFIX, policy) {
+    }
 
     void set(const std::string& key, const std::string& value);
 
@@ -47,4 +46,4 @@ private:
     std::unordered_map<std::string, std::string> vars_;
 };
 
-} // namespace casos
+} // namespace cacos

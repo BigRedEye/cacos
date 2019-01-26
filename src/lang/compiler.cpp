@@ -10,8 +10,8 @@ namespace cacos::lang {
 
 Compiler::Compiler(const cpptoml::table& t, const fs::path& binaryDir)
     : Translator(t)
-    , binaryDir_(binaryDir)
-{}
+    , binaryDir_(binaryDir) {
+}
 
 executable::Executable Compiler::process(const fs::path& source) const {
     InlineVariables vars;
@@ -29,13 +29,8 @@ executable::Executable Compiler::process(const fs::path& source) const {
     std::future<std::string> stdErr;
 
     boost::asio::io_context ctx;
-    bp::child child = exe_.run(
-        vars,
-        args,
-        bp::std_out > std::ref(stdOut),
-        bp::std_err > std::ref(stdErr),
-        ctx
-    );
+    bp::child child =
+        exe_.run(vars, args, bp::std_out > std::ref(stdOut), bp::std_err > std::ref(stdErr), ctx);
 
     // TODO: fixme
     ctx.run_for(std::chrono::seconds(3));

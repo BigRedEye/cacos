@@ -1,6 +1,6 @@
+#include "cacos/ejudge/solution.h"
 #include "cacos/ejudge/parser/parser.h"
 #include "cacos/ejudge/session.h"
-#include "cacos/ejudge/solution.h"
 
 #include "cacos/config/config.h"
 
@@ -19,12 +19,14 @@ int list(int argc, const char* argv[]) {
     config::Config cfg(parser, config::EJUDGE);
 
     std::string taskName;
+    // clang-format off
     parser
         .positional("task")
         .required()
         .description("Ejudge task (sm02-3, for example)")
         .value_type("TASK")
         .store(taskName);
+    // clang-format on
 
     parser.parse(argc, argv);
 
@@ -50,12 +52,14 @@ int fetch(int argc, const char* argv[]) {
     config::Config cfg(parser, config::EJUDGE);
 
     i32 id;
+    // clang-format off
     parser
         .positional("id")
         .required()
         .description("Ejudge run id")
         .value_type("ID")
         .store(id);
+    // clang-format on
 
     parser.parse(argc, argv);
 
@@ -72,12 +76,14 @@ int diff(int argc, const char* argv[]) {
 
     config::Config cfg(parser, config::EJUDGE);
 
-    auto add = [&] (auto name) -> auto& {
+    auto add = [&](auto name) -> auto& {
+        // clang-format off
         return parser
             .positional(name)
             .required()
             .description("Ejudge run id")
             .value_type("ID");
+        // clang-format on
     };
 
     i32 ids[2];
@@ -88,14 +94,10 @@ int diff(int argc, const char* argv[]) {
 
     parser::Parser client(cfg);
 
-    auto splitSource = [] (auto source) {
-        return util::split(source, "\n");
-    };
+    auto splitSource = [](auto source) { return util::split(source, "\n"); };
 
-    std::vector<std::string_view> sources[] = {
-        splitSource(client.source(ids[0])),
-        splitSource(client.source(ids[1]))
-    };
+    std::vector<std::string_view> sources[] = {splitSource(client.source(ids[0])),
+                                               splitSource(client.source(ids[1]))};
 
     dtl::Diff<std::string_view> d(sources[0], sources[1]);
     d.compose();
@@ -134,11 +136,24 @@ int solution(int argc, const char* argv[]) {
     cpparg::command_parser parser("cacos ejudge solution");
     parser.title("Manage ejudge solutions");
 
-    parser.command("list").description("List solutions").handle(list);
-    parser.command("fetch").description("Fetch solution").handle(fetch);
-    parser.command("diff").description("Compare solutions").handle(diff);
+    // clang-format off
+    parser
+        .command("list")
+        .description("List solutions")
+        .handle(list);
+
+    parser
+        .command("fetch")
+        .description("Fetch solution")
+        .handle(fetch);
+
+    parser
+        .command("diff")
+        .description("Compare solutions")
+        .handle(diff);
+    // clang-format on
 
     return parser.parse(argc, argv);
 }
 
-}
+} // namespace cacos::ejudge::commands

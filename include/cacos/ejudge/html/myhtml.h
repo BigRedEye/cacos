@@ -2,8 +2,8 @@
 
 #include <myhtml/api.h>
 
-#include <string_view>
 #include <optional>
+#include <string_view>
 
 namespace cacos::html {
 
@@ -137,4 +137,4 @@ private:
     myhtml_tree_t* tree_ = nullptr;
 };
 
-}
+} // namespace cacos::html

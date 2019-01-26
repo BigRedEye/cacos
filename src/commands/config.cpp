@@ -11,6 +11,7 @@ int config(int argc, const char* argv[]) {
 
     config::Config cfg;
 
+    // clang-format off
     parser
         .add("login")
         .optional()
@@ -42,6 +43,7 @@ int config(int argc, const char* argv[]) {
         .handle([&](auto sv) {
             cfg.set("ejudge.url", util::str(sv));
         });
+    // clang-format on
 
     parser.add_help('h', "help");
     parser.parse(argc, argv);
@@ -51,4 +53,4 @@ int config(int argc, const char* argv[]) {
     return 0;
 }
 
-}
+} // namespace cacos::commands

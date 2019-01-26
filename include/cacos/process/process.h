@@ -34,4 +34,4 @@ private:
     InfoFetcher fetcher_;
 };
 
-}
+} // namespace cacos::process

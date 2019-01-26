@@ -95,8 +95,8 @@ bool Attributes::Iterator::operator!=(Iterator other) const {
 }
 
 Node::Node(myhtml_tree_node_t* node)
-    : node_(node)
-{}
+    : node_(node) {
+}
 
 Node::Iterator Node::begin() const {
     return myhtml_node_child(node_);
@@ -165,10 +165,7 @@ bool Node::Iterator::operator!=(Iterator other) const {
 }
 
 Attributes Node::attrs() const {
-    return {
-        myhtml_node_attribute_first(node_),
-        myhtml_node_attribute_last(node_)
-    };
+    return {myhtml_node_attribute_first(node_), myhtml_node_attribute_last(node_)};
 }
 
 Collection::Iterator::Iterator(const myhtml_collection_t* base, size_t pos)
@@ -259,11 +256,13 @@ Collection Html::tags(std::string_view name) const {
 }
 
 Collection Html::attrs(std::string_view name) const {
-    return myhtml_get_nodes_by_attribute_key(tree_, nullptr, nullptr, name.data(), name.size(), nullptr);
+    return myhtml_get_nodes_by_attribute_key(
+        tree_, nullptr, nullptr, name.data(), name.size(), nullptr);
 }
 
 Collection Html::attrs(std::string_view key, std::string_view value) const {
-    return myhtml_get_nodes_by_attribute_value(tree_, nullptr, nullptr, true, key.data(), key.size(), value.data(), value.size(), nullptr);
+    return myhtml_get_nodes_by_attribute_value(
+        tree_, nullptr, nullptr, true, key.data(), key.size(), value.data(), value.size(), nullptr);
 }
 
-}
+} // namespace cacos::html

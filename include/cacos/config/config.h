@@ -2,8 +2,8 @@
 
 #include "cacos/executable/executable.h"
 
-#include "cacos/lang/opts.h"
 #include "cacos/ejudge/opts.h"
+#include "cacos/lang/opts.h"
 
 #include "cacos/util/split.h"
 
@@ -11,8 +11,8 @@
 
 #include <cpptoml.h>
 
-#include <string_view>
 #include <optional>
+#include <string_view>
 
 namespace cacos::config {
 
@@ -49,9 +49,9 @@ enum class ConfigType {
 };
 
 enum Mask : ui64 {
-    LANGS     = ui64{1} << 1,
-    EJUDGE    = ui64{1} << 2,
-    ALL       = ~ui64{0},
+    LANGS = ui64{1} << 1,
+    EJUDGE = ui64{1} << 2,
+    ALL = ~ui64{0},
 };
 
 class Config {
@@ -74,7 +74,10 @@ public:
     void dump(ConfigType type) const;
 
 private:
-    void setImpl(std::string_view path, const std::shared_ptr<cpptoml::base>& value, ConfigType type) const;
+    void setImpl(
+        std::string_view path,
+        const std::shared_ptr<cpptoml::base>& value,
+        ConfigType type) const;
     void parseLangs(const fs::path& langs);
 
     template<typename T>
@@ -100,10 +103,7 @@ private:
     }
 
     template<typename T, typename E>
-    T argOrConfig(
-        const std::string& arg,
-        const std::string& key,
-        E&& exception) {
+    T argOrConfig(const std::string& arg, const std::string& key, E&& exception) {
         try {
             return argOrConfig<T>(arg, key).value();
         } catch (const std::bad_variant_access&) {
@@ -124,4 +124,4 @@ private:
     opts::EjudgeOpts ejudge_;
 };
 
-}
+} // namespace cacos::config

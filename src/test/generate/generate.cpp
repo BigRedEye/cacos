@@ -1,14 +1,14 @@
 #include "cacos/test/generate/generate.h"
 #include "cacos/test/generate/generator.h"
 
+#include "cacos/config/config.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
-#include "cacos/config/config.h"
 
 #include <cpparg/cpparg.h>
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace cacos::test {
 
@@ -18,6 +18,7 @@ int generate(int argc, const char* argv[]) {
 
     GeneratorOptions opts;
 
+    // clang-format off
     parser
         .add("generator")
         .required()
@@ -75,6 +76,7 @@ int generate(int argc, const char* argv[]) {
         .value_type("STRING")
         .description("Test name")
         .store(opts.testName);
+    // clang-format on
 
     config::Config cfg(parser, config::LANGS);
 

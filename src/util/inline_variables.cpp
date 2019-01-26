@@ -7,7 +7,7 @@
 
 namespace cacos {
 
-namespace  {
+namespace {
 
 static constexpr char OPEN_BRACE = '{';
 static constexpr char CLOSE_BRACE = '}';
@@ -82,8 +82,7 @@ TransitionTable initTransitionTable(std::string_view prefix) {
     result.add(
         static_cast<state::ParsingState>(state::PREFIX + prefix.size()),
         OPEN_BRACE,
-        state::VARIABLE_BEGIN
-    );
+        state::VARIABLE_BEGIN);
 
     result.add(state::VARIABLE_BEGIN, state::VARIABLE);
     result.add(state::VARIABLE_BEGIN, CLOSE_BRACE, state::VARIABLE_END);
@@ -104,15 +103,15 @@ const TransitionTable& tableForPrefix(std::string_view prefix) {
     return it->second;
 }
 
-}
+} // namespace
 
 UnknownVariableName::UnknownVariableName(const std::string& name)
-    : std::runtime_error(std::string("Unknown variable name:" + name))
-{}
+    : std::runtime_error(std::string("Unknown variable name:" + name)) {
+}
 
 InlineVariableParsingError::InlineVariableParsingError(const std::string& what)
-    : std::runtime_error(what)
-{}
+    : std::runtime_error(what) {
+}
 
 void InlineVariables::set(const std::string& key, const std::string& value) {
     vars_[key] = value;

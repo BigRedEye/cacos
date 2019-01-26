@@ -54,8 +54,8 @@ class EnumeratedIterator {
 public:
     EnumeratedIterator(It&& it, size_t pos = 0)
         : it_(std::forward<It>(it))
-        , pos_(pos)
-    {}
+        , pos_(pos) {
+    }
 
     auto operator*() const {
         return std::pair{*it_, pos_};
@@ -91,4 +91,4 @@ Range<EnumeratedIterator<It>> enumerate(C&& c) {
     return {EnumeratedIterator{c.begin(), 0}, EnumeratedIterator{c.end(), 0}};
 }
 
-}
+} // namespace cacos::util

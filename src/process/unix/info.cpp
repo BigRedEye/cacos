@@ -2,9 +2,9 @@
 
 #include "cacos/process/info.h"
 
-#include "cacos/util/string.h"
 #include "cacos/util/ints.h"
 #include "cacos/util/split.h"
+#include "cacos/util/string.h"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -23,11 +23,11 @@ enum {
     RSS = 23,
 };
 
-}
+} // namespace proc::stat
 
 InfoError::InfoError(const std::string& msg)
-    : std::runtime_error(msg)
-{}
+    : std::runtime_error(msg) {
+}
 
 struct ProcessStats {
     ui64 utime;
@@ -111,8 +111,8 @@ private:
 };
 
 InfoFetcher::InfoFetcher(const bp::child& c)
-    : impl_(std::make_unique<Impl>(c))
-{}
+    : impl_(std::make_unique<Impl>(c)) {
+}
 
 InfoFetcher::~InfoFetcher() {
 }
@@ -125,6 +125,6 @@ void InfoFetcher::status(status::Status newStatus) {
     return impl_->status(newStatus);
 }
 
-}
+} // namespace cacos::process
 
 #endif // CACOS_OS_UNIX

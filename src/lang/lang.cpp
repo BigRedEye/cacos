@@ -7,8 +7,8 @@
 namespace cacos::lang {
 
 LanguageError::LanguageError(const std::string& what)
-    : std::runtime_error(what)
-{}
+    : std::runtime_error(what) {
+}
 
 Language::Language(const cpptoml::table& config, const fs::path& binaryDir) {
     auto compiler = config.get_table("compiler");
@@ -59,7 +59,8 @@ LanguageTable::LanguageTable(const cpptoml::table& table, const fs::path& binary
 
 executable::Executable LanguageTable::runnable(const fs::path& path) const {
     bool isExecutable = !bp::search_path(path.string()).empty();
-    isExecutable = isExecutable || !bp::search_path(path.string(), { path.parent_path().string() }).empty();
+    isExecutable =
+        isExecutable || !bp::search_path(path.string(), {path.parent_path().string()}).empty();
     if (isExecutable) {
         return path;
     }

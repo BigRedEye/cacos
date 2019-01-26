@@ -1,6 +1,6 @@
 #include "cacos/process/process.h"
-#include "cacos/util/string.h"
 #include "cacos/util/split.h"
+#include "cacos/util/string.h"
 
 #include <cstdio>
 
@@ -12,8 +12,8 @@ namespace cacos::process {
 
 Process::Process(bp::child&& c)
     : child_(std::move(c))
-    , fetcher_(child_)
-{}
+    , fetcher_(child_) {
+}
 
 Info Process::info() const {
     return fetcher_.get();
@@ -47,4 +47,4 @@ void Process::wait() {
     return child_.wait(errc);
 }
 
-}
+} // namespace cacos::process

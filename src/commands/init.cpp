@@ -5,9 +5,9 @@
 
 #include <cpparg/cpparg.h>
 
-#include <string>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <string>
 
 namespace cacos::commands {
 
@@ -19,6 +19,7 @@ int init(int argc, const char* argv[]) {
 
     fs::path workspace;
 
+    // clang-format off
     parser
         .positional("workspace")
         .optional()
@@ -28,10 +29,11 @@ int init(int argc, const char* argv[]) {
         .handle([&](std::string_view path) {
             workspace = path;
         });
+    // clang-format on
 
     parser.parse(argc, argv);
 
-    std::vector<std::string_view> required_dirs = { ".cacos", "test" };
+    std::vector<std::string_view> required_dirs = {".cacos", "test"};
 
     for (auto dir : required_dirs) {
         if (!fs::create_directories(workspace / dir)) {
@@ -42,4 +44,4 @@ int init(int argc, const char* argv[]) {
     return 0;
 }
 
-}
+} // namespace cacos::commands

@@ -1,13 +1,13 @@
+#include "cacos/ejudge/status.h"
 #include "cacos/ejudge/html/myhtml.h"
 #include "cacos/ejudge/http/client.h"
 #include "cacos/ejudge/parser/parser.h"
 #include "cacos/ejudge/session.h"
-#include "cacos/ejudge/status.h"
 
 #include "cacos/config/config.h"
 
-#include "cacos/util/split.h"
 #include "cacos/util/ranges.h"
+#include "cacos/util/split.h"
 
 #include <cpparg/cpparg.h>
 
@@ -49,9 +49,10 @@ int status(int argc, const char* argv[]) {
         std::cout << ", id = " << task.id << std::endl;
     }
 
-    std::cout << termcolor::bold << "Total score: " << client.score() << termcolor::reset << std::endl;
+    std::cout << termcolor::bold << "Total score: " << client.score() << termcolor::reset
+              << std::endl;
 
     return 0;
 }
 
-}
+} // namespace cacos::ejudge::commands

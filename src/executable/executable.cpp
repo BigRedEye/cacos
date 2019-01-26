@@ -12,8 +12,8 @@
 namespace cacos::executable {
 
 Executable::Executable(const fs::path& exe)
-    : Executable(exe, {})
-{}
+    : Executable(exe, {}) {
+}
 
 Executable::Executable(const fs::path& exe, const std::vector<std::string>& flags)
     : executable_(exe)
@@ -35,8 +35,8 @@ void ExecTask::onExit(process::Result res, std::optional<process::Info>&& info) 
 
 ExecPool::ExecPool(process::Limits limits, size_t workers)
     : workers_(workers)
-    , limits_(limits)
-{}
+    , limits_(limits) {
+}
 
 void ExecPool::push(ExecTaskPtr&& task) {
     tasks_.push_back(std::move(task));
@@ -56,16 +56,13 @@ void ExecPool::run() {
             return false;
         }
 
-        auto onExit = [&, id, task=(*task).get()] (int exitCode, const std::error_code&) {
+        auto onExit = [&, id, task = (*task).get()](int exitCode, const std::error_code&) {
             auto it = running.find(id);
             std::optional<process::Info> info;
             if (it != running.end()) {
                 info = it->second.info();
             }
-            process::Result res {
-                info ? info->result : process::status::UNDEFINED,
-                exitCode
-            };
+            process::Result res{info ? info->result : process::status::UNDEFINED, exitCode};
             task->onExit(res, std::move(info));
 
             if (it != running.end()) {
@@ -93,12 +90,12 @@ void ExecPool::run() {
                 "cpu time = {:.3f} s, real time = {:.3f} s, max rss = {:.3f} mb",
                 info.cpuTime.count(),
                 info.realTime.count(),
-                info.maxRss / (1024. * 1024.)
-            );
+                info.maxRss / (1024. * 1024.));
             if (limits_.cpu != process::Limits::unlimited<seconds> && info.cpuTime > limits_.cpu) {
                 c.kill(process::status::TL);
             }
-            if (limits_.real != process::Limits::unlimited<seconds> && info.realTime > limits_.real) {
+            if (limits_.real != process::Limits::unlimited<seconds> &&
+                info.realTime > limits_.real) {
                 c.kill(process::status::IL);
             }
             if (limits_.ml != process::Limits::unlimited<bytes> && info.maxRss > limits_.ml) {
@@ -107,7 +104,7 @@ void ExecPool::run() {
         }
     };
 
-    auto poll = [&] (std::chrono::microseconds timeout) {
+    auto poll = [&](std::chrono::microseconds timeout) {
         ctx.restart();
         ctx.run_for(timeout);
         pollInfo();
@@ -135,4 +132,4 @@ void ExecPool::run() {
     tasks_.clear();
 }
 
-}
+} // namespace cacos::executable

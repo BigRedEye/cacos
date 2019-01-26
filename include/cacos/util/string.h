@@ -68,4 +68,4 @@ inline std::string readFile(const fs::path& path) {
     return readFile(ifs);
 }
 
-} // namespace cacos
+} // namespace cacos::util

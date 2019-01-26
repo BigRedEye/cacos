@@ -7,8 +7,8 @@
 namespace cacos::lang {
 
 Interpreter::Interpreter(const cpptoml::table& t)
-    : Translator(t)
-{}
+    : Translator(t) {
+}
 
 executable::Executable Interpreter::process(const fs::path& source) const {
     InlineVariables vars;

@@ -31,7 +31,9 @@ public:
     }
 
     std::string_view set(const std::string& key, const std::string& value) {
-        auto [it, inserted] = cache_.emplace(key, Responce{value, std::chrono::high_resolution_clock::now() + std::chrono::seconds(1)});
+        auto [it, inserted] = cache_.emplace(
+            key,
+            Responce{value, std::chrono::high_resolution_clock::now() + std::chrono::seconds(1)});
         return it->second.data;
     }
 
@@ -42,14 +44,12 @@ private:
 Session::Session(const config::Config& config)
     : config_(config)
     , client_(config.file(config::FileType::cookies))
-    , cache_(std::make_unique<Cache>())
-{
+    , cache_(std::make_unique<Cache>()) {
     prefix_ = util::split(config_.ejudge().url, "?")[0];
     auto& session = config.ejudge().session;
     if (session.ejsid && session.token) {
-        Logger::log().print("Found user-defined session (ejsid = {}, token = {})",
-            *session.ejsid,
-            *session.token);
+        Logger::log().print(
+            "Found user-defined session (ejsid = {}, token = {})", *session.ejsid, *session.token);
         token_ = *session.token;
         setCookie(*session.ejsid);
     } else if (loadSession()) {
@@ -105,8 +105,11 @@ void Session::reauth() {
 
     std::string loginPage = client_.post(
         vars.parse(config_.ejudge().url),
-        util::join("login=", config_.ejudge().login.login.value(), "&password=", config_.ejudge().login.password.value())
-    );
+        util::join(
+            "login=",
+            config_.ejudge().login.login.value(),
+            "&password=",
+            config_.ejudge().login.password.value()));
 
     html::Html page(loginPage);
     html::Collection titles = page.tags("title");
@@ -145,15 +148,12 @@ std::string Session::buildUrl(std::string_view base) {
 }
 
 html::Html Session::getPage(std::string_view base, std::string_view params) {
-    return getter(base, params, [this](auto base, auto params) {
-        return getPageImpl(base, params);
-    });
+    return getter(
+        base, params, [this](auto base, auto params) { return getPageImpl(base, params); });
 }
 
 std::string_view Session::getRaw(std::string_view base, std::string_view params) {
-    return getter(base, params, [this](auto base, auto params) {
-        return getImpl(base, params);
-    });
+    return getter(base, params, [this](auto base, auto params) { return getImpl(base, params); });
 }
 
 std::string_view Session::getImpl(std::string_view base, std::string_view params) {
@@ -185,4 +185,4 @@ html::Html Session::getPageImpl(std::string_view base, std::string_view params) 
     return page;
 }
 
-}
+} // namespace cacos::ejudge

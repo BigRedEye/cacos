@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cacos/ejudge/parser/task.h"
 #include "cacos/ejudge/html/myhtml.h"
+#include "cacos/ejudge/parser/task.h"
 
 #include "cacos/config/config.h"
 #include "cacos/ejudge/session.h"
@@ -31,4 +31,4 @@ private:
     mutable Session session_;
 };
 
-}
+} // namespace cacos::ejudge::parser

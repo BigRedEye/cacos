@@ -5,7 +5,7 @@
 namespace cacos::process::status {
 
 std::string serialize(Status status) {
-    static const std::vector<std::string> serialized{ "OK", "RE", "TL", "IL", "ML", "UNDEFINED" };
+    static const std::vector<std::string> serialized{"OK", "RE", "TL", "IL", "ML", "UNDEFINED"};
     if (status >= serialized.size()) {
         return serialized.back();
     }
