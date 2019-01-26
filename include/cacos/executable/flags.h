@@ -22,4 +22,4 @@ private:
     std::vector<std::string> flags_;
 };
 
-}
+} // namespace cacos::executable

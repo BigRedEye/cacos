@@ -1,14 +1,14 @@
 #include "cacos/lang/lang.h"
 
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include "cacos/util/util.h"
 
 namespace cacos::lang {
 
 LanguageError::LanguageError(const std::string& what)
-    : std::runtime_error(what)
-{}
+    : std::runtime_error(what) {
+}
 
 Language::Language(const cpptoml::table& config, const fs::path& binaryDir) {
     auto compiler = config.get_table("compiler");
@@ -33,11 +33,9 @@ executable::Executable Language::process(const fs::path& source) const {
     if (compiler_) {
         compiled = compiler_->process(source).path();
     }
-    executable::Executable result;
+    executable::Executable result = compiled;
     if (interpreter_) {
         result = interpreter_->process(result.path());
-    } else {
-        result = compiled;
     }
     return result;
 }
@@ -61,7 +59,8 @@ LanguageTable::LanguageTable(const cpptoml::table& table, const fs::path& binary
 
 executable::Executable LanguageTable::runnable(const fs::path& path) const {
     bool isExecutable = !bp::search_path(path.string()).empty();
-    isExecutable = isExecutable || !bp::search_path(path.string(), { path.parent_path().string() }).empty();
+    isExecutable =
+        isExecutable || !bp::search_path(path.string(), {path.parent_path().string()}).empty();
     if (isExecutable) {
         return path;
     }

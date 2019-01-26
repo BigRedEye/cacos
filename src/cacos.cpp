@@ -1,14 +1,14 @@
-#include "cacos/init.h"
-#include "cacos/config.h"
+#include "cacos/commands/config.h"
+#include "cacos/commands/init.h"
+
 #include "cacos/test/test.h"
+
+#include "cacos/ejudge/solution.h"
 #include "cacos/ejudge/status.h"
 
 #include <cpparg/cpparg.h>
 
 #include <iostream>
-
-#include <cpptoml.h>
-#include <string_view>
 
 namespace cacos {
 
@@ -18,10 +18,38 @@ int main(int argc, const char* argv[]) {
 
     cpparg::command_parser parser("cacos");
     parser.title("CAOS testing utility");
-    parser.command("init").description("Initialize new workspace").handle(cacos::commands::init);
-    parser.command("test").description("Manage tests").handle(cacos::commands::test);
-    parser.command("run").description("Compile and run").handle(cacos::commands::run);
-    parser.command("status").description("Ejudge contest status").handle(cacos::ejudge::commands::status);
+
+    // clang-format off
+    parser
+        .command("init")
+        .description("Initialize new workspace")
+        .handle(cacos::commands::init);
+
+    parser
+        .command("config")
+        .description("Manage config")
+        .handle(cacos::commands::config);
+
+    parser
+        .command("test")
+        .description("Manage tests")
+        .handle(cacos::commands::test);
+
+    parser
+        .command("run")
+        .description("Compile and run")
+        .handle(cacos::commands::run);
+
+    parser
+        .command("status")
+        .description("Ejudge contest status")
+        .handle(cacos::ejudge::commands::status);
+
+    parser
+        .command("solution")
+        .description("Manage ejudge solutions")
+        .handle(cacos::ejudge::commands::solution);
+    // clang-format on
 
     return parser.parse(argc, argv);
 }

@@ -1,14 +1,14 @@
 #include "cacos/lang/compiler.h"
 
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include "cacos/util/inline_variables.h"
 
 namespace cacos::lang {
 
 Interpreter::Interpreter(const cpptoml::table& t)
-    : Translator(t)
-{}
+    : Translator(t) {
+}
 
 executable::Executable Interpreter::process(const fs::path& source) const {
     InlineVariables vars;
@@ -17,6 +17,7 @@ executable::Executable Interpreter::process(const fs::path& source) const {
 
     executable::Flags flags = common_;
     flags.append(debug_);
+
     return executable::Executable(exe_.path(), flags.build(vars));
 }
 

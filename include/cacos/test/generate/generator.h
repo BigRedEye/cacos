@@ -1,8 +1,6 @@
 #pragma once
 
-#include "cacos/options.h"
-
-#include "cacos/config.h"
+#include "cacos/config/config.h"
 
 #include "cacos/util/inline_variables.h"
 
@@ -19,7 +17,7 @@ struct Range {
     T step;
 };
 
-struct GeneratorOptions : public Options {
+struct GeneratorOptions {
     using Variables = std::map<std::string, Range<i64>>;
 
     std::string generator;

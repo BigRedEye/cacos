@@ -9,7 +9,7 @@ namespace cacos {
 
 class Logger {
 public:
-    enum MessagePriority { LOG, INFO, WARNING, ERROR, FATAL };
+    enum MessagePriority { DEBUG, LOG, INFO, WARNING, ERROR, FATAL };
 
     Logger(MessagePriority prior = INFO);
 
@@ -22,22 +22,32 @@ public:
 
     template<typename T>
     Logger& operator<<(const T& msg) {
-        os_ << msg;
-        if (delim_) {
-            os_ << delim_;
+        if (verbosity_ <= prior_) {
+            os_ << msg;
+            if (delim_) {
+                os_ << delim_;
+            }
         }
         return *this;
     }
 
-    template<typename ...Args>
-    Logger& print(Args&& ...args) {
-        fmt::print(os_, std::forward<Args>(args)...);
+    template<typename... Args>
+    Logger& print(Args&&... args) {
+        if (verbosity_ <= prior_) {
+            fmt::print(os_, std::forward<Args>(args)...);
+        }
         return *this;
     }
 
     Logger& operator<<(std::ostream& (*manip)(std::ostream&)) {
-        os_ << manip;
+        if (verbosity_ <= prior_) {
+            os_ << manip;
+        }
         return *this;
+    }
+
+    static Logger debug() {
+        return Logger(DEBUG);
     }
 
     static Logger log() {
@@ -60,9 +70,12 @@ public:
         return Logger(FATAL);
     }
 
-private:
-    std::ostream& os_;
+    static void increaseVerbosity(int delta = 1);
 
+private:
+    static MessagePriority verbosity_;
+
+    std::ostream& os_;
     MessagePriority prior_;
     char delim_;
     bool flush_;

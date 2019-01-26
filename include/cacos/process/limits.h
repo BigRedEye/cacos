@@ -9,7 +9,8 @@ struct Limits {
     static constexpr T unlimited = T{0};
 
     bytes ml = unlimited<bytes>;
-    seconds tl = unlimited<seconds>;
+    seconds cpu = unlimited<seconds>;
+    seconds real = unlimited<seconds>;
 };
 
-}
+} // namespace cacos::process

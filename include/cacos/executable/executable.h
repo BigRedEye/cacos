@@ -2,11 +2,11 @@
 
 #include "cacos/executable/flags.h"
 
-#include "cacos/process/process.h"
 #include "cacos/process/limits.h"
+#include "cacos/process/process.h"
 
-#include "cacos/util/util.h"
 #include "cacos/util/inline_variables.h"
+#include "cacos/util/util.h"
 
 #include <variant>
 
@@ -18,19 +18,22 @@ public:
     Executable(const fs::path& exe);
     Executable(const fs::path& exe, const std::vector<std::string>& flags);
 
-    template<typename ...Args>
-    bp::child run(
-        const InlineVariables& vars,
-        Args&&... args) const {
-        bp::child result(bp::exe = executable_.string(), bp::args += flags_.build(vars), std::forward<Args>(args)...);
+    template<typename... Args>
+    bp::child run(const InlineVariables& vars, Args&&... args) const {
+        bp::child result(
+            bp::exe = executable_.string(),
+            bp::args += flags_.build(vars),
+            std::forward<Args>(args)...);
         return result;
     }
 
-    template<typename ...Args>
-    bp::child run(
-        const std::vector<std::string>& flags,
-        Args&&... args) const {
-        bp::child result(bp::exe = executable_.string(), bp::args += flags, std::forward<Args>(args)...);
+    template<typename... Args>
+    bp::child run(const std::vector<std::string>& flags, Args&&... args) const {
+        bp::child result(
+            bp::exe = executable_.string(),
+            bp::args += flags_.build({}),
+            bp::args += flags,
+            std::forward<Args>(args)...);
         return result;
     }
 
@@ -53,8 +56,8 @@ class ExecTask {
 public:
     ExecTask(Executable& exe, ExecTaskContext&& ctx = {})
         : exe_(exe)
-        , ctx_(ctx)
-    {}
+        , ctx_(ctx) {
+    }
 
     virtual ~ExecTask();
 
@@ -71,15 +74,18 @@ protected:
 
 using ExecTaskPtr = std::unique_ptr<ExecTask>;
 
-template<typename StdIn = bp::detail::null_t, typename StdOut = bp::detail::null_t, typename StdErr = bp::detail::null_t>
+template<
+    typename StdIn = bp::detail::null_t,
+    typename StdOut = bp::detail::null_t,
+    typename StdErr = bp::detail::null_t>
 class ExecTaskImpl final : public ExecTask {
 public:
     ExecTaskImpl(Executable& exe, ExecTaskContext&& ctx, StdIn in, StdOut out, StdErr err)
         : ExecTask(exe, std::move(ctx))
         , stdin_(in)
         , stdout_(out)
-        , stderr_(err)
-    {}
+        , stderr_(err) {
+    }
 
     bp::child run(
         const std::function<void(int, const std::error_code&)>& exitCallback,
@@ -91,8 +97,7 @@ public:
             bp::std_out = stdout_,
             bp::std_err = stderr_,
             bp::on_exit = exitCallback,
-            ioctx
-        );
+            ioctx);
     }
 
 private:
@@ -105,12 +110,12 @@ private:
  * gcc bug
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81486
  */
-template<typename ...Args>
+template<typename... Args>
 ExecTaskPtr makeTask(Executable& exe, ExecTaskContext&& ctx, Args&&... rest) {
     return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, std::move(ctx), std::forward<Args>(rest)...));
 }
 
-template<typename ...Args>
+template<typename... Args>
 ExecTaskPtr makeTask(Executable& exe, const ExecTaskContext& ctx, Args&&... rest) {
     ExecTaskContext copy = ctx;
     return maskTask(exe, std::move(copy), std::forward<Args>(rest)...);
@@ -136,4 +141,4 @@ private:
     std::vector<ExecTaskPtr> tasks_;
 };
 
-}
+} // namespace cacos::executable

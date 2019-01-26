@@ -7,14 +7,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(CACOS_BUILD_TESTS "Build tests" OFF)
 option(CACOS_DOWNLOAD_BOOST "Do not use system boost" OFF)
+option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
 
-set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to place the default configs")
+set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to install the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
 # Sanitizers build type
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Sanitizers)
+
+# Debug
+set(CACOS_DEBUG OFF)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Sanitizers")
+    set(CACOS_DEBUG ON)
+endif()
 
 # Detect platform
 
@@ -30,11 +37,10 @@ endif()
 # Sources
 
 file(GLOB SOURCES
-    src/common_args.cpp
-    src/config.cpp
-    src/init.cpp
-    src/language.cpp
-    src/options.cpp
+    src/config/config.cpp
+
+    src/commands/init.cpp
+    src/commands/config.cpp
 
     src/executable/executable.cpp
     src/executable/flags.cpp
@@ -45,7 +51,8 @@ file(GLOB SOURCES
     src/test/generate/generate.cpp
     src/test/generate/generator.cpp
 
-    src/process/unix/process.cpp
+    src/process/unix/info.cpp
+    src/process/process.cpp
     src/process/result.cpp
 
     src/lang/compiler.cpp
@@ -53,7 +60,11 @@ file(GLOB SOURCES
     src/lang/lang.cpp
     src/lang/translator.cpp
 
+    src/ejudge/html/myhtml.cpp
     src/ejudge/http/client.cpp
+    src/ejudge/parser/parser.cpp
+    src/ejudge/session.cpp
+    src/ejudge/solution.cpp
     src/ejudge/status.cpp
 
     src/util/inline_variables.cpp
@@ -66,11 +77,12 @@ file(GLOB SOURCES
 )
 
 file(GLOB HEADERS
-    include/cacos/config.h
-    include/cacos/common_args.h
-    include/cacos/language.h
-    include/cacos/init.h
     include/cacos/options.h
+
+    include/cacos/config/config.h
+
+    include/cacos/commands/init.h
+    include/cacos/commands/config.h
 
     include/cacos/executable/executable.h
     include/cacos/executable/flags.h
@@ -80,23 +92,33 @@ file(GLOB HEADERS
     include/cacos/test/generate/generate.h
     include/cacos/test/generate/generator.h
 
+    include/cacos/process/info.h
     include/cacos/process/limits.h
     include/cacos/process/process.h
     include/cacos/process/result.h
 
-    include/cacos/lang/lang.h
     include/cacos/lang/compiler.h
     include/cacos/lang/interpreter.h
+    include/cacos/lang/lang.h
+    include/cacos/lang/opts.h
     include/cacos/lang/translator.h
 
+    include/cacos/ejudge/html/myhtml.h
     include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/parser/parser.h
+    include/cacos/ejudge/parser/task.h
+    include/cacos/ejudge/opts.h
+    include/cacos/ejudge/session.h
+    include/cacos/ejudge/solution.h
     include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h
     include/cacos/util/logger.h
+    include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
     include/cacos/util/util.h
+    include/cacos/util/ints.h
 
     include/cacos/util/mt/fixed_queue.h
 
@@ -104,6 +126,7 @@ file(GLOB HEADERS
 )
 
 file(GLOB CONFIGS
+    cacos.toml
     langs.toml
 )
 
@@ -157,6 +180,10 @@ list(APPEND CACOS_LIBS termcolor::termcolor)
 add_subdirectory(third-party/fmt EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS fmt::fmt)
 
+## dtl
+add_subdirectory(third-party/dtl EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS dtl::dtl)
+
 ## myhtml
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
@@ -167,6 +194,7 @@ target_compile_definitions(
     CACOS_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
+    CACOS_DEBUG=$<BOOL:${CACOS_DEBUG}>
     ${CACOS_OS}=1
 )
 
@@ -175,6 +203,7 @@ list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${MYHTML_INCLUDE_DIRS}
 )
 
 target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
@@ -210,6 +239,18 @@ install(
     DESTINATION ${CACOS_CONFIGS_PREFIX}/cacos/
     COMPONENT configs
 )
+
+# Uninstall target
+if(NOT TARGET uninstall)
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+        IMMEDIATE @ONLY)
+
+    add_custom_target(uninstall
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+endif()
+
 
 if (${CACOS_BUILD_TESTS})
     enable_testing()

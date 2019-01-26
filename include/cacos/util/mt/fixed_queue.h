@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include <thread>
 #include <atomic>
+#include <thread>
 
 #include <functional>
 
@@ -31,4 +31,4 @@ private:
     std::atomic_size_t next_;
 };
 
-} // namespace cpparg::mt
+} // namespace cacos::mt

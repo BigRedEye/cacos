@@ -1,6 +1,8 @@
 #ifdef CACOS_HAS_CURL
 
 #include "cacos/ejudge/http/client.h"
+
+#include "cacos/util/logger.h"
 #include "cacos/util/string.h"
 
 #include "curl/curl.h"
@@ -39,12 +41,16 @@ size_t curlWriteToString(void* contents, size_t size, size_t nmemb, void* userp)
     return size * nmemb;
 }
 
+Error::Error(const std::string& what)
+    : std::runtime_error(what) {
+}
+
 class Client::Impl : public CurlLoader {
 public:
     Impl() {
         curl_ = curl_easy_init();
         if (!curl_) {
-            throw std::runtime_error("Cannot initialize curl: curl_easy_init returned nullptr");
+            throw Error("Cannot initialize curl: curl_easy_init returned nullptr");
         }
     }
 
@@ -70,6 +76,7 @@ public:
 
     template<request::Type type>
     std::string request(const request::Params<type>& params) const {
+        Logger::debug().print("Perforing curl request: url = {}", params.url);
         curl_easy_reset(curl_);
 
         std::string result;
@@ -77,6 +84,10 @@ public:
         if (!cookies_.empty()) {
             curl_easy_setopt(curl_, CURLOPT_COOKIEJAR, cookies_.c_str());
             curl_easy_setopt(curl_, CURLOPT_COOKIEFILE, cookies_.c_str());
+        }
+
+        for (auto&& c : overridenCookies_) {
+            curl_easy_setopt(curl_, CURLOPT_COOKIE, c.data());
         }
 
         curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curlWriteToString);
@@ -87,25 +98,27 @@ public:
         }
         curl_easy_setopt(curl_, CURLOPT_COOKIE, "FLUSH");
 
-        std::cerr << params.url.data() << std::endl;
-
         perform();
 
         return result;
     }
 
-private:
+    void cookie(std::string_view kv) {
+        overridenCookies_.push_back(util::str(kv));
+    }
 
+private:
     void perform() const {
         CURLcode err = curl_easy_perform(curl_);
         if (err != CURLE_OK) {
-            throw std::runtime_error(util::join("Cannot perform curl request: ", curl_easy_strerror(err)));
+            throw Error(util::join("Cannot perform curl request: ", curl_easy_strerror(err)));
         }
     }
 
 private:
     CURL* curl_ = nullptr;
     fs::path cookies_;
+    std::vector<std::string> overridenCookies_;
 };
 
 Client::Client()
@@ -128,7 +141,10 @@ std::string Client::request(const request::Params<request::Type::POST>& params) 
     return impl_->request(params);
 }
 
-
+void Client::cookie(std::string_view netscape) const {
+    return impl_->cookie(netscape);
 }
+
+} // namespace cacos::http
 
 #endif // CACOS_HAS_CURL

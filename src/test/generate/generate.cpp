@@ -1,16 +1,14 @@
 #include "cacos/test/generate/generate.h"
 #include "cacos/test/generate/generator.h"
 
-#include "cacos/options.h"
-#include "cacos/common_args.h"
+#include "cacos/config/config.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
-#include "cacos/config.h"
 
 #include <cpparg/cpparg.h>
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace cacos::test {
 
@@ -19,17 +17,17 @@ int generate(int argc, const char* argv[]) {
     parser.title("Generate new tests");
 
     GeneratorOptions opts;
-    setCommonOptions(parser, opts, options::WORKSPACE | options::CONFIG | options::CONFIG);
 
+    // clang-format off
     parser
-        .add('g', "generator")
+        .add("generator")
         .required()
         .value_type("SOURCE")
         .description("Generator executable or source")
         .store(opts.generator);
 
     parser
-        .add('v', "var")
+        .add("var")
         .optional()
         .repeatable()
         .value_type("VAR:FROM:TO:STEP")
@@ -54,7 +52,7 @@ int generate(int argc, const char* argv[]) {
         });
 
     parser
-        .add('a', "args")
+        .add("args")
         .optional()
         .value_type("ARGS")
         .description("Arguments for generator, separated with spaces")
@@ -66,22 +64,23 @@ int generate(int argc, const char* argv[]) {
         });
 
     parser
-        .add('i', "stdin")
+        .add("stdin")
         .optional()
         .value_type("STRING")
         .description("Stdin for generator")
         .store(opts.input);
 
     parser
-        .add('t', "test")
+        .add("test")
         .required()
         .value_type("STRING")
         .description("Test name")
         .store(opts.testName);
+    // clang-format on
+
+    config::Config cfg(parser, config::LANGS);
 
     parser.parse(argc, argv);
-
-    config::Config cfg(opts);
     Generator generator(cfg, opts);
     generator.run();
 

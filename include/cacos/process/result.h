@@ -8,12 +8,13 @@ enum Status {
     OK,
     RE,
     TL,
+    IL,
     ML,
     UNDEFINED,
 };
 
 std::string serialize(Status status);
-}
+} // namespace status
 
 struct Result {
     status::Status status;

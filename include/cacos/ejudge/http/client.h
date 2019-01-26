@@ -23,7 +23,12 @@ struct Params<Type::POST> {
     std::string url;
     std::string data;
 };
-}
+} // namespace request
+
+class Error : public std::runtime_error {
+public:
+    Error(const std::string& what);
+};
 
 class Client {
 public:
@@ -41,7 +46,7 @@ public:
     std::string request(const request::Params<request::Type::GET>& params) const;
     std::string request(const request::Params<request::Type::POST>& params) const;
 
-    std::string get(const std::string& url) const  {
+    std::string get(const std::string& url) const {
         return request(request::Params<request::Type::GET>{url});
     }
 
@@ -49,10 +54,12 @@ public:
         return request(request::Params<request::Type::POST>{url, data});
     }
 
+    void cookie(std::string_view netscape) const;
+
 private:
     class Impl;
 
     std::unique_ptr<Impl> impl_;
 };
 
-}
+} // namespace cacos::http
