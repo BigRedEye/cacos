@@ -7,9 +7,6 @@
 [submodule "third-party/toml"]
 	path = third-party/toml
 	url = https://github.com/skystrife/cpptoml.git
-[submodule "third-party/boost-cmake"]
-	path = third-party/boost-cmake
-	url = https://github.com/Orphis/boost-cmake.git
 [submodule "third-party/fmt"]
 	path = third-party/fmt
 	url = https://github.com/fmtlib/fmt.git

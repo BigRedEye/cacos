@@ -1,0 +1,10 @@
+[requires]
+libcurl/7.61.1@bincrafters/stable
+boost/1.69.0@conan/stable
+
+[options]
+libcurl:shared=False
+boost:shared=False
+
+[generators]
+cmake

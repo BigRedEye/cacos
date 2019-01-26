@@ -5,9 +5,9 @@ project(cacos)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(CACOS_BUILD_TESTS "Build tests" OFF)
-option(CACOS_DOWNLOAD_BOOST "Do not use system boost" OFF)
 option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
+option(CACOS_USE_CONAN "Use conan" OFF)
+option(CACOS_BUILD_TESTS "Build tests" OFF)
 
 set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to install the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
@@ -16,6 +16,11 @@ set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/third-party/cmake-git-version-tracking)
+
+# Output binary dir
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Sanitizers build type
 include(Sanitizers)
@@ -27,7 +32,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Sanitizers")
 endif()
 
 # Detect platform
-
 set(CACOS_OS "CACOS_OS_UNDEFINED")
 if (WIN32)
     set(CACOS_OS "CACOS_OS_WINDOWS")
@@ -38,7 +42,6 @@ elseif (UNIX)
 endif()
 
 # Sources
-
 file(GLOB SOURCES
     src/config/config.cpp
 
@@ -152,6 +155,12 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
 
 set(CACOS_LIBS)
 
+## conan
+if(${CACOS_USE_CONAN})
+    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
+    conan_basic_setup()
+endif()
+
 ## Threads
 find_package(Threads REQUIRED)
 list(APPEND CACOS_LIBS ${CMAKE_THREAD_LIBS_INIT})
@@ -168,12 +177,7 @@ endif()
 ## Boost
 set(Boost_USE_MULTITHREAD ON)
 set(Boost_USE_STATIC_LIBS ON)
-if (CACOS_DOWNLOAD_BOOST)
-    message(STATUS " Downloading boost")
-    add_subdirectory(third-party/boost-cmake)
-else()
-    find_package(Boost COMPONENTS system thread filesystem REQUIRED)
-endif()
+find_package(Boost COMPONENTS system thread filesystem REQUIRED)
 list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 
 ## cpptoml
@@ -214,6 +218,10 @@ target_compile_definitions(
 
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)
 list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
+
+if (${CACOS_USE_CONAN})
+    list(APPEND CACOS_LIBS ${CONAN_LIBS})
+endif()
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
