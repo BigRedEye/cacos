@@ -60,7 +60,7 @@ void ExecPool::run() {
             auto it = running.find(id);
             std::optional<process::Info> info;
             if (it != running.end()) {
-                info = it->second.cachedInfo();
+                info = it->second.info();
             }
             process::Result res {
                 info ? info->result : process::status::UNDEFINED,
@@ -96,13 +96,13 @@ void ExecPool::run() {
                 info.maxRss / (1024. * 1024.)
             );
             if (limits_.cpu != process::Limits::unlimited<seconds> && info.cpuTime > limits_.cpu) {
-                c.terminate(process::status::TL);
+                c.kill(process::status::TL);
             }
             if (limits_.real != process::Limits::unlimited<seconds> && info.realTime > limits_.real) {
-                c.terminate(process::status::IL);
+                c.kill(process::status::IL);
             }
             if (limits_.ml != process::Limits::unlimited<bytes> && info.maxRss > limits_.ml) {
-                c.terminate(process::status::ML);
+                c.kill(process::status::ML);
             }
         }
     };

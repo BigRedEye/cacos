@@ -51,7 +51,8 @@ file(GLOB SOURCES
     src/test/generate/generate.cpp
     src/test/generate/generator.cpp
 
-    src/process/unix/process.cpp
+    src/process/unix/info.cpp
+    src/process/process.cpp
     src/process/result.cpp
 
     src/lang/compiler.cpp
@@ -91,6 +92,7 @@ file(GLOB HEADERS
     include/cacos/test/generate/generate.h
     include/cacos/test/generate/generator.h
 
+    include/cacos/process/info.h
     include/cacos/process/limits.h
     include/cacos/process/process.h
     include/cacos/process/result.h
