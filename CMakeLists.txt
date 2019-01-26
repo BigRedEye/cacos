@@ -9,7 +9,7 @@ option(CACOS_BUILD_TESTS "Build tests" OFF)
 option(CACOS_DOWNLOAD_BOOST "Do not use system boost" OFF)
 option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
 
-set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to place the default configs")
+set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to install the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
 # Sanitizers build type
@@ -61,8 +61,9 @@ file(GLOB SOURCES
 
     src/ejudge/html/myhtml.cpp
     src/ejudge/http/client.cpp
-    src/ejudge/parser.cpp
+    src/ejudge/parser/parser.cpp
     src/ejudge/session.cpp
+    src/ejudge/solution.cpp
     src/ejudge/status.cpp
 
     src/util/inline_variables.cpp
@@ -102,9 +103,11 @@ file(GLOB HEADERS
 
     include/cacos/ejudge/html/myhtml.h
     include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/parser/parser.h
+    include/cacos/ejudge/parser/task.h
     include/cacos/ejudge/opts.h
-    include/cacos/ejudge/parser.h
     include/cacos/ejudge/session.h
+    include/cacos/ejudge/solution.h
     include/cacos/ejudge/status.h
 
     include/cacos/util/inline_variables.h

@@ -53,8 +53,8 @@ public:
 
     std::optional<std::string_view> attr(std::string_view key);
 
-
     std::string_view text() const;
+    std::string innerText() const;
     Attributes attrs() const;
 
 private:

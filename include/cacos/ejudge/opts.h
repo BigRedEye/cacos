@@ -18,6 +18,7 @@ struct Session {
 };
 
 struct EjudgeOpts {
+    std::string task;
     std::string url;
     i32 contestId;
 

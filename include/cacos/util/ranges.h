@@ -49,4 +49,46 @@ Range<It> select(C&& c, std::size_t pos) {
     return {it, next};
 }
 
+template<typename It>
+class EnumeratedIterator {
+public:
+    EnumeratedIterator(It&& it, size_t pos = 0)
+        : it_(std::forward<It>(it))
+        , pos_(pos)
+    {}
+
+    auto operator*() const {
+        return std::pair{*it_, pos_};
+    }
+
+    auto operator*() {
+        return std::pair{*it_, pos_};
+    }
+
+    EnumeratedIterator& operator++() {
+        ++it_;
+        ++pos_;
+        return *this;
+    }
+
+    EnumeratedIterator operator++(int) {
+        EnumeratedIterator tmp = *this;
+        ++*this;
+        return tmp;
+    }
+
+    bool operator!=(const EnumeratedIterator& other) {
+        return it_ != other.it_;
+    }
+
+private:
+    It it_;
+    size_t pos_;
+};
+
+template<typename C, typename It = decltype(std::declval<C>().begin())>
+Range<EnumeratedIterator<It>> enumerate(C&& c) {
+    return {EnumeratedIterator{c.begin(), 0}, EnumeratedIterator{c.end(), 0}};
+}
+
 }

@@ -14,9 +14,36 @@ SessionError::SessionError(const std::string& what)
     : std::runtime_error(what) {
 }
 
-Session::Session(const http::Client& client, const config::Config& config)
-    : client_(client)
-    , config_(config) {
+class Session::Cache {
+public:
+    struct Responce {
+        std::string data;
+        std::chrono::high_resolution_clock::time_point expiration;
+    };
+
+    std::optional<Responce*> get(const std::string& req) {
+        auto it = cache_.find(req);
+        if (it == cache_.end()) {
+            return std::nullopt;
+        } else {
+            return &it->second;
+        }
+    }
+
+    std::string_view set(const std::string& key, const std::string& value) {
+        auto [it, inserted] = cache_.emplace(key, Responce{value, std::chrono::high_resolution_clock::now() + std::chrono::seconds(1)});
+        return it->second.data;
+    }
+
+private:
+    std::unordered_map<std::string, Responce> cache_;
+};
+
+Session::Session(const config::Config& config)
+    : config_(config)
+    , client_(config.file(config::FileType::cookies))
+    , cache_(std::make_unique<Cache>())
+{
     prefix_ = util::split(config_.ejudge().url, "?")[0];
     auto& session = config.ejudge().session;
     if (session.ejsid && session.token) {
@@ -32,6 +59,9 @@ Session::Session(const http::Client& client, const config::Config& config)
         Logger::log().print("No external session was found; trying to reauth");
         reauth();
     }
+}
+
+Session::~Session() {
 }
 
 void Session::setCookie(std::string_view cookie) const {
@@ -53,7 +83,7 @@ bool Session::loadSession() {
         std::getline(ifs, token_);
         return true;
     } else {
-        Logger::log().print("Cannot found token at {}", file);
+        Logger::log().print("Cannot find token at {}", file);
         return false;
     }
 }
@@ -62,7 +92,7 @@ std::string_view Session::domain() const {
     auto tokens = util::split(prefix_, "/");
     auto view = prefix_;
     if (util::starts_with(tokens[0], "http")) {
-        return tokens[2];
+        return tokens[2]; /* "http:" "" "caos.ejudge.ru" ... */
     } else {
         return tokens[0];
     }
@@ -114,27 +144,34 @@ std::string Session::buildUrl(std::string_view base) {
     return util::join(prefix_, "/", base, "/", token_);
 }
 
-html::Html Session::get(std::string_view base, std::string_view params) {
-    for (size_t i = 1; i < MAX_RETRIES; ++i) {
-        try {
-            return getImpl(base, params);
-        } catch (const SessionError& err) {
-            Logger::log().print("SessionError {} / {}: {}", i, MAX_RETRIES - 1, err.what());
-            reauth();
-        } catch (const http::Error& err) {
-            Logger::log().print("http::Error {} / {}: {}", i, MAX_RETRIES - 1, err.what());
-        }
-    }
-    return getImpl(base, params);
+html::Html Session::getPage(std::string_view base, std::string_view params) {
+    return getter(base, params, [this](auto base, auto params) {
+        return getPageImpl(base, params);
+    });
 }
 
-html::Html Session::getImpl(std::string_view base, std::string_view params) {
+std::string_view Session::getRaw(std::string_view base, std::string_view params) {
+    return getter(base, params, [this](auto base, auto params) {
+        return getImpl(base, params);
+    });
+}
+
+std::string_view Session::getImpl(std::string_view base, std::string_view params) {
     std::string url = buildUrl(base);
     if (!params.empty()) {
-        url += util::str(params);
+        url += "?" + util::str(params);
     }
+    if (auto res = cache_->get(url)) {
+        if ((*res)->expiration > std::chrono::high_resolution_clock::now()) {
+            return (*res)->data;
+        }
+    }
+    std::string result = client_.get(url);
+    return cache_->set(url, result);
+}
 
-    html::Html page(client_.get(url));
+html::Html Session::getPageImpl(std::string_view base, std::string_view params) {
+    html::Html page(getImpl(base, params));
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         if (node.child()->text().find("Permission denied") != std::string_view::npos) {

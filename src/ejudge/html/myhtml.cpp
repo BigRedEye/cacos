@@ -1,5 +1,7 @@
 #include "cacos/ejudge/html/myhtml.h"
 
+#include "cacos/util/string.h"
+
 #include <algorithm>
 #include <stdexcept>
 
@@ -129,6 +131,14 @@ std::string_view Node::text() const {
     size_t len = 0;
     const char* buf = myhtml_node_text(node_, &len);
     return {buf, len};
+}
+
+std::string Node::innerText() const {
+    std::string result = util::str(text());
+    for (auto node : *this) {
+        result += node.innerText();
+    }
+    return result;
 }
 
 Node::Iterator::Iterator(myhtml_tree_node_t* node)

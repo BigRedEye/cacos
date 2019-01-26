@@ -1,7 +1,9 @@
 #ifdef CACOS_HAS_CURL
 
 #include "cacos/ejudge/http/client.h"
+
 #include "cacos/util/string.h"
+#include "cacos/util/logger.h"
 
 #include "curl/curl.h"
 
@@ -74,6 +76,7 @@ public:
 
     template<request::Type type>
     std::string request(const request::Params<type>& params) const {
+        Logger::debug().print("Perforing curl request: url = {}", params.url);
         curl_easy_reset(curl_);
 
         std::string result;

@@ -13,10 +13,15 @@ inline std::string str(std::string_view view) {
     return std::string(view.begin(), view.end());
 }
 
+inline std::istringstream createISStream() {
+    std::istringstream ss;
+    ss.exceptions(std::istringstream::failbit);
+    return ss;
+}
+
 template<typename T>
 inline T from_string(std::string_view s) {
-    static std::istringstream ss;
-    ss.exceptions(std::istringstream::failbit);
+    static std::istringstream ss = createISStream();
     ss.clear();
     ss.str(str(s));
     T result;
