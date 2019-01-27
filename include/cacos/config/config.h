@@ -33,6 +33,7 @@ enum class DirType {
     cache,
     config,
     task,
+    temp,
 };
 
 enum class FileType {

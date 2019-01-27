@@ -9,7 +9,6 @@ option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
 option(CACOS_USE_CONAN "Use conan" OFF)
 option(CACOS_BUILD_TESTS "Build tests" OFF)
 
-set(CACOS_CONFIGS_PREFIX "${CMAKE_INSTALL_PREFIX}/share/" CACHE PATH "Where to install the default configs")
 set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 
 # Modules
@@ -88,6 +87,7 @@ file(GLOB HEADERS
     include/cacos/options.h
 
     include/cacos/config/config.h
+    include/cacos/config/default.h
 
     include/cacos/commands/init.h
     include/cacos/commands/config.h
@@ -141,44 +141,60 @@ file(GLOB CONFIGS
     langs.toml
 )
 
+file(GLOB CONFIGURABLE_SOURCES
+    src/config/default.cpp.in
+    src/version/git.cpp.in
+)
+
+# Save configs to the binary
+foreach(config ${CONFIGS})
+    get_filename_component(sourcefile ${config} NAME)
+    file(READ ${sourcefile} CACOS_CONFIG_FILE_${sourcefile})
+endforeach()
+
+set(CONFIGS_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/config/default.cpp.in)
+set(CONFIGS_POST_CONFIGURE ${CMAKE_CURRENT_BINARY_DIR}/src/default.cpp)
+configure_file(${CONFIGS_PRE_CONFIGURE} ${CONFIGS_POST_CONFIGURE} @ONLY)
+list(APPEND SOURCES ${CONFIGS_POST_CONFIGURE})
+
 # Include git version
 set(PRE_CONFIGURE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/version/git.cpp.in)
-set(POST_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/git.cpp)
+set(POST_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/git.cpp)
 include(git_watcher)
 list(APPEND SOURCES ${POST_CONFIGURE_FILE})
 
 set(CACOS_LIB ${PROJECT_NAME}_lib)
 
-add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS})
+add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS} ${CONFIGURABLE_SOURCES})
 
 # Dependecies
 
 set(CACOS_LIBS)
 
-## conan
 if(${CACOS_USE_CONAN})
     include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup()
+    conan_basic_setup(TARGETS)
+    list(APPEND CACOS_LIBS CONAN_PKG::boost CONAN_PKG::libcurl)
+else()
+    ## CURL
+    find_package(CURL)
+    if (${CURL_FOUND})
+        list(APPEND CACOS_LIBS CURL::libcurl)
+    else()
+        message(STATUS " libcurl was not found; compiling without ejudge client")
+    endif()
+
+    ## Boost
+    set(Boost_USE_MULTITHREAD ON)
+    set(Boost_USE_STATIC_LIBS ON)
+    find_package(Boost COMPONENTS system thread filesystem REQUIRED)
+    list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 endif()
+
 
 ## Threads
 find_package(Threads REQUIRED)
 list(APPEND CACOS_LIBS ${CMAKE_THREAD_LIBS_INIT})
-
-
-## CURL
-find_package(CURL)
-if (${CURL_FOUND})
-    list(APPEND CACOS_LIBS CURL::libcurl)
-else()
-    message(STATUS " CURL was not found; compiling without its support")
-endif()
-
-## Boost
-set(Boost_USE_MULTITHREAD ON)
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS system thread filesystem REQUIRED)
-list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 
 ## cpptoml
 set(ENABLE_LIBCXX OFF CACHE "" INTERNAL)
@@ -209,7 +225,6 @@ list(APPEND CACOS_LIBS myhtml_static)
 target_compile_definitions(
     ${CACOS_LIB}
     PUBLIC
-    CACOS_CONFIG_PREFIX="${CACOS_CONFIGS_PREFIX}"
     CACOS_VERSION="${CACOS_VERSION}"
     CACOS_HAS_CURL=$<BOOL:${CURL_FOUND}>
     CACOS_DEBUG=$<BOOL:${CACOS_DEBUG}>
@@ -219,9 +234,6 @@ target_compile_definitions(
 set(CXX_FILESYSTEM_LIBRARY stdc++fs)
 list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
 
-if (${CACOS_USE_CONAN})
-    list(APPEND CACOS_LIBS ${CONAN_LIBS})
-endif()
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
@@ -244,7 +256,7 @@ check_ipo_supported(RESULT result OUTPUT output)
 if(result)
     set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()
-    message(WARNING "LPO is not supported: ${output}")
+    message(WARNING "LTO is not supported: ${output}")
 endif()
 
 
@@ -254,12 +266,6 @@ install(
     TARGETS ${PROJECT_NAME}
     COMPONENT ${PROJECT_NAME}
     DESTINATION bin
-)
-
-install(
-    FILES ${CONFIGS}
-    DESTINATION ${CACOS_CONFIGS_PREFIX}/cacos/
-    COMPONENT configs
 )
 
 # Uninstall target

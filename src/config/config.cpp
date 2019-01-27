@@ -1,4 +1,5 @@
 #include "cacos/config/config.h"
+#include "cacos/config/default.h"
 
 #include <cpptoml.h>
 
@@ -16,9 +17,6 @@
 namespace cacos::config {
 
 namespace {
-fs::path defaultDir() {
-    return fs::path(CACOS_CONFIG_PREFIX) / "cacos";
-}
 
 fs::path homeDir() {
 #ifdef CACOS_OS_UNIX
@@ -71,14 +69,15 @@ std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives
 std::optional<fs::path> findConfig(
     const fs::path& overriden,
     const fs::path& config,
-    const std::vector<fs::path>& defaults) {
-    auto firstDefault = findConfigFile(defaults);
-    if (!fs::exists(config) && firstDefault) {
+    std::string_view defaultKey) {
+    auto defaultConfig = defaults::find(defaultKey);
+    if (!fs::exists(config) && defaultConfig) {
         try {
             fs::create_directories(config.parent_path());
         } catch (...) {
         }
-        fs::copy(*firstDefault, config);
+        std::ofstream ofs(config);
+        ofs.write(defaultConfig->data(), static_cast<std::streamsize>(defaultConfig->size()));
     }
 
     return findConfigFile({overriden, config});
@@ -115,6 +114,9 @@ fs::path Config::dir(DirType type) const {
     case DirType::task:
         result = workspace() / ".cacos";
         break;
+    case DirType::temp:
+        result = fs::temp_directory_path() / "cacos";
+        break;
     default:
         break;
     }
@@ -129,9 +131,9 @@ fs::path Config::file(FileType type) const {
     case FileType::langs:
         return dir(DirType::config) / LANGS_FILE;
     case FileType::token:
-        return dir(DirType::config) / TOKEN_FILE;
+        return dir(DirType::temp) / TOKEN_FILE;
     case FileType::cookies:
-        return dir(DirType::config) / COOKIES_FILE;
+        return dir(DirType::temp) / COOKIES_FILE;
     case FileType::taskConfig:
         return dir(DirType::task) / CONFIG_FILE;
     default:
@@ -150,7 +152,7 @@ Config::Config()
     : workspace_(fs::current_path()) {
     fs::path config;
     try {
-        config = findConfig("", file(FileType::config), {defaultDir() / CONFIG_FILE}).value();
+        config = findConfig("", file(FileType::config), "config").value();
     } catch (...) {
         std::throw_with_nested(
             ConfigError("Cannot find main config file; you may consider reinstall the program."));
@@ -184,7 +186,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
                     langs = findConfig(
                         path,
                         dir(DirType::config) / LANGS_FILE,
-                        {defaultDir() / LANGS_FILE}).value();
+                        "langs").value();
                 } catch (...) {
                     std::throw_with_nested(
                         ConfigError("Cannot find langs file")
