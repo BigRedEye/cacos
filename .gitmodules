@@ -19,3 +19,6 @@
 [submodule "third-party/cmake-git-version-tracking"]
 	path = third-party/cmake-git-version-tracking
 	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git
+[submodule "third-party/cmake-conan"]
+	path = third-party/cmake-conan
+	url = https://github.com/conan-io/cmake-conan.git

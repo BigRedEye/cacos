@@ -14,7 +14,8 @@ set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
 # Modules
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/cmake-git-version-tracking)
+    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/cmake-git-version-tracking
+    ${CMAKE_CURRENT_SOURCE_DIR}/third-party/cmake-conan)
 
 # Output binary dir
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -172,8 +173,8 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS} ${CONFIGURABLE_
 set(CACOS_LIBS)
 
 if(${CACOS_USE_CONAN})
-    include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS)
+    include(conan)
+    conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing)
     list(APPEND CACOS_LIBS CONAN_PKG::boost CONAN_PKG::libcurl)
 else()
     ## CURL
