@@ -1,0 +1,3 @@
+[exe]
+sources = [ "lib.c", "another_lib.s", "main.cpp" ]
+arch = "x64"

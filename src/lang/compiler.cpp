@@ -13,52 +13,56 @@ Compiler::Compiler(const cpptoml::table& t, const fs::path& binaryDir)
     , binaryDir_(binaryDir) {
 }
 
-executable::Executable Compiler::process(const fs::path& source) const {
+fs::path Compiler::compile(const fs::path& source, const opts::CompilerOpts& opts) const {
+    process::Limits limits;
+    limits.cpu = limits.real = seconds(3);
+    std::future<std::string> stdOut;
+    std::future<std::string> stdErr;
+    auto&& [binary, task] = this->task(source, opts, stdOut, stdErr);
+
+    executable::ExecPool pool(limits);
+    pool.push(std::move(task));
+    pool.run();
+    return binary;
+}
+
+std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
+            const fs::path& source,
+            const opts::CompilerOpts& options,
+            std::future<std::string>& stdOut,
+            std::future<std::string>& stdErr) const {
     InlineVariables vars;
 
-    fs::path binary = binaryDir_ / source.filename();
+    fs::path binary = binaryDir_ / (source.filename().replace_extension("o"));
 
     vars.set("source", source);
     vars.set("binary", binary);
+    vars.set("object", binary);
+    vars.set("arch", util::str(opts::serialize(options.archBits)));
 
     executable::Flags flags = common_;
     flags.append(debug_);
     auto args = flags.build(vars);
 
-    std::future<std::string> stdOut;
-    std::future<std::string> stdErr;
+    auto callback = [&, source] (process::Result res, std::optional<process::Info>&&) {
+        if (res.status == process::status::IL || res.status == process::status::TL) {
+            throw std::runtime_error("Compilation time out");
+        }
+        if (res.returnCode != 0) {
+            throw std::runtime_error(util::join(
+                "Cannot compile ",
+                source.string(),
+                ":\n\nCompiler stdout:\n",
+                stdOut.get(),
+                "\n\nCompiler stderr:\n",
+                stdErr.get()));
+        }
+    };
 
-    boost::asio::io_context ctx;
-    bp::child child =
-        exe_.run(vars, args, bp::std_out > std::ref(stdOut), bp::std_err > std::ref(stdErr), ctx);
+    auto result = executable::makeTask(exe_, executable::ExecTaskContext{
+        std::move(args), {}, std::move(callback)}, bp::null, std::ref(stdOut), std::ref(stdErr));
 
-    // TODO: fixme
-    ctx.run_for(std::chrono::seconds(3));
-
-    if (child.running()) {
-        child.terminate();
-        throw std::runtime_error("Compilation time out");
-    }
-
-    if (child.exit_code() != 0) {
-        throw std::runtime_error(util::join(
-            "Cannot compile ",
-            source.string(),
-            ":\n\nCompiler stdout:\n",
-            stdOut.get(),
-            "\n\nCompiler stderr:\n",
-            stdErr.get()));
-    }
-
-    if (!stdOut.get().empty()) {
-        Logger::warning() << "Compiler stdout:\n" << stdOut.get();
-    }
-
-    if (!stdErr.get().empty()) {
-        Logger::warning() << "Compiler stderr:\n" << stdErr.get();
-    }
-
-    return executable::Executable(binary);
+    return {binary, std::move(result)};
 }
 
 } // namespace cacos::lang

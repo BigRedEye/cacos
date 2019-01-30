@@ -9,9 +9,9 @@ namespace cacos::lang {
 class Translator {
 public:
     Translator(const cpptoml::table& table);
-    virtual ~Translator() = default;
 
-    virtual executable::Executable process(const fs::path& source) const = 0;
+    bool operator==(const Translator& other) const;
+    bool operator!=(const Translator& other) const;
 
 protected:
     executable::Executable exe_;

@@ -20,6 +20,14 @@ Executable::Executable(const fs::path& exe, const std::vector<std::string>& flag
     , flags_(flags) {
 }
 
+bool Executable::operator==(const Executable& other) const {
+    return executable_ == other.executable_ && flags_ == other.flags_;
+}
+
+bool Executable::operator!=(const Executable& other) const {
+    return executable_ == other.executable_ && flags_ == other.flags_;
+}
+
 const fs::path& Executable::path() const {
     return executable_;
 }

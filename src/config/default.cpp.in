@@ -9,8 +9,9 @@ namespace {
 using namespace std::literals;
 
 static std::unordered_map<std::string_view, std::string_view> storage {
-    {"config", R"(@CACOS_CONFIG_FILE_cacos.toml@)"sv},
-    {"langs",  R"(@CACOS_CONFIG_FILE_langs.toml@)"sv},
+    {"config", R"!(@CACOS_CONFIG_FILE_cacos.toml@)!"sv},
+    {"langs",  R"!(@CACOS_CONFIG_FILE_langs.toml@)!"sv},
+    {"task",   R"!(@CACOS_CONFIG_FILE_task.toml@)!"sv },
 };
 
 }

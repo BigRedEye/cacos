@@ -17,4 +17,13 @@ Translator::Translator(const cpptoml::table& table) {
     }
 }
 
+bool Translator::operator==(const Translator& other) const {
+    return std::tie(exe_, common_, debug_, release_)
+        == std::tie(other.exe_, other.common_, other.debug_, other.release_);
+}
+
+bool Translator::operator!=(const Translator& other) const {
+    return !operator==(other);
+}
+
 } // namespace cacos::lang

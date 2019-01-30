@@ -135,14 +135,14 @@ fs::path Config::file(FileType type) const {
     case FileType::cookies:
         return dir(DirType::temp) / COOKIES_FILE;
     case FileType::taskConfig:
-        return dir(DirType::task) / CONFIG_FILE;
+        return dir(DirType::workspace) / CONFIG_FILE;
     default:
         return {};
     }
 }
 
 fs::path Config::workspace() const {
-    if (!fs::exists(workspace_ / ".cacos")) {
+    if (!fs::exists(workspace_ / "cacos.toml")) {
         throw BadWorkspace();
     }
     return workspace_;
@@ -168,6 +168,8 @@ Config::Config()
     } catch (const BadWorkspace&) {
         taskConfig_.reset();
     }
+
+    parseConfig();
 }
 
 Config::Config(cpparg::parser& parser, ui64 mask)
@@ -202,54 +204,48 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .add("login")
             .optional()
             .description("Ejudge login")
-            .default_value("config{ejudge.login}")
             .handle([&](auto sv) {
-                ejudge_.login.login = argOrConfig<std::string>(util::str(sv), "ejudge.login");
+                ejudge_.login.login = util::str(sv);
             });
 
         parser
             .add("password")
             .optional()
             .description("Ejudge password")
-            .default_value("config{ejudge.password}")
             .handle([&, this](auto sv) {
-                ejudge_.login.password = argOrConfig<std::string>(util::str(sv), "ejudge.password");
+                ejudge_.login.password = util::str(sv);
             });
 
         parser
             .add("cookie")
             .optional()
             .description("Ejudge cookie (EJSID=...)")
-            .default_value("config{ejudge.cookie}")
             .handle([&](auto sv) {
-                ejudge_.session.ejsid = argOrConfig<std::string>(util::str(sv), "ejudge.cookie");
+                ejudge_.session.ejsid = util::str(sv);
             });
 
         parser
             .add("token")
             .optional()
             .description("Ejudge session token from url")
-            .default_value("config{ejudge.token}")
             .handle([&](auto sv) {
-                ejudge_.session.token = argOrConfig<std::string>(util::str(sv), "ejudge.token");
+                ejudge_.session.token = util::str(sv);
             });
 
         parser
             .add("contest_id")
             .optional()
             .description("Ejudge contest_id")
-            .default_value("config{ejudge.contest_id}")
             .handle([&](auto sv) {
-                ejudge_.contestId = argOrConfig<i32>(util::str(sv), "ejudge.contest_id", ConfigError("Invalid contest_id"));
+                ejudge_.contestId = util::from_string<i32>(sv);
             });
 
         parser
             .add("url")
             .optional()
             .description("Ejudge login page")
-            .default_value("config{ejudge.url}")
-            .handle([&](auto url) {
-                ejudge_.url = argOrConfig<std::string>(util::str(url), "ejudge.url", ConfigError("Invalid ejudge url"));
+            .handle([&](auto sv) {
+                ejudge_.url = util::str(sv);
             });
     }
 
@@ -305,12 +301,48 @@ void Config::parseLangs(const fs::path& langs) {
     }
 }
 
+void Config::parseConfig() {
+    auto setIfHas = [] (const auto& table, auto key, auto& value, auto dummy) {
+        if (auto node = table->template get_qualified_as<std::decay_t<decltype(dummy)>>(util::str(key))) {
+            value = *node;
+        }
+    };
+    setIfHas(globalConfig_, "ejudge.login", ejudge_.login.login, std::string{});
+    setIfHas(globalConfig_, "ejudge.password", ejudge_.login.password, std::string{});
+    setIfHas(globalConfig_, "ejudge.cookie", ejudge_.session.ejsid, std::string{});
+    setIfHas(globalConfig_, "ejudge.token", ejudge_.session.token, std::string{});
+    setIfHas(globalConfig_, "ejudge.contest_id", ejudge_.contestId, i32{});
+    setIfHas(globalConfig_, "ejudge.url", ejudge_.url, std::string{});
+
+    if (taskConfig_) {
+        if (auto node = taskConfig_->get_qualified_array_of<std::string>("exe.sources")) {
+            std::transform(node->begin(), node->end(), std::back_inserter(task_.exe.sources), [](auto file) {
+                return fs::path(file);
+            });
+        }
+
+        if (auto node = taskConfig_->get_qualified_as<std::string>("exe.arch")) {
+            if (util::ends_with(*node, "32") || util::ends_with(*node, "86")) {
+                task_.exe.compiler.archBits = opts::ArchBits::x32;
+            } else if (util::ends_with(*node, "64")) {
+                task_.exe.compiler.archBits = opts::ArchBits::x64;
+            } else {
+                task_.exe.compiler.archBits = opts::ArchBits::undefined;
+            }
+        }
+    }
+}
+
 const lang::LanguageTable& Config::langs() const {
     return langs_.langs;
 }
 
 const opts::EjudgeOpts& Config::ejudge() const {
     return ejudge_;
+}
+
+const opts::TaskOpts& Config::task() const {
+    return task_;
 }
 
 void Config::dump(ConfigType type) const {

@@ -21,7 +21,7 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 }
 
 void Generator::run() {
-    executable::Executable exe = config_.langs().runnable(fs::current_path() / opts_.generator);
+    executable::Executable exe = config_.langs().runnable({opts_.generatorSources, config_.task().exe.compiler});
 
     InlineVariables vars;
 

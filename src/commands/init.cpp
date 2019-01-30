@@ -1,7 +1,9 @@
 #include "cacos/commands/init.h"
 #include "cacos/config/config.h"
+#include "cacos/config/default.h"
 
 #include "cacos/util/logger.h"
+#include "cacos/util/string.h"
 
 #include <cpparg/cpparg.h>
 
@@ -40,6 +42,8 @@ int init(int argc, const char* argv[]) {
             throw std::runtime_error("Cannot create directory");
         }
     }
+
+    util::file::write(workspace / "cacos.toml", config::defaults::find("task").value());
 
     return 0;
 }

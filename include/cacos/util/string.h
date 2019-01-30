@@ -52,20 +52,43 @@ inline std::string join(Args&&... args) {
     return ("" + ... + to_string(args));
 }
 
-inline std::string readFile(std::ifstream& in) {
+template<typename T, typename A, typename U>
+inline std::string join(const std::vector<T, A>& ts, U delim) {
+    if (ts.empty()) {
+        return {};
+    }
+    std::string result = to_string(ts[0]);
+    for (auto&& t : skip(ts, 1)) {
+        result += join(delim, t);
+    }
+    return result;
+}
+
+namespace file {
+
+inline constexpr size_t defaultBufferCapacity = 4096;
+
+inline std::string read(std::ifstream& in) {
     std::string result;
-    std::string buffer(4096, '\0');
+    std::string buffer(defaultBufferCapacity, '\0');
     do {
-        in.read(buffer.data(), buffer.size());
-        size_t bytes = in.gcount();
+        in.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+        size_t bytes = static_cast<size_t>(in.gcount());
         result.append(buffer.data(), bytes);
     } while (in);
     return result;
 }
 
-inline std::string readFile(const fs::path& path) {
+inline std::string read(const fs::path& path) {
     std::ifstream ifs(path);
-    return readFile(ifs);
+    return read(ifs);
+}
+
+inline void write(const fs::path& path, std::string_view data) {
+    std::ofstream ofs(path);
+    ofs.write(data.data(), static_cast<std::streamsize>(data.size()));
+}
+
 }
 
 } // namespace cacos::util

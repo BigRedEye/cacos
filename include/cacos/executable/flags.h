@@ -13,6 +13,9 @@ public:
     Flags() = default;
     Flags(const std::vector<std::string>& flags);
 
+    bool operator==(const Flags& other) const;
+    bool operator!=(const Flags& other) const;
+
     std::vector<std::string> build(const InlineVariables& vars) const;
 
     void prepend(const Flags& flags);

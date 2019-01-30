@@ -18,6 +18,9 @@ public:
     Executable(const fs::path& exe);
     Executable(const fs::path& exe, const std::vector<std::string>& flags);
 
+    bool operator==(const Executable& other) const;
+    bool operator!=(const Executable& other) const;
+
     template<typename... Args>
     bp::child run(const InlineVariables& vars, Args&&... args) const {
         bp::child result(
@@ -54,7 +57,7 @@ struct ExecTaskContext {
 
 class ExecTask {
 public:
-    ExecTask(Executable& exe, ExecTaskContext&& ctx = {})
+    ExecTask(const Executable& exe, ExecTaskContext&& ctx = {})
         : exe_(exe)
         , ctx_(ctx) {
     }
@@ -68,7 +71,7 @@ public:
     void onExit(process::Result result, std::optional<process::Info>&& info);
 
 protected:
-    Executable& exe_;
+    const Executable& exe_;
     ExecTaskContext ctx_;
 };
 
@@ -80,7 +83,7 @@ template<
     typename StdErr = bp::detail::null_t>
 class ExecTaskImpl final : public ExecTask {
 public:
-    ExecTaskImpl(Executable& exe, ExecTaskContext&& ctx, StdIn in, StdOut out, StdErr err)
+    ExecTaskImpl(const Executable& exe, ExecTaskContext&& ctx, StdIn in, StdOut out, StdErr err)
         : ExecTask(exe, std::move(ctx))
         , stdin_(in)
         , stdout_(out)
@@ -111,12 +114,12 @@ private:
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81486
  */
 template<typename... Args>
-ExecTaskPtr makeTask(Executable& exe, ExecTaskContext&& ctx, Args&&... rest) {
+ExecTaskPtr makeTask(const Executable& exe, ExecTaskContext&& ctx, Args&&... rest) {
     return ExecTaskPtr(new ExecTaskImpl<Args...>(exe, std::move(ctx), std::forward<Args>(rest)...));
 }
 
 template<typename... Args>
-ExecTaskPtr makeTask(Executable& exe, const ExecTaskContext& ctx, Args&&... rest) {
+ExecTaskPtr makeTask(const Executable& exe, const ExecTaskContext& ctx, Args&&... rest) {
     ExecTaskContext copy = ctx;
     return maskTask(exe, std::move(copy), std::forward<Args>(rest)...);
 }

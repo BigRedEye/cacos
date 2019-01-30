@@ -8,7 +8,7 @@ class Interpreter : public Translator {
 public:
     Interpreter(const cpptoml::table& t);
 
-    executable::Executable process(const fs::path& source) const override;
+    executable::Executable process(const fs::path& source) const;
 };
 
 } // namespace cacos::lang

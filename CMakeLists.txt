@@ -64,6 +64,7 @@ file(GLOB SOURCES
     src/lang/compiler.cpp
     src/lang/interpreter.cpp
     src/lang/lang.cpp
+    src/lang/linker.cpp
     src/lang/translator.cpp
 
     src/ejudge/html/myhtml.cpp
@@ -75,8 +76,11 @@ file(GLOB SOURCES
 
     src/version/version.cpp
 
+    src/task/opts.cpp
+
     src/util/inline_variables.cpp
     src/util/logger.cpp
+    src/util/optional_ref.cpp
     src/util/split.cpp
 
     src/util/mt/fixed_queue.cpp
@@ -109,6 +113,7 @@ file(GLOB HEADERS
     include/cacos/lang/compiler.h
     include/cacos/lang/interpreter.h
     include/cacos/lang/lang.h
+    include/cacos/lang/linker.h
     include/cacos/lang/opts.h
     include/cacos/lang/translator.h
 
@@ -124,13 +129,16 @@ file(GLOB HEADERS
     include/cacos/version/git.h
     include/cacos/version/version.h
 
+    include/cacos/task/opts.h
+
     include/cacos/util/inline_variables.h
+    include/cacos/util/ints.h
     include/cacos/util/logger.h
+    include/cacos/util/optional_ref.h
     include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
     include/cacos/util/util.h
-    include/cacos/util/ints.h
 
     include/cacos/util/mt/fixed_queue.h
 
@@ -140,6 +148,7 @@ file(GLOB HEADERS
 file(GLOB CONFIGS
     cacos.toml
     langs.toml
+    task.toml
 )
 
 file(GLOB CONFIGURABLE_SOURCES
@@ -159,6 +168,7 @@ configure_file(${CONFIGS_PRE_CONFIGURE} ${CONFIGS_POST_CONFIGURE} @ONLY)
 list(APPEND SOURCES ${CONFIGS_POST_CONFIGURE})
 
 # Include git version
+set(_BUILD_TIME_CHECK_GIT ON)
 set(PRE_CONFIGURE_FILE ${CMAKE_CURRENT_SOURCE_DIR}/src/version/git.cpp.in)
 set(POST_CONFIGURE_FILE ${CMAKE_CURRENT_BINARY_DIR}/src/git.cpp)
 include(git_watcher)

@@ -8,6 +8,14 @@ Flags::Flags(const std::vector<std::string>& flags)
     : flags_(flags) {
 }
 
+bool Flags::operator==(const Flags& other) const {
+    return flags_ == other.flags_;
+}
+
+bool Flags::operator!=(const Flags& other) const {
+    return !operator==(other);
+}
+
 std::vector<std::string> Flags::build(const InlineVariables& vars) const {
     std::vector<std::string> result;
     for (auto&& f : flags_) {

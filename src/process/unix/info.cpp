@@ -78,7 +78,7 @@ private:
         }
 
         std::ifstream ifs(statPath);
-        std::string raw = util::readFile(ifs);
+        std::string raw = util::file::read(ifs);
         std::vector<std::string_view> tokens = util::split(raw, " ");
 
         ProcessStats stats;

@@ -20,7 +20,7 @@ struct Range {
 struct GeneratorOptions {
     using Variables = std::map<std::string, Range<i64>>;
 
-    std::string generator;
+    std::vector<fs::path> generatorSources;
     Variables vars;
     std::string input;
     std::string testName;

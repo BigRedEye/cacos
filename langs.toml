@@ -3,19 +3,20 @@ name = "c"
 extensions = [ ".c" ]
 
 [lang.compiler]
-exe = "clang"
+exe = "clang++"
 flags = [
+    "-xc",
+    "-c",
     "@{source}",
     "-o",
     "@{binary}",
-    "-xc",
+    "-m@{arch}",
     "-std=gnu11",
     "-Wall",
     "-Wextra",
     "-Wpedantic",
     "-Wshadow",
     "-Werror",
-    "-lm",
 ]
 release = [
     "-O3",
@@ -27,6 +28,23 @@ debug = [
     "-fsanitize=address,undefined",
 ]
 
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-lasan",
+]
+release = [
+    "-O3",
+    "-march=native",
+]
+
 
 [[lang]]
 name = "c++"
@@ -35,11 +53,13 @@ extensions = [ ".cpp", ".cxx", ".cc" ]
 [lang.compiler]
 exe = "clang++"
 flags = [
+    "-xc++",
+    "-c",
     "@{source}",
     "-o",
     "@{binary}",
+    "-m@{arch}",
     "-std=c++17",
-    "-xc++",
     "-Wall",
     "-Wextra",
     "-Wpedantic",
@@ -47,12 +67,30 @@ flags = [
     "-Werror",
 ]
 release = [
-    "-O2",
+    "-O3",
+    "-march=native",
 ]
 debug = [
     "-O0",
     "-ggdb",
     "-fsanitize=address,undefined",
+]
+
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-lasan",
+]
+release = [
+    "-O3",
+    "-march=native",
 ]
 
 
@@ -61,11 +99,31 @@ name = "asm"
 extensions = [ ".s", ".S" ]
 
 [lang.compiler]
-exe = "clang"
+exe = "clang++"
 flags = [
+    "-c",
     "@{source}",
     "-o",
-    "@{binary}"
+    "@{binary}",
+    "-m@{arch}",
+]
+
+
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-lasan",
+]
+release = [
+    "-O3",
+    "-march=native",
 ]
 
 

@@ -23,8 +23,15 @@ int generate(int argc, const char* argv[]) {
         .add("generator")
         .required()
         .value_type("SOURCE")
-        .description("Generator executable or source")
-        .store(opts.generator);
+        .description("Generator executable or sources")
+        .handle([&](auto sv) {
+            auto splitted = util::split(sv, ", ");
+            for (auto&& path : splitted) {
+                if (!path.empty()) {
+                    opts.generatorSources.emplace_back(path);
+                }
+            }
+        });
 
     parser
         .add("var")

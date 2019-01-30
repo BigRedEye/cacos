@@ -4,6 +4,7 @@
 
 #include "cacos/ejudge/opts.h"
 #include "cacos/lang/opts.h"
+#include "cacos/task/opts.h"
 
 #include "cacos/util/split.h"
 
@@ -66,6 +67,7 @@ public:
 
     const lang::LanguageTable& langs() const;
     const opts::EjudgeOpts& ejudge() const;
+    const opts::TaskOpts& task() const;
 
     template<typename T>
     void set(std::string_view path, T&& value, ConfigType type = ConfigType::global) {
@@ -80,37 +82,7 @@ private:
         const std::shared_ptr<cpptoml::base>& value,
         ConfigType type) const;
     void parseLangs(const fs::path& langs);
-
-    template<typename T>
-    std::optional<T> argOrConfig(const std::string& arg, const std::string& key) {
-        if (arg == util::join("config{", key, "}")) {
-            auto value = std::optional<T>{};
-            if (taskConfig_) {
-                auto res = taskConfig_->get_qualified_as<T>(key);
-                if (res) {
-                    value = *res;
-                }
-            }
-            if (!value) {
-                auto res = globalConfig_->get_qualified_as<T>(key);
-                if (res) {
-                    value = *res;
-                }
-            }
-            return value;
-        } else {
-            return util::from_string<T>(arg);
-        }
-    }
-
-    template<typename T, typename E>
-    T argOrConfig(const std::string& arg, const std::string& key, E&& exception) {
-        try {
-            return argOrConfig<T>(arg, key).value();
-        } catch (const std::bad_variant_access&) {
-            std::throw_with_nested(std::forward<E>(exception));
-        }
-    }
+    void parseConfig();
 
     static constexpr std::string_view CONFIG_FILE = "cacos.toml";
     static constexpr std::string_view LANGS_FILE = "langs.toml";
@@ -123,6 +95,7 @@ private:
     std::shared_ptr<cpptoml::table> taskConfig_;
     opts::LangOpts langs_;
     opts::EjudgeOpts ejudge_;
+    opts::TaskOpts task_;
 };
 
 } // namespace cacos::config
