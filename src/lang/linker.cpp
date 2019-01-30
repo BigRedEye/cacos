@@ -53,4 +53,4 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     return binary;
 }
 
-}
+} // namespace cacos::lang

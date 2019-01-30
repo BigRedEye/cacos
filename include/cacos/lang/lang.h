@@ -8,8 +8,8 @@
 
 #include "cacos/executable/executable.h"
 
-#include "cacos/util/util.h"
 #include "cacos/util/optional_ref.h"
+#include "cacos/util/util.h"
 
 #include <boost/container/stable_vector.hpp>
 

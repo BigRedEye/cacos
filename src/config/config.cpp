@@ -66,10 +66,8 @@ std::optional<fs::path> findConfigFile(const std::vector<fs::path>& alternatives
     return {};
 }
 
-std::optional<fs::path> findConfig(
-    const fs::path& overriden,
-    const fs::path& config,
-    std::string_view defaultKey) {
+std::optional<fs::path>
+    findConfig(const fs::path& overriden, const fs::path& config, std::string_view defaultKey) {
     auto defaultConfig = defaults::find(defaultKey);
     if (!fs::exists(config) && defaultConfig) {
         try {
@@ -302,8 +300,9 @@ void Config::parseLangs(const fs::path& langs) {
 }
 
 void Config::parseConfig() {
-    auto setIfHas = [] (const auto& table, auto key, auto& value, auto dummy) {
-        if (auto node = table->template get_qualified_as<std::decay_t<decltype(dummy)>>(util::str(key))) {
+    auto setIfHas = [](const auto& table, auto key, auto& value, auto dummy) {
+        if (auto node =
+                table->template get_qualified_as<std::decay_t<decltype(dummy)>>(util::str(key))) {
             value = *node;
         }
     };
@@ -316,9 +315,10 @@ void Config::parseConfig() {
 
     if (taskConfig_) {
         if (auto node = taskConfig_->get_qualified_array_of<std::string>("exe.sources")) {
-            std::transform(node->begin(), node->end(), std::back_inserter(task_.exe.sources), [](auto file) {
-                return fs::path(file);
-            });
+            std::transform(
+                node->begin(), node->end(), std::back_inserter(task_.exe.sources), [](auto file) {
+                    return fs::path(file);
+                });
         }
 
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.arch")) {

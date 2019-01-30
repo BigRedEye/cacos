@@ -4,8 +4,8 @@
 
 #include "cacos/config/config.h"
 
-#include "cacos/util/util.h"
 #include "cacos/util/ranges.h"
+#include "cacos/util/util.h"
 
 namespace cacos::lang {
 
@@ -39,7 +39,8 @@ Language::Language(const cpptoml::table& config, const fs::path& binaryDir) {
     std::copy(exts->begin(), exts->end(), std::back_inserter(extensions_));
 }
 
-executable::Executable Language::process(const fs::path& source, const opts::CompilerOpts& options) const {
+executable::Executable Language::process(const fs::path& source, const opts::CompilerOpts& options)
+    const {
     fs::path compiled = source;
     if (compiler_) {
         compiled = compiler_->compile(source, options);
@@ -90,14 +91,14 @@ executable::Executable LanguageTable::runnable(const opts::ExeOpts& opts) const 
         const auto& path = opts.sources[0];
         bool isExecutable = !bp::search_path(path.filename().string()).empty();
         isExecutable =
-            isExecutable || !bp::search_path(path.filename().string(), {path.parent_path().string()}).empty();
+            isExecutable ||
+            !bp::search_path(path.filename().string(), {path.parent_path().string()}).empty();
         if (isExecutable) {
             return path;
         }
 
         return lang(path).process(path, opts.compiler);
     } else {
-
         const auto& sources = opts.sources;
         const Linker& linker = lang(sources[0]).linker();
 
@@ -108,8 +109,8 @@ executable::Executable LanguageTable::runnable(const opts::ExeOpts& opts) const 
                 throw std::runtime_error("Cannot find linker for source " + path.string());
             }
             if (curLinker != linker) {
-                throw std::runtime_error(
-                    util::join("Mismatched linkers for sources ", sources[0].string(), ", ", path.string()));
+                throw std::runtime_error(util::join(
+                    "Mismatched linkers for sources ", sources[0].string(), ", ", path.string()));
             }
         }
 

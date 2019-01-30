@@ -13,4 +13,4 @@ std::string_view serialize(ArchBits bits) {
     }
 }
 
-}
+} // namespace cacos::opts

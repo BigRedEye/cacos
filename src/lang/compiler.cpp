@@ -27,10 +27,10 @@ fs::path Compiler::compile(const fs::path& source, const opts::CompilerOpts& opt
 }
 
 std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
-            const fs::path& source,
-            const opts::CompilerOpts& options,
-            std::future<std::string>& stdOut,
-            std::future<std::string>& stdErr) const {
+    const fs::path& source,
+    const opts::CompilerOpts& options,
+    std::future<std::string>& stdOut,
+    std::future<std::string>& stdErr) const {
     InlineVariables vars;
 
     fs::path binary = binaryDir_ / (source.filename().replace_extension("o"));
@@ -44,7 +44,7 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
     flags.append(debug_);
     auto args = flags.build(vars);
 
-    auto callback = [&, source] (process::Result res, std::optional<process::Info>&&) {
+    auto callback = [&, source](process::Result res, std::optional<process::Info>&&) {
         if (res.status == process::status::IL || res.status == process::status::TL) {
             throw std::runtime_error("Compilation time out");
         }
@@ -59,8 +59,12 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
         }
     };
 
-    auto result = executable::makeTask(exe_, executable::ExecTaskContext{
-        std::move(args), {}, std::move(callback)}, bp::null, std::ref(stdOut), std::ref(stdErr));
+    auto result = executable::makeTask(
+        exe_,
+        executable::ExecTaskContext{std::move(args), {}, std::move(callback)},
+        bp::null,
+        std::ref(stdOut),
+        std::ref(stdErr));
 
     return {binary, std::move(result)};
 }

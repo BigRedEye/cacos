@@ -10,4 +10,4 @@ std::string_view commit(size_t digits = defaultDigits);
 bool dirty();
 bool hasGitState();
 
-}
+} // namespace cacos::version::git

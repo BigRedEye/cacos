@@ -12,8 +12,7 @@ public:
     bad_optional_ref_access();
 };
 
-struct empty_optional_ref_tag {
-};
+struct empty_optional_ref_tag {};
 
 inline constexpr empty_optional_ref_tag nullref;
 
@@ -21,12 +20,12 @@ template<typename T>
 class optional_ref {
 public:
     /* implicit */ optional_ref(T& t)
-        : ptr_(std::addressof(t))
-    {}
+        : ptr_(std::addressof(t)) {
+    }
 
     /* implicit */ optional_ref(empty_optional_ref_tag)
-        : ptr_(nullptr)
-    {}
+        : ptr_(nullptr) {
+    }
 
     operator T&() {
         if (!ptr_) {
@@ -66,4 +65,4 @@ private:
     T* ptr_ = nullptr;
 };
 
-}
+} // namespace cacos::util

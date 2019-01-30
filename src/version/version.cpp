@@ -17,4 +17,4 @@ int version(int, const char*[]) {
     return 0;
 }
 
-}
+} // namespace cacos::commands

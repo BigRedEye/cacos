@@ -89,6 +89,6 @@ inline void write(const fs::path& path, std::string_view data) {
     ofs.write(data.data(), static_cast<std::streamsize>(data.size()));
 }
 
-}
+} // namespace file
 
 } // namespace cacos::util
