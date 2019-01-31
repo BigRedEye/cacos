@@ -33,7 +33,7 @@ before_install:
   
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-  - sudo pip install conan
+  - sudo pip install conan --upgrade
   - conan user
 
 script:
