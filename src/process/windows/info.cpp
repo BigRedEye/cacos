@@ -40,7 +40,8 @@ private:
     void update() {
         PROCESS_MEMORY_COUNTERS memory;
         if (!GetProcessMemoryInfo(handle_, &memory, sizeof(memory))) {
-            throw InfoError(util::join("Cannot get process memory usage: winapi last_error = ", GetLastError()));
+            throw InfoError(util::join(
+                "Cannot get process memory usage: winapi last_error = ", GetLastError()));
         }
 
         bytes rss = static_cast<bytes>(memory.PeakWorkingSetSize);
@@ -50,10 +51,11 @@ private:
         FILETIME kernelTime;
         FILETIME userTime;
         if (!GetProcessTimes(handle_, &creationTime, &exitTime, &kernelTime, &userTime)) {
-            throw InfoError(util::join("Cannot get process times: winapi last_error = ", GetLastError()));
+            throw InfoError(
+                util::join("Cannot get process times: winapi last_error = ", GetLastError()));
         }
 
-        auto fuckingWinapiStructureToSeconds = [] (FILETIME time) {
+        auto fuckingWinapiStructureToSeconds = [](FILETIME time) {
             ui64 idioticTicks = (ui64{time.dwHighDateTime} << 32) + time.dwLowDateTime;
             ui64 nanoseconds = idioticTicks * 100;
             return std::chrono::duration_cast<seconds>(std::chrono::nanoseconds(nanoseconds));
@@ -65,8 +67,10 @@ private:
         SystemTimeToFileTime(&currentSystemTime, &currentTime);
 
         cache_.maxRss = std::max<ui64>(cache_.maxRss, rss);
-        cache_.cpuTime = fuckingWinapiStructureToSeconds(kernelTime) + fuckingWinapiStructureToSeconds(userTime);
-        cache_.realTime = fuckingWinapiStructureToSeconds(currentTime) - fuckingWinapiStructureToSeconds(creationTime);
+        cache_.cpuTime =
+            fuckingWinapiStructureToSeconds(kernelTime) + fuckingWinapiStructureToSeconds(userTime);
+        cache_.realTime = fuckingWinapiStructureToSeconds(currentTime) -
+                          fuckingWinapiStructureToSeconds(creationTime);
     }
 
 private:

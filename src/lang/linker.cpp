@@ -24,9 +24,9 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     ptrdiff_t it = std::find(args.begin(), args.end(), "compiled") - args.begin();
     if (it != static_cast<ptrdiff_t>(args.size())) {
         args.erase(args.begin() + it);
-		for (auto rit = objs.rbegin(); rit != objs.rend(); ++rit) {
-			args.insert(args.begin() + it, rit->string());
-		}
+        for (auto rit = objs.rbegin(); rit != objs.rend(); ++rit) {
+            args.insert(args.begin() + it, rit->string());
+        }
     }
 
     std::future<std::string> stdOut;

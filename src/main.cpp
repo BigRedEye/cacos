@@ -14,7 +14,7 @@ void printException(const std::exception& e, size_t depth = 1) noexcept {
 }
 
 int main(int argc, const char* argv[]) {
-#if CACOS_DEBUGq
+#if CACOS_DEBUG
     return cacos::main(argc, argv);
 #else
     try {

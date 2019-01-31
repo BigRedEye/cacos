@@ -36,7 +36,9 @@ auto colorForPriority(Logger::MessagePriority priority) {
     default:
         break;
     }
-    return +[](std::ostream& os) -> auto& { return os; };
+    return +[](std::ostream & os) -> auto& {
+        return os;
+    };
 }
 
 } // namespace
@@ -96,7 +98,8 @@ Logger& Logger::flush(bool flush) {
 }
 
 void Logger::increaseVerbosity(int delta) {
-    verbosity_ = static_cast<MessagePriority>(std::max<int>( static_cast<int>(verbosity_) - delta, static_cast<int>(MessagePriority::debug)));
+    verbosity_ = static_cast<MessagePriority>(std::max<int>(
+        static_cast<int>(verbosity_) - delta, static_cast<int>(MessagePriority::debug)));
 }
 
 } // namespace cacos

@@ -25,11 +25,11 @@ fs::path homeDir() {
         return fs::path(pass->pw_dir);
     }
 #endif
-	
+
     static const char* vars[] = {"HOME", "LOCALAPPDATA", "USERPROFILE"};
     for (auto var : vars) {
-		if (const char* str = getenv(var); str) {
-			return str;
+        if (const char* str = getenv(var); str) {
+            return str;
         }
     }
     Logger::warning() << "Unable to determine user home dir";
