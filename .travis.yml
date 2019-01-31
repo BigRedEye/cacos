@@ -1,7 +1,10 @@
 dist: xenial
 sudo: require
 
-language: cpp
+language:
+  - cpp
+  - python
+
 compiler:
   - clang
   - gcc
@@ -19,7 +22,8 @@ addons:
       - cmake
 
 cache:
-  - pip
+  pip:
+    true
   directories:
     - $HOME/.conan
 
