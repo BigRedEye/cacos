@@ -3,9 +3,29 @@ sudo: require
 
 language: cpp
 
-compiler:
-  - clang
-  - gcc
+matrix:
+  include:
+    - compiler: clang
+      language: python
+      python: "3.7"
+      before_install:
+        - pip install -U pip
+      install:
+        - pip install conan
+      before_script:
+        - pip --version
+        - conan --version
+    
+    - compiler: gcc
+      language: python
+      python: "3.7"
+      before_install:
+        - pip install -U pip
+      install:
+        - pip install conan
+      before_script:
+        - pip --version
+        - conan --version
 
 git:
   submodules:
@@ -31,8 +51,6 @@ before_install:
   
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-  - sudo pip install -U pip
-  - sudo pip install conan --upgrade
   - conan user
 
 script:
