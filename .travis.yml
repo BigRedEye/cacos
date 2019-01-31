@@ -2,9 +2,10 @@ dist: xenial
 sudo: require
 
 language: cpp
-compiler:
-  - clang
-  - gcc
+
+git:
+  submodules:
+    false
 
 addons:
   apt:
@@ -14,12 +15,57 @@ addons:
       - g++-8
       - cmake
 
-install:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+cache:
+  directories:
+    - $HOME/.conan
 
+matrix:
+  include:
+    - compiler: clang
+      language: python
+      python: "3.7"
+      cache:
+        pip:
+          true
+      install:
+        - pip install -U pip
+        - pip install conan
+      before_script:
+        - export CXX="clang++" CC="clang"
+
+        - pip --version
+        - conan --version
+        - conan user
+    
+    - compiler: gcc
+      language: python
+      python: "3.7"
+      cache:
+        pip:
+          true
+      install:
+        - pip install -U pip
+        - pip install conan
+      before_script:
+        - export CXX="g++-8" CC="gcc-8"
+
+        - pip --version
+        - conan --version
+        - conan user
+
+before_install:
+  - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
+  - git submodule update --init --recursive
+  
 script:
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Sanitizers -DCACOS_BUILD_TESTS=ON
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
   - cmake --build . --parallel $(nproc)
-  - test/cacos_test
+  - sudo cmake --build . --target install
+
+  - bin/cacos_test
+  - cacos config --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID --url $CACOS_URL
+  - cacos status
+  - cacos solution list sm07-5
+  - cacos solution diff 1068 1069 -v
