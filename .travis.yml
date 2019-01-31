@@ -31,7 +31,8 @@ matrix:
         - pip install -U pip
         - pip install conan
       before_script:
-        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+        - export CXX="clang++" CC="clang"
+
         - pip --version
         - conan --version
         - conan user
@@ -46,7 +47,8 @@ matrix:
         - pip install -U pip
         - pip install conan
       before_script:
-        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+        - export CXX="g++-8" CC="gcc-8"
+
         - pip --version
         - conan --version
         - conan user
@@ -56,10 +58,6 @@ before_install:
   - git submodule update --init --recursive
   
 script:
-  - cmake --version
-  - g++ --version
-  - clang++ --version
-
   - mkdir build
   - cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
