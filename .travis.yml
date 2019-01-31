@@ -1,4 +1,5 @@
 dist: xenial
+sudo: require
 
 language: cpp
 
@@ -30,8 +31,8 @@ before_install:
   
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-  - pip install -U pip
-  - pip install conan --upgrade
+  - sudo pip install -U pip
+  - sudo pip install conan --upgrade
   - conan user
 
 script:
