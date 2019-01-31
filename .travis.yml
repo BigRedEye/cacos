@@ -1,6 +1,8 @@
 dist: xenial
 sudo: require
+
 language: cpp
+
 git:
   submodules: false
 
@@ -23,9 +25,6 @@ matrix:
     python: '3.7'
     env: CACOS_DEPLOY=ON
 
-    cache:
-      pip: true
-
     install:
     - pip install -U pip
     - pip install conan
@@ -40,9 +39,6 @@ matrix:
     language: python
     python: '3.7'
     env: CACOS_DEPLOY=OFF
-
-    cache:
-      pip: true
 
     install:
     - pip install -U pip
@@ -86,7 +82,6 @@ deploy:
   api_key:
     secure: IlcahBhty7IkU/UKtZAlv/tF4tWek2hXQxeHPhQdXSYe36OSkrf9gqRnTR+3S5auvbj52k4Acxp4qC0TkPifjxzTV+04e8Y87DuhUIa8xfK5l8SbkaA0jexD7pWgIhgV3/vvUyr82awBEZUgP2cGSdI5X78q0OJXWWWzJTAgIuieE0ih0j7tJtp91Cd+EHI2eIC4Mjs4HKcAC2m+ngl1hu4dGdUuPHasX+FXWkthXbdAPLhfPbX0p6/fnkPRBevyzHoRLZ5m+o02VlTzNtrVpbKM/QTb61p43NVpRsJhE+ceQHAJynnRjVDGf1J+Y943mLCKc0rbIkw9LjDUO6M19YvToLCqkq34LiJROv8nUkLciDlHiz3ZfCdw5JMuMXC6uhc5NI2cyWCivHAVENcQl6TfwLDa1yXwcnL6qV+CH0YX9jY3Tt4fgdWoiEX5vaV8yjiBQAZe6bK1FiYz/hRrkWLD4wN6eCFslDCAeRpiFZs+Z0jpJNyg/9EUFDAvdbhQlJieQDZOPEGU1bG5yv85W5avQNnjybtcfrDNp4BtntCZRt90XAbdoY/Q6Oe+U9670lSOOv4K8xj17maGl6mfnZi4gJSz/1D6xDpNk+sClS+sVVm9BMdzcSRoQruS3hy3m3Tr6M8+B+CU+TN1Xu4BCTlNM9Z5Zb/21UqdYQgSUMw=
   file: build/bin/cacos
+  draft: true
   on:
-    repo: BigRedEye/cacos
-    tags: true
     condition: $CACOS_DEPLOY = ON
