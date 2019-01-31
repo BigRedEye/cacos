@@ -6,6 +6,10 @@ compiler:
   - clang
   - gcc
 
+git:
+  submodules:
+    false
+
 addons:
   apt:
     sources:
@@ -14,12 +18,28 @@ addons:
       - g++-8
       - cmake
 
+cache:
+  directories:
+    - $HOME/.conan
+
+before_install:
+  - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
+  - git submodule update --init --recursive
+  
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+  - pip install conan
+  - conan user
 
 script:
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_BUILD_TYPE=Sanitizers -DCACOS_BUILD_TESTS=ON
+  - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
   - cmake --build . --parallel $(nproc)
+  - sudo cmake --build . --target install
+
   - test/cacos_test
+  - cacos config --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID --url $CACOS_URL
+  - cacos status
+  - cacos solution list sm07-5
+  - cacos solution diff 1068 1069 -v
