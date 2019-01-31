@@ -11,7 +11,7 @@ TEST(inline_variables, simple) {
 }
 
 TEST(inline_variables, throws) {
-    cacos::InlineVariables parser(cacos::UnknownVariablePolicy::THROW);
+    cacos::InlineVariables parser(cacos::UnknownVariablePolicy::rethrow);
     parser.set("source", "main.cpp");
     parser.set("binary", "main.exe");
 

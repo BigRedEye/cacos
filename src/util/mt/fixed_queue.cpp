@@ -1,5 +1,7 @@
 #include "cacos/util/mt/fixed_queue.h"
 
+#include <algorithm>
+
 namespace cacos::mt {
 
 FixedQueue::FixedQueue(size_t threads)

@@ -58,6 +58,7 @@ file(GLOB SOURCES
     src/test/generate/generator.cpp
 
     src/process/unix/info.cpp
+    src/process/windows/info.cpp
     src/process/process.cpp
     src/process/result.cpp
 
@@ -230,8 +231,22 @@ add_subdirectory(third-party/dtl EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS dtl::dtl)
 
 ## myhtml
+set(MyHTML_BUILD_WITHOUT_THREADS OFF)
+set(MyCORE_BUILD_WITHOUT_THREADS OFF)
+if (WIN32)
+	set(MyHTML_BUILD_WITHOUT_THREADS ON)
+	set(MyCORE_BUILD_WITHOUT_THREADS ON)
+endif(WIN32)
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_compile_definitions(
+    ${CACOS_LIB}
+    PUBLIC
+    _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
+    _WIN32_WINNT=0x0601)
+endif()
 
 target_compile_definitions(
     ${CACOS_LIB}
@@ -242,16 +257,18 @@ target_compile_definitions(
     ${CACOS_OS}=1
 )
 
-set(CXX_FILESYSTEM_LIBRARY stdc++fs)
-list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
+## std::filesystem
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CXX_FILESYSTEM_LIBRARY stdc++fs)
+    list(APPEND CACOS_LIBS ${CXX_FILESYSTEM_LIBRARY})
+endif()
 
+target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
 
 target_include_directories(${CACOS_LIB} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
     ${MYHTML_INCLUDE_DIRS}
 )
-
-target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
 
 # Executable
 

@@ -13,7 +13,7 @@ Interpreter::Interpreter(const cpptoml::table& t)
 executable::Executable Interpreter::process(const fs::path& source) const {
     InlineVariables vars;
 
-    vars.set("source", source);
+    vars.set("source", source.string());
 
     executable::Flags flags = common_;
     flags.append(debug_);

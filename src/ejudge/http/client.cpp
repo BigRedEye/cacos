@@ -80,8 +80,11 @@ public:
         curl_easy_reset(curl_);
 
         std::string result;
-
+		
         if (!cookies_.empty()) {
+			if (!fs::exists(cookies_)) {
+				std::ofstream ofs(cookies_);
+			}
             curl_easy_setopt(curl_, CURLOPT_COOKIEJAR, cookies_.c_str());
             curl_easy_setopt(curl_, CURLOPT_COOKIEFILE, cookies_.c_str());
         }
@@ -90,6 +93,7 @@ public:
             curl_easy_setopt(curl_, CURLOPT_COOKIE, c.data());
         }
 
+		curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0);
         curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, curlWriteToString);
         curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &result);
         curl_easy_setopt(curl_, CURLOPT_URL, params.url.data());
@@ -111,7 +115,8 @@ private:
     void perform() const {
         CURLcode err = curl_easy_perform(curl_);
         if (err != CURLE_OK) {
-            throw Error(util::join("Cannot perform curl request: ", curl_easy_strerror(err)));
+			std::string error = curl_easy_strerror(err);
+            throw Error(util::join("Cannot perform curl request: ", error));
         }
     }
 

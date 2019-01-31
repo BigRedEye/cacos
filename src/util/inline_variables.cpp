@@ -152,7 +152,7 @@ std::string InlineVariables::parse(std::string_view str) const {
         std::string key = util::str(keyView);
         auto var = vars_.find(key);
         if (var == vars_.end()) {
-            if (policy_ == UnknownVariablePolicy::IGNORE) {
+            if (policy_ == UnknownVariablePolicy::ignore) {
                 result.replace(l, r - l + 1, "");
             } else {
                 throw UnknownVariableName(key);

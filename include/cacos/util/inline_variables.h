@@ -19,18 +19,18 @@ public:
     InlineVariableParsingError(const std::string& what);
 };
 
-enum class UnknownVariablePolicy { IGNORE, THROW };
+enum class UnknownVariablePolicy { ignore, rethrow };
 
 class InlineVariables {
 public:
     InlineVariables(
         std::string_view prefix,
-        UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
+        UnknownVariablePolicy policy = UnknownVariablePolicy::ignore)
         : prefix_(util::str(prefix))
         , policy_(policy) {
     }
 
-    InlineVariables(UnknownVariablePolicy policy = UnknownVariablePolicy::IGNORE)
+    InlineVariables(UnknownVariablePolicy policy = UnknownVariablePolicy::ignore)
         : InlineVariables(DEFAULT_PREFIX, policy) {
     }
 

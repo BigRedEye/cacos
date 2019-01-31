@@ -25,12 +25,11 @@ fs::path homeDir() {
         return fs::path(pass->pw_dir);
     }
 #endif
-
-    static const char* vars[] = {"HOME", "HOMEPATH", "HOMESHARE", "USERPROFILE", "HOMEDRIVE"};
+	
+    static const char* vars[] = {"HOME", "LOCALAPPDATA", "USERPROFILE"};
     for (auto var : vars) {
-        const char* path;
-        if ((path = getenv(var))) {
-            return fs::path(path);
+		if (const char* str = getenv(var); str) {
+			return str;
         }
     }
     Logger::warning() << "Unable to determine user home dir";
@@ -156,12 +155,12 @@ Config::Config()
             ConfigError("Cannot find main config file; you may consider reinstall the program."));
     }
 
-    globalConfig_ = cpptoml::parse_file(config);
+    globalConfig_ = cpptoml::parse_file(config.string());
 
     try {
         fs::path taskConfig = file(FileType::taskConfig);
         if (fs::exists(taskConfig)) {
-            taskConfig_ = cpptoml::parse_file(taskConfig);
+            taskConfig_ = cpptoml::parse_file(taskConfig.string());
         }
     } catch (const BadWorkspace&) {
         taskConfig_.reset();
@@ -178,15 +177,19 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .add("langs")
             .optional()
             .description("Langs file")
-            .default_value(file(FileType::langs))
             .value_type("FILE")
+			.default_value(file(FileType::langs).string())
             .handle([this](std::string_view path) {
                 fs::path langs;
-                try {
-                    langs = findConfig(
-                        path,
-                        dir(DirType::config) / LANGS_FILE,
-                        "langs").value();
+				try {
+					langs = findConfig(
+						path,
+						file(FileType::langs),
+						"langs").value();
+				} catch (const std::bad_optional_access&) {
+					std::throw_with_nested(
+						ConfigError("Bad optional access")
+					);
                 } catch (...) {
                     std::throw_with_nested(
                         ConfigError("Cannot find langs file")
@@ -290,7 +293,7 @@ void Config::setImpl(
 }
 
 void Config::parseLangs(const fs::path& langs) {
-    auto table = cpptoml::parse_file(langs);
+    auto table = cpptoml::parse_file(langs.string());
 
     if (table) {
         langs_.langs = lang::LanguageTable(*table, dir(DirType::binary));

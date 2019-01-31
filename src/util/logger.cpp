@@ -11,7 +11,7 @@
 
 namespace cacos {
 
-Logger::MessagePriority Logger::verbosity_ = Logger::INFO;
+Logger::MessagePriority Logger::verbosity_ = Logger::MessagePriority::info;
 
 namespace {
 
@@ -21,21 +21,22 @@ std::ostream& boldRed(std::ostream& os) {
 
 auto colorForPriority(Logger::MessagePriority priority) {
     switch (priority) {
-    case Logger::DEBUG:
+    case Logger::MessagePriority::debug:
         return termcolor::dark;
-    case Logger::LOG:
+    case Logger::MessagePriority::log:
         return termcolor::white;
-    case Logger::INFO:
+    case Logger::MessagePriority::info:
         return termcolor::reset;
-    case Logger::WARNING:
+    case Logger::MessagePriority::warning:
         return termcolor::yellow;
-    case Logger::ERROR:
+    case Logger::MessagePriority::error:
         return termcolor::red;
-    case Logger::FATAL:
+    case Logger::MessagePriority::fatal:
         return boldRed;
     default:
         break;
     }
+    return +[](std::ostream& os) -> auto& { return os; };
 }
 
 } // namespace
@@ -48,36 +49,36 @@ Logger::Logger(Logger::MessagePriority priority)
     *this << termcolor::reset << colorForPriority(priority) << "[ ";
 
     switch (priority) {
-    case Logger::DEBUG:
+    case Logger::MessagePriority::debug:
         *this << "DEBUG";
         break;
-    case Logger::LOG:
+    case Logger::MessagePriority::log:
         *this << "LOG";
         break;
-    case Logger::INFO:
+    case Logger::MessagePriority::info:
         *this << "INFO";
         break;
-    case Logger::WARNING:
+    case Logger::MessagePriority::warning:
         *this << "WARNING";
         break;
-    case Logger::ERROR:
+    case Logger::MessagePriority::error:
         *this << "ERROR";
         break;
-    case Logger::FATAL:
+    case Logger::MessagePriority::fatal:
         *this << "FATAL";
         break;
     default:
         break;
     }
     *this << " ] ";
-    if (priority <= Logger::DEBUG) {
+    if (static_cast<int>(priority) <= static_cast<int>(Logger::MessagePriority::debug)) {
         *this << "[ 0x" << std::hex << std::this_thread::get_id() << std::dec << " ] ";
     }
 }
 
 Logger::~Logger() {
     *this << termcolor::reset;
-    if (flush_ || prior_ >= ERROR) {
+    if (flush_) {
         *this << std::endl;
     } else {
         *this << '\n';
@@ -95,7 +96,7 @@ Logger& Logger::flush(bool flush) {
 }
 
 void Logger::increaseVerbosity(int delta) {
-    verbosity_ = static_cast<MessagePriority>(std::max<int>(verbosity_ - delta, DEBUG));
+    verbosity_ = static_cast<MessagePriority>(std::max<int>( static_cast<int>(verbosity_) - delta, static_cast<int>(MessagePriority::debug)));
 }
 
 } // namespace cacos

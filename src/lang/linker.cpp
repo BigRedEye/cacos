@@ -13,7 +13,7 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     fs::path binary = binaryDir_ / (objs[0].filename().string() + "_linked");
 
     vars.set("arch", util::str(opts::serialize(options.archBits)));
-    vars.set("binary", binary);
+    vars.set("binary", binary.string());
     vars.set("objs", "compiled");
 
     executable::Flags flags = common_;
@@ -24,7 +24,9 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     ptrdiff_t it = std::find(args.begin(), args.end(), "compiled") - args.begin();
     if (it != static_cast<ptrdiff_t>(args.size())) {
         args.erase(args.begin() + it);
-        args.insert(args.begin() + it, objs.begin(), objs.end());
+		for (auto rit = objs.rbegin(); rit != objs.rend(); ++rit) {
+			args.insert(args.begin() + it, rit->string());
+		}
     }
 
     std::future<std::string> stdOut;

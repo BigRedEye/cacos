@@ -51,7 +51,7 @@ struct ExecTaskContext {
     using Callback = std::function<void(process::Result, std::optional<process::Info>&&)>;
 
     std::vector<std::string> args{};
-    bp::environment env{};
+    bp::environment env = boost::this_process::environment();
     Callback callback{};
 };
 

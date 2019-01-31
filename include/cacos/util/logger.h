@@ -9,9 +9,9 @@ namespace cacos {
 
 class Logger {
 public:
-    enum MessagePriority { DEBUG, LOG, INFO, WARNING, ERROR, FATAL };
+    enum class MessagePriority { debug, log, info, warning, error, fatal };
 
-    Logger(MessagePriority prior = INFO);
+    Logger(MessagePriority prior = MessagePriority::info);
 
     ~Logger();
 
@@ -47,27 +47,27 @@ public:
     }
 
     static Logger debug() {
-        return Logger(DEBUG);
+        return Logger(MessagePriority::debug);
     }
 
     static Logger log() {
-        return Logger(LOG);
+        return Logger(MessagePriority::log);
     }
 
     static Logger info() {
-        return Logger(INFO);
+        return Logger(MessagePriority::info);
     }
 
     static Logger warning() {
-        return Logger(WARNING);
+        return Logger(MessagePriority::warning);
     }
 
     static Logger error() {
-        return Logger(ERROR);
+        return Logger(MessagePriority::error);
     }
 
     static Logger fatal() {
-        return Logger(FATAL);
+        return Logger(MessagePriority::fatal);
     }
 
     static void increaseVerbosity(int delta = 1);

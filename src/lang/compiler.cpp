@@ -35,9 +35,9 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
 
     fs::path binary = binaryDir_ / (source.filename().replace_extension("o"));
 
-    vars.set("source", source);
-    vars.set("binary", binary);
-    vars.set("object", binary);
+    vars.set("source", source.string());
+    vars.set("binary", binary.string());
+    vars.set("object", binary.string());
     vars.set("arch", util::str(opts::serialize(options.archBits)));
 
     executable::Flags flags = common_;
@@ -61,7 +61,7 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
 
     auto result = executable::makeTask(
         exe_,
-        executable::ExecTaskContext{std::move(args), {}, std::move(callback)},
+        executable::ExecTaskContext{std::move(args), boost::this_process::environment(), std::move(callback)},
         bp::null,
         std::ref(stdOut),
         std::ref(stdErr));
