@@ -88,4 +88,5 @@ deploy:
   file: build/bin/cacos
   on:
     repo: BigRedEye/cacos
+    tags: true
     condition: $CACOS_DEPLOY = ON
