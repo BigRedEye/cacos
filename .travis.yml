@@ -70,12 +70,6 @@ script:
 - cacos solution list sm07-5
 - cacos solution diff 1068 1069 -v
 
-before_deploy:
-- git config --local user.name BigRedEye
-- git config --local user.email mail@bigredeye.me
-- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-- git tag $TRAVIS_TAG
-
 deploy:
   provider: releases
   skip_cleanup: true
@@ -85,4 +79,5 @@ deploy:
   draft: true
   on:
     condition: $CACOS_DEPLOY = ON
+    tags: true
     all_branches: true
