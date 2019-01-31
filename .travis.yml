@@ -84,4 +84,6 @@ deploy:
   file: build/bin/cacos
   draft: true
   on:
+    tags: true
     condition: $CACOS_DEPLOY = ON
+    all_branches: true
