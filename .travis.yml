@@ -3,32 +3,6 @@ sudo: require
 
 language: cpp
 
-matrix:
-  include:
-    - compiler: clang
-      language: python
-      python: "3.7"
-      install:
-        - pip install -U pip
-        - pip install conan
-      before_script:
-        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-        - pip --version
-        - conan --version
-        - conan user
-    
-    - compiler: gcc
-      language: python
-      python: "3.7"
-      install:
-        - pip install -U pip
-        - pip install conan
-      before_script:
-        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-        - pip --version
-        - conan --version
-        - conan user
-
 git:
   submodules:
     false
@@ -42,16 +16,50 @@ addons:
       - cmake
 
 cache:
-  pip:
-    true
   directories:
     - $HOME/.conan
+
+matrix:
+  include:
+    - compiler: clang
+      language: python
+      python: "3.7"
+      cache:
+        pip:
+          true
+      install:
+        - pip install -U pip
+        - pip install conan
+      before_script:
+        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+        - pip --version
+        - conan --version
+        - conan user
+    
+    - compiler: gcc
+      language: python
+      python: "3.7"
+      cache:
+        pip:
+          true
+      install:
+        - pip install -U pip
+        - pip install conan
+      before_script:
+        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
+        - pip --version
+        - conan --version
+        - conan user
 
 before_install:
   - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
   - git submodule update --init --recursive
   
 script:
+  - cmake --version
+  - g++ --version
+  - clang++ --version
+
   - mkdir build
   - cd build
   - cmake .. -DCMAKE_BUILD_TYPE=Debug -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
