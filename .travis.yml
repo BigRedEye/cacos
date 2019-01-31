@@ -8,24 +8,26 @@ matrix:
     - compiler: clang
       language: python
       python: "3.7"
-      before_install:
-        - pip install -U pip
       install:
+        - pip install -U pip
         - pip install conan
       before_script:
+        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
         - pip --version
         - conan --version
+        - conan user
     
     - compiler: gcc
       language: python
       python: "3.7"
-      before_install:
-        - pip install -U pip
       install:
+        - pip install -U pip
         - pip install conan
       before_script:
+        - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
         - pip --version
         - conan --version
+        - conan user
 
 git:
   submodules:
@@ -49,10 +51,6 @@ before_install:
   - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
   - git submodule update --init --recursive
   
-install:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-  - conan user
-
 script:
   - mkdir build
   - cd build
