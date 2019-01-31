@@ -19,6 +19,7 @@ addons:
       - cmake
 
 cache:
+  - pip
   directories:
     - $HOME/.conan
 
@@ -28,7 +29,7 @@ before_install:
   
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-8" CC="gcc-8"; fi
-  - pip install conan
+  - sudo pip install conan
   - conan user
 
 script:
@@ -38,7 +39,7 @@ script:
   - cmake --build . --parallel $(nproc)
   - sudo cmake --build . --target install
 
-  - test/cacos_test
+  - bin/cacos_test
   - cacos config --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID --url $CACOS_URL
   - cacos status
   - cacos solution list sm07-5
