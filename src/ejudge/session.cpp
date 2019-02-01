@@ -44,8 +44,8 @@ private:
 Session::Session(const config::Config& config)
     : config_(config)
     , client_(config.file(config::FileType::cookies))
+    , prefix_(config_.ejudge().url)
     , cache_(std::make_unique<Cache>()) {
-    prefix_ = util::split(config_.ejudge().url, "?")[0];
     auto& session = config.ejudge().session;
     if (session.ejsid && session.token) {
         Logger::log().print(
@@ -100,11 +100,13 @@ std::string_view Session::domain() const {
 
 void Session::reauth() {
     Logger::log().print("Trying to reauthenticate");
-    InlineVariables vars("config");
-    vars.set("contest_id", util::to_string(config_.ejudge().contestId));
+    std::string clientUrl = util::join(
+        prefix_,
+        "?contest_id=",
+        util::to_string(config_.ejudge().contestId));
 
     std::string loginPage = client_.post(
-        vars.parse(config_.ejudge().url),
+        clientUrl,
         util::join(
             "login=",
             config_.ejudge().login.login.value(),
