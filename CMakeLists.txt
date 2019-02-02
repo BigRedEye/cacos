@@ -147,9 +147,9 @@ file(GLOB HEADERS
 )
 
 file(GLOB CONFIGS
-    cacos.toml
-    langs.toml
-    task.toml
+    config/cacos.toml
+    config/langs.toml
+    config/task.toml
 )
 
 file(GLOB CONFIGURABLE_SOURCES
@@ -160,7 +160,7 @@ file(GLOB CONFIGURABLE_SOURCES
 # Save configs to the binary
 foreach(config ${CONFIGS})
     get_filename_component(sourcefile ${config} NAME)
-    file(READ ${sourcefile} CACOS_CONFIG_FILE_${sourcefile})
+    file(READ ${config} CACOS_CONFIG_FILE_${sourcefile})
 endforeach()
 
 set(CONFIGS_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/config/default.cpp.in)
