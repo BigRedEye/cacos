@@ -43,9 +43,17 @@ void Generator::run() {
         input.emplace_back(vars.parse(opts_.input));
         output.emplace_back(config_.dir(config::DirType::test) / vars.parse(opts_.testName));
 
-        auto callback = [&](process::Result res, std::optional<process::Info>&& info) {
+        auto callback = [&, i = totalTasks - 1](process::Result res, std::optional<process::Info>&& info) {
+            bool success = false;
             if (res.status != process::status::OK) {
                 Logger::warning().print("Exit status: {}", process::status::serialize(res.status));
+            } else if (res.returnCode != 0) {
+                Logger::warning().print("Non zero exit code: {}", res.returnCode);
+            } else {
+                success = true;
+            }
+            if (!success) {
+                fs::remove(output[i]);
             }
 
             Logger::log().print(
