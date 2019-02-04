@@ -100,10 +100,8 @@ std::string_view Session::domain() const {
 
 void Session::reauth() {
     Logger::log().print("Trying to reauthenticate");
-    std::string clientUrl = util::string::join(
-        prefix_,
-        "?contest_id=",
-        util::string::to(config_.ejudge().contestId));
+    std::string clientUrl =
+        util::string::join(prefix_, "?contest_id=", util::string::to(config_.ejudge().contestId));
 
     std::string loginPage = client_.post(
         clientUrl,

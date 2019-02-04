@@ -102,8 +102,8 @@ enum {
 }
 
 std::vector<Solution> Parser::solutions(i32 taskId) const {
-    html::Html page =
-        session_.getPage("view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
+    html::Html page = session_.getPage(
+        "view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
 
     std::vector<Solution> result;
 
@@ -150,8 +150,8 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
 }
 
 std::string_view Parser::source(i32 solutionId) const {
-    std::string_view result =
-        session_.getRaw("download-run", util::string::join("run_id=", util::string::to(solutionId)));
+    std::string_view result = session_.getRaw(
+        "download-run", util::string::join("run_id=", util::string::to(solutionId)));
 
     html::Html page(result);
     for (auto node : page.tags("title")) {

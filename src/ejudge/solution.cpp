@@ -96,7 +96,7 @@ int diff(int argc, const char* argv[]) {
 
     std::string rawSources[2];
 
-    auto splitSource = [&] (size_t id) {
+    auto splitSource = [&](size_t id) {
         std::optional<i32> runId;
         try {
             runId = util::string::from<i32>(ids[id]);
@@ -113,8 +113,7 @@ int diff(int argc, const char* argv[]) {
         return util::split(rawSources[id], "\n");
     };
 
-    std::vector<std::string_view> sources[] = {splitSource(0),
-                                               splitSource(1)};
+    std::vector<std::string_view> sources[] = {splitSource(0), splitSource(1)};
 
     dtl::Diff<std::string_view> d(sources[0], sources[1]);
     d.compose();

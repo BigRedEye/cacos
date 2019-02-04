@@ -18,8 +18,8 @@ namespace string {
 class FromStringError : public std::runtime_error {
 public:
     FromStringError()
-        : std::runtime_error("Cannot parse from string")
-    {}
+        : std::runtime_error("Cannot parse from string") {
+    }
 };
 
 inline std::istringstream createISStream() {
@@ -78,7 +78,7 @@ inline std::string join(const std::vector<T, A>& ts, U delim) {
     return result;
 }
 
-}
+} // namespace string
 
 namespace file {
 
