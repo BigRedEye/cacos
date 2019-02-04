@@ -50,9 +50,9 @@ int generate(int argc, const char* argv[]) {
             }
 
             Range<i64> range {
-                util::from_string<i64>(splitted[1]),
-                util::from_string<i64>(splitted[2]),
-                util::from_string<i64>(splitted[3]),
+                util::string::from<i64>(splitted[1]),
+                util::string::from<i64>(splitted[2]),
+                util::string::from<i64>(splitted[3]),
             };
 
             opts.vars[name] = range;

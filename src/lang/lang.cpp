@@ -109,7 +109,7 @@ executable::Executable LanguageTable::runnable(const opts::ExeOpts& opts) const 
                 throw std::runtime_error("Cannot find linker for source " + path.string());
             }
             if (curLinker != linker) {
-                throw std::runtime_error(util::join(
+                throw std::runtime_error(util::string::join(
                     "Mismatched linkers for sources ", sources[0].string(), ", ", path.string()));
             }
         }

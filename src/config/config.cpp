@@ -238,7 +238,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .optional()
             .description("Ejudge contest_id")
             .handle([&](auto sv) {
-                ejudge_.contestId = util::from_string<i32>(sv);
+                ejudge_.contestId = util::string::from<i32>(sv);
             });
 
         parser
@@ -325,9 +325,9 @@ void Config::parseConfig() {
         }
 
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.arch")) {
-            if (util::ends_with(*node, "32") || util::ends_with(*node, "86")) {
+            if (util::string::ends_with(*node, "32") || util::string::ends_with(*node, "86")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x32;
-            } else if (util::ends_with(*node, "64")) {
+            } else if (util::string::ends_with(*node, "64")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x64;
             } else {
                 task_.exe.compiler.archBits = opts::ArchBits::undefined;

@@ -13,24 +13,38 @@ inline std::string str(std::string_view view) {
     return std::string(view.begin(), view.end());
 }
 
+namespace string {
+
+class FromStringError : public std::runtime_error {
+public:
+    FromStringError()
+        : std::runtime_error("Cannot parse from string")
+    {}
+};
+
 inline std::istringstream createISStream() {
     std::istringstream ss;
-    ss.exceptions(std::istringstream::failbit);
+    ss.exceptions(std::istringstream::failbit | std::istringstream::badbit);
     return ss;
 }
 
 template<typename T>
-inline T from_string(std::string_view s) {
+inline T from(std::string_view s) {
     static std::istringstream ss = createISStream();
     ss.clear();
     ss.str(str(s));
     T result;
     ss >> result;
+
+    if (!ss.eof()) {
+        throw FromStringError{};
+    }
+
     return result;
 }
 
 template<typename T>
-inline std::string to_string(T&& t) {
+inline std::string to(T&& t) {
     static std::ostringstream os;
     os.clear();
     os.str("");
@@ -49,7 +63,7 @@ inline bool ends_with(std::string_view str, std::string_view suffix) {
 
 template<typename... Args>
 inline std::string join(Args&&... args) {
-    return ("" + ... + to_string(args));
+    return ("" + ... + to(args));
 }
 
 template<typename T, typename A, typename U>
@@ -57,11 +71,13 @@ inline std::string join(const std::vector<T, A>& ts, U delim) {
     if (ts.empty()) {
         return {};
     }
-    std::string result = to_string(ts[0]);
+    std::string result = to(ts[0]);
     for (auto&& t : skip(ts, 1)) {
         result += join(delim, t);
     }
     return result;
+}
+
 }
 
 namespace file {

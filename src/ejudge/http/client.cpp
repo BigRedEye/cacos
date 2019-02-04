@@ -116,7 +116,7 @@ private:
         CURLcode err = curl_easy_perform(curl_);
         if (err != CURLE_OK) {
             std::string error = curl_easy_strerror(err);
-            throw Error(util::join("Cannot perform curl request: ", error));
+            throw Error(util::string::join("Cannot perform curl request: ", error));
         }
     }
 

@@ -33,7 +33,7 @@ int config(int argc, const char* argv[]) {
         .optional()
         .description("Ejudge contest_id")
         .handle([&](auto sv) {
-            cfg.set("ejudge.contest_id", util::from_string<i32>(sv));
+            cfg.set("ejudge.contest_id", util::string::from<i32>(sv));
         });
 
     parser

@@ -49,7 +49,7 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
             throw std::runtime_error("Compilation time out");
         }
         if (res.returnCode != 0) {
-            throw std::runtime_error(util::join(
+            throw std::runtime_error(util::string::join(
                 "Cannot compile ",
                 source.string(),
                 ":\n\nCompiler stdout:\n",

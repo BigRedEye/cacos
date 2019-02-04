@@ -44,7 +44,7 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     }
 
     if (child.exit_code() != 0) {
-        throw std::runtime_error(util::join(
+        throw std::runtime_error(util::string::join(
             "Cannot link object files: ",
             ":\n\nLinker stdout:\n",
             stdOut.get(),

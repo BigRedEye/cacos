@@ -96,7 +96,7 @@ void Generator::traverse(
     } else {
         auto next = std::next(it);
         for (i64 i = it->second.from; i < it->second.to; i += it->second.step) {
-            vars.set(it->first, util::to_string(i));
+            vars.set(it->first, util::string::to(i));
             traverse(next, vars, callback);
         }
     }

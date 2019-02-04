@@ -53,10 +53,10 @@ Session::Session(const config::Config& config)
         token_ = *session.token;
         setCookie(*session.ejsid);
     } else if (loadSession()) {
-        Logger::log().print("Found external session");
+        Logger::log().print("Found cached session");
         return;
     } else {
-        Logger::log().print("No external session was found; trying to reauth");
+        Logger::log().print("No cached session was found; trying to reauth");
         reauth();
     }
 }
@@ -91,7 +91,7 @@ bool Session::loadSession() {
 std::string_view Session::domain() const {
     auto tokens = util::split(prefix_, "/");
     auto view = prefix_;
-    if (util::starts_with(tokens[0], "http")) {
+    if (util::string::starts_with(tokens[0], "http")) {
         return tokens[2]; /* "http:" "" "caos.ejudge.ru" ... */
     } else {
         return tokens[0];
@@ -100,14 +100,14 @@ std::string_view Session::domain() const {
 
 void Session::reauth() {
     Logger::log().print("Trying to reauthenticate");
-    std::string clientUrl = util::join(
+    std::string clientUrl = util::string::join(
         prefix_,
         "?contest_id=",
-        util::to_string(config_.ejudge().contestId));
+        util::string::to(config_.ejudge().contestId));
 
     std::string loginPage = client_.post(
         clientUrl,
-        util::join(
+        util::string::join(
             "login=",
             config_.ejudge().login.login.value(),
             "&password=",
@@ -146,7 +146,7 @@ void Session::reauth() {
 }
 
 std::string Session::buildUrl(std::string_view base) {
-    return util::join(prefix_, "/", base, "/", token_);
+    return util::string::join(prefix_, "/", base, "/", token_);
 }
 
 html::Html Session::getPage(std::string_view base, std::string_view params) {

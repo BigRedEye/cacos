@@ -81,12 +81,12 @@ int diff(int argc, const char* argv[]) {
         return parser
             .positional(name)
             .required()
-            .description("Ejudge run id")
-            .value_type("ID");
+            .description("Ejudge run id or source file")
+            .value_type("SOURCE");
         // clang-format on
     };
 
-    i32 ids[2];
+    std::string ids[2];
     add("first").store(ids[0]);
     add("second").store(ids[1]);
 
@@ -94,10 +94,27 @@ int diff(int argc, const char* argv[]) {
 
     parser::Parser client(cfg);
 
-    auto splitSource = [](auto source) { return util::split(source, "\n"); };
+    std::string rawSources[2];
 
-    std::vector<std::string_view> sources[] = {splitSource(client.source(ids[0])),
-                                               splitSource(client.source(ids[1]))};
+    auto splitSource = [&] (size_t id) {
+        std::optional<i32> runId;
+        try {
+            runId = util::string::from<i32>(ids[id]);
+        } catch (...) {
+            // ¯\_(ツ)_/¯
+        }
+        if (runId) {
+            rawSources[id] = client.source(runId.value());
+        } else if (fs::exists(ids[id])) {
+            rawSources[id] = util::file::read(ids[id]);
+        } else {
+            throw std::runtime_error("Cannot find file " + ids[id]);
+        }
+        return util::split(rawSources[id], "\n");
+    };
+
+    std::vector<std::string_view> sources[] = {splitSource(0),
+                                               splitSource(1)};
 
     dtl::Diff<std::string_view> d(sources[0], sources[1]);
     d.compose();

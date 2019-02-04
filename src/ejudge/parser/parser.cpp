@@ -30,7 +30,7 @@ std::vector<Task> Parser::tasks() const {
             if (children.size() != 13) {
                 throw ParserError(
                     "Cannot parse ejudge responce: weird summary table size " +
-                    util::to_string(children.size()));
+                    util::string::to(children.size()));
             }
 
             auto get = [](auto&& opt) -> auto& {
@@ -48,7 +48,7 @@ std::vector<Task> Parser::tasks() const {
                 auto tokens = util::split(link.substr(pos + 1), "=&");
                 for (auto [token, i] : util::enumerate(tokens)) {
                     if (token == "prob_id") {
-                        task.id = util::from_string<i32>(tokens[i + 1]);
+                        task.id = util::string::from<i32>(tokens[i + 1]);
                     }
                 }
             }
@@ -58,7 +58,7 @@ std::vector<Task> Parser::tasks() const {
             }
             auto score = children[9].child()->text();
             if (score != nbsp) {
-                get(task.result).score = util::from_string<i32>(score);
+                get(task.result).score = util::string::from<i32>(score);
             }
 
             result.push_back(std::move(task));
@@ -80,10 +80,10 @@ std::optional<Task> Parser::task(std::string_view key) const {
 i32 Parser::score() const {
     html::Html summary = session_.getPage("view-problem-summary");
     for (auto node : summary.tags(MyHTML_TAG__TEXT)) {
-        if (util::starts_with(node.text(), "Total score:")) {
+        if (util::string::starts_with(node.text(), "Total score:")) {
             std::string_view score = node.text().substr(std::string_view("Total score: ").size());
             try {
-                return util::from_string<i32>(score);
+                return util::string::from<i32>(score);
             } catch (const std::exception&) {
                 std::throw_with_nested(ParserError("Cannot find total score"));
             }
@@ -103,7 +103,7 @@ enum {
 
 std::vector<Solution> Parser::solutions(i32 taskId) const {
     html::Html page =
-        session_.getPage("view-problem-submit", util::join("prob_id=", util::to_string(taskId)));
+        session_.getPage("view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
 
     std::vector<Solution> result;
 
@@ -122,20 +122,20 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
             for (auto [node, i] : util::enumerate(util::skip(row, 1))) {
                 switch (i) {
                 case view_solution::ID:
-                    solution.id = util::from_string<i32>(node.innerText());
+                    solution.id = util::string::from<i32>(node.innerText());
                     break;
                 case view_solution::RESULT:
                     solution.result.status = node.innerText();
                     break;
                 case view_solution::TESTS_PASSED:
                     try {
-                        solution.result.tests = util::from_string<i32>(node.innerText());
+                        solution.result.tests = util::string::from<i32>(node.innerText());
                     } catch (...) {
                     }
                     break;
                 case view_solution::SCORE:
                     try {
-                        solution.result.score = util::from_string<i32>(node.innerText());
+                        solution.result.score = util::string::from<i32>(node.innerText());
                     } catch (...) {
                     }
                     break;
@@ -151,7 +151,7 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
 
 std::string_view Parser::source(i32 solutionId) const {
     std::string_view result =
-        session_.getRaw("download-run", util::join("run_id=", util::to_string(solutionId)));
+        session_.getRaw("download-run", util::string::join("run_id=", util::string::to(solutionId)));
 
     html::Html page(result);
     for (auto node : page.tags("title")) {

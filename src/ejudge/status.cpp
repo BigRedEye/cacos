@@ -46,7 +46,7 @@ int status(int argc, const char* argv[]) {
         } else {
             std::cout << task.name << ": --";
         }
-        std::cout << ", id = " << task.id << std::endl;
+        std::cout << std::endl;
     }
 
     std::cout << termcolor::bold << "Total score: " << client.score() << termcolor::reset

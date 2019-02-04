@@ -71,7 +71,7 @@ private:
     }
 
     ProcessStats parseStats() {
-        std::string pid = util::to_string(pid_);
+        std::string pid = util::string::to(pid_);
         fs::path statPath = fs::path("/proc") / pid / "stat";
         if (!fs::exists(statPath)) {
             throw InfoError("Cannot open " + statPath.string() + " file");
@@ -82,12 +82,12 @@ private:
         std::vector<std::string_view> tokens = util::split(raw, " ");
 
         ProcessStats stats;
-        stats.rss = util::from_string<ui64>(tokens[proc::stat::RSS]);
-        stats.utime = util::from_string<ui64>(tokens[proc::stat::UTIME]);
-        stats.stime = util::from_string<ui64>(tokens[proc::stat::STIME]);
-        stats.cutime = util::from_string<ui64>(tokens[proc::stat::CUTIME]);
-        stats.cstime = util::from_string<ui64>(tokens[proc::stat::CSTIME]);
-        stats.starttime = util::from_string<ui64>(tokens[proc::stat::STARTTIME]);
+        stats.rss = util::string::from<ui64>(tokens[proc::stat::RSS]);
+        stats.utime = util::string::from<ui64>(tokens[proc::stat::UTIME]);
+        stats.stime = util::string::from<ui64>(tokens[proc::stat::STIME]);
+        stats.cutime = util::string::from<ui64>(tokens[proc::stat::CUTIME]);
+        stats.cstime = util::string::from<ui64>(tokens[proc::stat::CSTIME]);
+        stats.starttime = util::string::from<ui64>(tokens[proc::stat::STARTTIME]);
 
         return stats;
     }
