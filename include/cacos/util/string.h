@@ -31,11 +31,11 @@ inline T from(std::string_view s) {
     ss >> result;
 
     if (!ss) {
-        throw from_string_error{};
+        throw FromStringError{};
     }
 
     if (ss.peek() != std::char_traits<char>::eof()) {
-        throw from_string_error{};
+        throw FromStringError{};
     }
 
     return result;
