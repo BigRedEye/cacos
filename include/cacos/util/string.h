@@ -22,22 +22,20 @@ public:
     }
 };
 
-inline std::istringstream createISStream() {
-    std::istringstream ss;
-    ss.exceptions(std::istringstream::failbit | std::istringstream::badbit);
-    return ss;
-}
-
 template<typename T>
 inline T from(std::string_view s) {
-    static std::istringstream ss = createISStream();
+    static std::istringstream ss;
     ss.clear();
     ss.str(str(s));
     T result;
     ss >> result;
 
-    if (!ss.eof()) {
-        throw FromStringError{};
+    if (!ss) {
+        throw from_string_error{};
+    }
+
+    if (ss.peek() != std::char_traits<char>::eof()) {
+        throw from_string_error{};
     }
 
     return result;
