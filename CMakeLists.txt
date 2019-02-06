@@ -184,8 +184,13 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS} ${CONFIGURABLE_
 set(CACOS_LIBS)
 
 if(${CACOS_USE_CONAN})
+    set(CACHED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL Sanitizers)
+        set(CMAKE_BUILD_TYPE Debug)
+    endif()
     include(conan)
     conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing)
+    set(CMAKE_BUILD_TYPE ${CACHED_BUILD_TYPE})
     list(APPEND CACOS_LIBS CONAN_PKG::boost CONAN_PKG::libcurl)
 else()
     ## CURL
