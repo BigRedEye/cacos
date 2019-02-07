@@ -15,6 +15,31 @@ inline std::string str(std::string_view view) {
 
 namespace string {
 
+namespace detail {
+
+template<typename T>
+using istream_read_t = decltype(std::declval<std::istream&>() >> std::declval<T&>());
+
+template<typename T, typename U = istream_read_t<T>>
+std::true_type test(T);
+
+std::true_type test(std::string);
+std::true_type test(std::string_view);
+
+template<typename ...Args>
+std::false_type test(Args...);
+
+template<typename T>
+struct is_convertible_from_string : decltype(test(std::declval<T>())) {};
+
+template<>
+struct is_convertible_from_string<void> : std::false_type {};
+
+template<typename T>
+inline constexpr bool is_convertible_from_string_v = is_convertible_from_string<T>::value;
+
+}
+
 class FromStringError : public std::runtime_error {
 public:
     FromStringError()
@@ -24,21 +49,30 @@ public:
 
 template<typename T>
 inline T from(std::string_view s) {
-    static std::istringstream ss;
-    ss.clear();
-    ss.str(str(s));
-    T result;
-    ss >> result;
+    static_assert(detail::is_convertible_from_string_v<T>,
+        "Cannot find std::istream& operator>>(std::istream&, T&)");
 
-    if (!ss) {
-        throw FromStringError{};
+    if constexpr (std::is_same_v<std::string, T>) {
+        return str(s);
+    } else if constexpr (std::is_same_v<std::string_view, T>) {
+        return s;
+    } else {
+        static std::istringstream ss;
+        ss.clear();
+        ss.str(str(s));
+        T result;
+        ss >> result;
+
+        if (!ss) {
+            throw FromStringError{};
+        }
+
+        if (ss.peek() != std::char_traits<char>::eof()) {
+            throw FromStringError{};
+        }
+
+        return result;
     }
-
-    if (ss.peek() != std::char_traits<char>::eof()) {
-        throw FromStringError{};
-    }
-
-    return result;
 }
 
 template<typename T>
@@ -75,6 +109,9 @@ inline std::string join(const std::vector<T, A>& ts, U delim) {
     }
     return result;
 }
+
+std::string escape(const std::string& s);
+std::string escape(std::string_view s);
 
 } // namespace string
 

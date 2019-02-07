@@ -35,7 +35,7 @@ int init(int argc, const char* argv[]) {
 
     parser.parse(argc, argv);
 
-    std::vector<std::string_view> required_dirs = {".cacos", "test"};
+    std::vector<std::string_view> required_dirs = {"test"};
 
     for (auto dir : required_dirs) {
         if (!fs::create_directories(workspace / dir)) {

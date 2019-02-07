@@ -50,6 +50,12 @@ void ExecPool::push(ExecTaskPtr&& task) {
     tasks_.push_back(std::move(task));
 }
 
+/*
+ * Ехал Лямбда через лямбду
+ * Видит Лямбда - в лямбде лямбда
+ * Сунул в лямбду лямбду Лямбда
+ * Лямбда лямбда Лямбду лямбда
+ */
 void ExecPool::run() {
     boost::asio::io_context ctx;
 
@@ -133,8 +139,8 @@ void ExecPool::run() {
     ctx.restart();
     ctx.run();
 
-    if (running.size()) {
-        Logger::warning() << "Running tasks " << running.size() << " != 0: ";
+    if (!running.empty()) {
+        Logger::error() << "Running tasks " << running.size() << " != 0: ";
     }
 
     tasks_.clear();

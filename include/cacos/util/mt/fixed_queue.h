@@ -7,7 +7,7 @@
 
 #include <functional>
 
-namespace cacos::mt {
+namespace cacos::util::mt {
 
 using Task = std::function<void(void)>;
 
@@ -31,4 +31,4 @@ private:
     std::atomic_size_t next_;
 };
 
-} // namespace cacos::mt
+} // namespace cacos::util::mt

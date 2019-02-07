@@ -51,6 +51,7 @@ enum class ConfigType {
 };
 
 enum Mask : ui64 {
+    NONE = 0,
     LANGS = ui64{1} << 1,
     EJUDGE = ui64{1} << 2,
     ALL = ~ui64{0},
@@ -59,7 +60,7 @@ enum Mask : ui64 {
 class Config {
 public:
     Config();
-    Config(cpparg::parser& parser, ui64 opts);
+    Config(cpparg::parser& parser, ui64 opts = NONE);
 
     fs::path dir(DirType type) const;
     fs::path file(FileType type) const;

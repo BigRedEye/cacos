@@ -57,6 +57,7 @@ file(GLOB SOURCES
     src/test/suite/test.cpp
     src/test/generate/generate.cpp
     src/test/generate/generator.cpp
+    src/test/run/run.cpp
 
     src/process/unix/info.cpp
     src/process/windows/info.cpp
@@ -84,8 +85,9 @@ file(GLOB SOURCES
     src/util/logger.cpp
     src/util/optional_ref.cpp
     src/util/split.cpp
+    src/util/string.cpp
 
-    src/util/diff/diff.cpp
+    src/util/diff/unified.cpp
 
     src/util/mt/fixed_queue.cpp
 
@@ -110,6 +112,7 @@ file(GLOB HEADERS
     include/cacos/test/suite/test.h
     include/cacos/test/generate/generate.h
     include/cacos/test/generate/generator.h
+    include/cacos/test/run/run.h
 
     include/cacos/process/info.h
     include/cacos/process/limits.h
@@ -146,7 +149,7 @@ file(GLOB HEADERS
     include/cacos/util/string.h
     include/cacos/util/util.h
 
-    include/cacos/util/diff/diff.h
+    include/cacos/util/diff/unified.h
 
     include/cacos/util/mt/fixed_queue.h
 

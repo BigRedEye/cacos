@@ -38,11 +38,6 @@ int main(int argc, const char* argv[]) {
         .handle(cacos::commands::test);
 
     parser
-        .command("run")
-        .description("Compile and run")
-        .handle(cacos::commands::run);
-
-    parser
         .command("status")
         .description("Ejudge contest status")
         .handle(cacos::ejudge::commands::status);

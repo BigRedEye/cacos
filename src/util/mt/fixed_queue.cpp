@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace cacos::mt {
+namespace cacos::util::mt {
 
 FixedQueue::FixedQueue(size_t threads)
     : threads_(threads) {
@@ -45,4 +45,4 @@ void FixedQueue::worker() {
     }
 }
 
-} // namespace cacos::mt
+} // namespace cacos::util::mt
