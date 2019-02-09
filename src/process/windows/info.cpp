@@ -40,7 +40,7 @@ private:
     void update() {
         PROCESS_MEMORY_COUNTERS memory;
         if (!GetProcessMemoryInfo(handle_, &memory, sizeof(memory))) {
-            throw InfoError(util::join(
+            throw InfoError(util::string::join(
                 "Cannot get process memory usage: winapi last_error = ", GetLastError()));
         }
 
@@ -52,7 +52,7 @@ private:
         FILETIME userTime;
         if (!GetProcessTimes(handle_, &creationTime, &exitTime, &kernelTime, &userTime)) {
             throw InfoError(
-                util::join("Cannot get process times: winapi last_error = ", GetLastError()));
+                util::string::join("Cannot get process times: winapi last_error = ", GetLastError()));
         }
 
         auto fuckingWinapiStructureToSeconds = [](FILETIME time) {
