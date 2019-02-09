@@ -3,6 +3,10 @@
 
 #include <stdexcept>
 
+#ifdef CACOS_OS_WINDOWS
+#include "windows.h"
+#endif // CACOS_OS_WINDOWS
+
 void printException(const std::exception& e, size_t depth = 1) noexcept {
     cacos::Logger::error() << std::string(depth, '\t') << e.what();
     try {
@@ -13,7 +17,38 @@ void printException(const std::exception& e, size_t depth = 1) noexcept {
     }
 }
 
+#ifdef CACOS_OS_WINDOWS
+
+class ConsoleCodePageSetter {
+public:
+    ConsoleCodePageSetter()
+        : inputCodePage_{GetConsoleCP()}
+        , outputCodePage_{GetConsoleOutputCP()} {
+        set(CP_UTF8, CP_UTF8);
+    }
+
+    ~ConsoleCodePageSetter() {
+        set(inputCodePage_, outputCodePage_);
+    }
+
+private:
+    void set(UINT input, UINT output) {
+        SetConsoleCP(input);
+        SetConsoleOutputCP(output);
+    }
+
+private:
+    UINT inputCodePage_;
+    UINT outputCodePage_;
+};
+
+#endif // CACOS_OS_WINDOWS
+
 int main(int argc, const char* argv[]) {
+#ifdef CACOS_OS_WINDOWS
+    ConsoleCodePageSetter cp;
+#endif // CACOS_OS_WINDOWS
+
 #if CACOS_DEBUG
     return cacos::main(argc, argv);
 #else
