@@ -261,6 +261,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     PUBLIC
     _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
     _WIN32_WINNT=0x0601)
+    target_compile_options(${CACOS_LIB} PUBLIC /utf-8)
 endif()
 
 target_compile_definitions(
