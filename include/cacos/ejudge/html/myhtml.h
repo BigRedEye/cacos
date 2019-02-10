@@ -31,7 +31,7 @@ public:
     Iterator(myhtml_tree_attr_t* attr);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     bool operator!=(Iterator other) const;
     Attribute operator*() const;
@@ -66,7 +66,7 @@ public:
     Iterator(myhtml_tree_node_t* node);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     bool operator!=(Iterator other) const;
     Node operator*() const;
@@ -104,7 +104,7 @@ public:
     Iterator(const myhtml_collection_t* base, size_t pos);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     Node operator*() const;
 

@@ -115,7 +115,8 @@ private:
  */
 template<typename... Args>
 ExecTaskPtr makeTask(const Executable& exe, ExecTaskContext&& ctx, Args&&... rest) {
-    return ExecTaskPtr(new ExecTaskImpl<std::decay_t<Args>...>(exe, std::move(ctx), std::forward<Args>(rest)...));
+    return ExecTaskPtr(
+        new ExecTaskImpl<std::decay_t<Args>...>(exe, std::move(ctx), std::forward<Args>(rest)...));
 }
 
 template<typename... Args>

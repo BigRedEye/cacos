@@ -91,7 +91,7 @@ bool Session::loadSession() {
 std::string_view Session::domain() const {
     auto tokens = util::split(prefix_, "/");
     auto view = prefix_;
-    if (util::string::starts_with(tokens[0], "http")) {
+    if (util::string::starts(tokens[0], "http")) {
         return tokens[2]; /* "http:" "" "caos.ejudge.ru" ... */
     } else {
         return tokens[0];

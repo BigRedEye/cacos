@@ -24,8 +24,8 @@ std::string serialize(Type type) {
 
 BlobDiff::BlobDiff(const std::string& left, const std::string& right)
     : left_(util::string::escape(left))
-    , right_(util::string::escape(right))
-{}
+    , right_(util::string::escape(right)) {
+}
 
 const std::string& BlobDiff::left() const {
     return left_;
@@ -61,9 +61,9 @@ Test::Test(const fs::path& base, const fs::path& toml) {
     };
 
     if (auto test = get(true, "type", std::string{})) {
-        if (util::string::starts_with(*test, "diff")) {
+        if (util::string::starts(*test, "diff")) {
             type_ = Type::diff;
-        } else if (util::string::starts_with(*test, "canon")) {
+        } else if (util::string::starts(*test, "canon")) {
             type_ = Type::canonical;
         } else {
             throw std::runtime_error("Unknown test type " + *test);

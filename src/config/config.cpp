@@ -325,9 +325,9 @@ void Config::parseConfig() {
         }
 
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.arch")) {
-            if (util::string::ends_with(*node, "32") || util::string::ends_with(*node, "86")) {
+            if (util::string::ends(*node, "32") || util::string::ends(*node, "86")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x32;
-            } else if (util::string::ends_with(*node, "64")) {
+            } else if (util::string::ends(*node, "64")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x64;
             } else {
                 task_.exe.compiler.archBits = opts::ArchBits::undefined;

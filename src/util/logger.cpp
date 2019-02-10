@@ -11,7 +11,7 @@
 
 namespace cacos {
 
-Logger::MessagePriority Logger::verbosity_ = Logger::MessagePriority::info;
+Logger::MessagePriority Logger::verbosity = Logger::MessagePriority::info;
 
 namespace {
 
@@ -98,8 +98,8 @@ Logger& Logger::flush(bool flush) {
 }
 
 void Logger::increaseVerbosity(int delta) {
-    verbosity_ = static_cast<MessagePriority>(std::max<int>(
-        static_cast<int>(verbosity_) - delta, static_cast<int>(MessagePriority::debug)));
+    verbosity = static_cast<MessagePriority>(std::max<int>(
+        static_cast<int>(verbosity) - delta, static_cast<int>(MessagePriority::debug)));
 }
 
 } // namespace cacos

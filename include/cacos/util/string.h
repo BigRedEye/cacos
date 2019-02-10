@@ -26,7 +26,7 @@ std::true_type test(T);
 std::true_type test(std::string);
 std::true_type test(std::string_view);
 
-template<typename ...Args>
+template<typename... Args>
 std::false_type test(Args...);
 
 template<typename T>
@@ -38,7 +38,7 @@ struct is_convertible_from_string<void> : std::false_type {};
 template<typename T>
 inline constexpr bool is_convertible_from_string_v = is_convertible_from_string<T>::value;
 
-}
+} // namespace detail
 
 class FromStringError : public std::runtime_error {
 public:
@@ -49,7 +49,8 @@ public:
 
 template<typename T>
 inline T from(std::string_view s) {
-    static_assert(detail::is_convertible_from_string_v<T>,
+    static_assert(
+        detail::is_convertible_from_string_v<T>,
         "Cannot find std::istream& operator>>(std::istream&, T&)");
 
     if constexpr (std::is_same_v<std::string, T>) {
@@ -84,11 +85,11 @@ inline std::string to(T&& t) {
     return os.str();
 }
 
-inline bool starts_with(std::string_view str, std::string_view prefix) {
+inline bool starts(std::string_view str, std::string_view prefix) {
     return str.size() >= prefix.size() && str.compare(0, prefix.size(), prefix) == 0;
 }
 
-inline bool ends_with(std::string_view str, std::string_view suffix) {
+inline bool ends(std::string_view str, std::string_view suffix) {
     return str.size() >= suffix.size() &&
            str.compare(str.size() - suffix.size(), std::string_view::npos, suffix) == 0;
 }
@@ -124,7 +125,7 @@ inline std::string read(std::ifstream& in) {
     std::string buffer(defaultBufferCapacity, '\0');
     do {
         in.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
-        size_t bytes = static_cast<size_t>(in.gcount());
+        auto bytes = static_cast<size_t>(in.gcount());
         result.append(buffer.data(), bytes);
     } while (in);
     return result;

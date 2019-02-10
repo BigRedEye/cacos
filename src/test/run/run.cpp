@@ -54,32 +54,27 @@ int run(int argc, const char* argv[]) {
         .store(name);
 
     RunOpts runOpts;
-    parser.add("info")
-        .optional()
-        .no_argument()
-        .description("Print run stats")
-        .handle([&] (auto) { runOpts.printInfo = true; });
+    parser.add("info").optional().no_argument().description("Print run stats").handle([&](auto) {
+        runOpts.printInfo = true;
+    });
 
     parser.add("tl")
         .optional()
         .value_type("SECONDS")
         .description("Time limit")
         .default_value(1.0)
-        .handle<double>([&] (double s) {
+        .handle<double>([&](double s) {
             runOpts.limits.cpu = seconds(s);
             runOpts.limits.real = seconds(s);
-        }
-    );
+        });
 
     parser.add("ml")
         .optional()
         .value_type("MiB")
         .description("Memory limit")
         .default_value(64.0)
-        .handle<double>([&] (double ram) {
-            runOpts.limits.ml = static_cast<bytes>(ram * 1024. * 1024.);
-        }
-    );
+        .handle<double>(
+            [&](double ram) { runOpts.limits.ml = static_cast<bytes>(ram * 1024. * 1024.); });
 
     parser.parse(argc, argv);
 

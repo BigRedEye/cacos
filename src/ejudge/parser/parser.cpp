@@ -80,7 +80,7 @@ std::optional<Task> Parser::task(std::string_view key) const {
 i32 Parser::score() const {
     html::Html summary = session_.getPage("view-problem-summary");
     for (auto node : summary.tags(MyHTML_TAG__TEXT)) {
-        if (util::string::starts_with(node.text(), "Total score:")) {
+        if (util::string::starts(node.text(), "Total score:")) {
             std::string_view score = node.text().substr(std::string_view("Total score: ").size());
             try {
                 return util::string::from<i32>(score);

@@ -22,6 +22,13 @@ struct Info {
 class InfoFetcher {
 public:
     InfoFetcher(const bp::child& child);
+
+    InfoFetcher(InfoFetcher&& moved) = default;
+    InfoFetcher(const InfoFetcher& other) = delete;
+
+    InfoFetcher& operator=(InfoFetcher&& moved) = default;
+    InfoFetcher& operator=(const InfoFetcher& other) = delete;
+
     ~InfoFetcher();
 
     Info get() const;

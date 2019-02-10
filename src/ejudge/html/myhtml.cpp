@@ -73,7 +73,7 @@ Attributes::Iterator& Attributes::Iterator::operator++() {
     return *this;
 }
 
-Attributes::Iterator Attributes::Iterator::operator++(int) {
+const Attributes::Iterator Attributes::Iterator::operator++(int) {
     Iterator tmp = *this;
     ++*this;
     return tmp;
@@ -150,7 +150,7 @@ Node::Iterator& Node::Iterator::operator++() {
     return *this;
 }
 
-Node::Iterator Node::Iterator::operator++(int) {
+const Node::Iterator Node::Iterator::operator++(int) {
     Iterator tmp = *this;
     ++*this;
     return tmp;
@@ -178,7 +178,7 @@ Collection::Iterator& Collection::Iterator::operator++() {
     return *this;
 }
 
-Collection::Iterator Collection::Iterator::operator++(int) {
+const Collection::Iterator Collection::Iterator::operator++(int) {
     Iterator tmp = *this;
     ++pos_;
     return tmp;

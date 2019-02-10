@@ -46,4 +46,4 @@ std::string escape(std::string_view s) {
     return result;
 }
 
-}
+} // namespace cacos::util::string

@@ -8,6 +8,10 @@
 
 #include <termcolor/termcolor.hpp>
 
+/**
+ * TODO: refactor
+ */
+
 namespace cacos::test {
 
 Suite::Suite(const config::Config& cfg)
@@ -29,12 +33,10 @@ struct RunResult {
     TestingResult diff;
 };
 
-/// TODO: refactor
 void Suite::run(
     const RunOpts& opts,
     const executable::Executable& exe,
     util::optional_ref<const executable::Executable> checker) {
-
     static const std::string CHECKER_SUFFIX = "_check";
 
     executable::ExecPool pool(opts.limits);
@@ -90,7 +92,8 @@ void Suite::run(
         };
 
     auto success = [&](const Test& test, RunResult& result) -> bool {
-        return result.result.status == process::status::OK && result.result.returnCode == test.returnCode();
+        return result.result.status == process::status::OK &&
+               result.result.returnCode == test.returnCode();
     };
 
     auto pushComputeDiff = [&](const Test& test) {
@@ -150,7 +153,8 @@ void Suite::run(
                 ++crashed;
 
                 std::cout << termcolor::red;
-                std::string status = process::status::serialize(context[test.name() + CHECKER_SUFFIX].result.status);
+                std::string status =
+                    process::status::serialize(context[test.name() + CHECKER_SUFFIX].result.status);
                 fmt::print(std::cout, " Checker failure: {}\n", status);
                 std::cout << termcolor::reset;
                 continue;
@@ -180,10 +184,11 @@ void Suite::run(
 
             fmt::print(std::cout, " Result: {}", process::status::serialize(ctx.result.status));
             if (opts.printInfo) {
-                fmt::print(std::cout, ", cpu time: {:.3f} seconds, max rss: {:.3f} MiB",
-                   ctx.info->cpuTime.count(),
-                   ctx.info->maxRss / (1024. * 1024.)
-               );
+                fmt::print(
+                    std::cout,
+                    ", cpu time: {:.3f} seconds, max rss: {:.3f} MiB",
+                    ctx.info->cpuTime.count(),
+                    ctx.info->maxRss / (1024. * 1024.));
             }
             std::cout << std::endl << termcolor::reset;
 
@@ -193,15 +198,19 @@ void Suite::run(
 
             fmt::print(std::cout, "Diff:\n");
 
-            std::visit([](auto&& value) {
-                using T = std::decay_t<decltype(value)>;
-                if constexpr (std::is_same_v<T, util::diff::Unified>) {
-                    value.print(std::cout);
-                } else if constexpr (std::is_same_v<T, BlobDiff>) {
-                    std::cout << termcolor::red << value.left() << termcolor::reset << std::endl;
-                    std::cout << termcolor::green << value.right() << termcolor::reset << std::endl;
-                }
-            }, ctx.diff.diff);
+            std::visit(
+                [](auto&& value) {
+                    using T = std::decay_t<decltype(value)>;
+                    if constexpr (std::is_same_v<T, util::diff::Unified>) {
+                        value.print(std::cout);
+                    } else if constexpr (std::is_same_v<T, BlobDiff>) {
+                        std::cout << termcolor::red << value.left() << termcolor::reset
+                                  << std::endl;
+                        std::cout << termcolor::green << value.right() << termcolor::reset
+                                  << std::endl;
+                    }
+                },
+                ctx.diff.diff);
         }
     };
 
@@ -222,9 +231,24 @@ void Suite::run(
     ui64 total = crashed + failed + passed;
 
     fmt::print(std::cout, "\n");
-    fmt::print(std::cout, "[Passed      ]: {} / {} tests ({:.1f}%)\n", passed, total, passed * 100. / total);
-    fmt::print(std::cout, "[Crashed     ]: {} / {} tests ({:.1f}%)\n", crashed, total, crashed * 100. / total);
-    fmt::print(std::cout, "[Wrong answer]: {} / {} tests ({:.1f}%)\n", failed, total, failed * 100. / total);
+    fmt::print(
+        std::cout,
+        "[Passed      ]: {} / {} tests ({:.1f}%)\n",
+        passed,
+        total,
+        passed * 100. / total);
+    fmt::print(
+        std::cout,
+        "[Crashed     ]: {} / {} tests ({:.1f}%)\n",
+        crashed,
+        total,
+        crashed * 100. / total);
+    fmt::print(
+        std::cout,
+        "[Wrong answer]: {} / {} tests ({:.1f}%)\n",
+        failed,
+        total,
+        failed * 100. / total);
 
     std::cout << termcolor::reset;
 }
