@@ -47,10 +47,10 @@ private:
             try {
                 return callback(base, params);
             } catch (const SessionError& err) {
-                Logger::log().print("SessionError {} / {}: {}", i, MAX_RETRIES - 1, err.what());
+                log::log().print("SessionError {} / {}: {}", i, MAX_RETRIES - 1, err.what());
                 reauth();
             } catch (const http::Error& err) {
-                Logger::log().print("http::Error {} / {}: {}", i, MAX_RETRIES - 1, err.what());
+                log::log().print("http::Error {} / {}: {}", i, MAX_RETRIES - 1, err.what());
             }
         }
         return callback(base, params);

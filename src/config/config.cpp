@@ -32,7 +32,7 @@ fs::path homeDir() {
             return str;
         }
     }
-    Logger::warning() << "Unable to determine user home dir";
+    log::warning() << "Unable to determine user home dir";
     return fs::current_path();
 }
 
@@ -257,7 +257,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
         .description("Increase verbosity level")
         .no_argument()
         .handle([] (auto) {
-            Logger::increaseVerbosity();
+            log::detail::Logger::increaseVerbosity();
         });
 
     parser

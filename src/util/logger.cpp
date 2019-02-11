@@ -9,7 +9,9 @@
 #include <string>
 #include <thread>
 
-namespace cacos {
+namespace cacos::log {
+
+namespace detail {
 
 Logger::MessagePriority Logger::verbosity = Logger::MessagePriority::info;
 
@@ -102,4 +104,30 @@ void Logger::increaseVerbosity(int delta) {
         static_cast<int>(verbosity) - delta, static_cast<int>(MessagePriority::debug)));
 }
 
-} // namespace cacos
+} // namespace detail
+
+detail::Logger debug() {
+    return detail::Logger(detail::Logger::MessagePriority::debug);
+}
+
+detail::Logger log() {
+    return detail::Logger(detail::Logger::MessagePriority::log);
+}
+
+detail::Logger info() {
+    return detail::Logger(detail::Logger::MessagePriority::info);
+}
+
+detail::Logger warning() {
+    return detail::Logger(detail::Logger::MessagePriority::warning);
+}
+
+detail::Logger error() {
+    return detail::Logger(detail::Logger::MessagePriority::error);
+}
+
+detail::Logger fatal() {
+    return detail::Logger(detail::Logger::MessagePriority::fatal);
+}
+
+} // namespace cacos::log

@@ -76,7 +76,7 @@ public:
 
     template<request::Type type>
     std::string request(const request::Params<type>& params) const {
-        Logger::debug().print("Perforing curl request: url = {}", params.url);
+        log::debug().print("Perforing curl request: url = {}", params.url);
         curl_easy_reset(curl_);
 
         std::string result;

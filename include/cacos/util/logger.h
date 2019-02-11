@@ -5,7 +5,9 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-namespace cacos {
+namespace cacos::log {
+
+namespace detail {
 
 class Logger {
 public:
@@ -50,30 +52,6 @@ public:
         return *this;
     }
 
-    static Logger debug() {
-        return Logger(MessagePriority::debug);
-    }
-
-    static Logger log() {
-        return Logger(MessagePriority::log);
-    }
-
-    static Logger info() {
-        return Logger(MessagePriority::info);
-    }
-
-    static Logger warning() {
-        return Logger(MessagePriority::warning);
-    }
-
-    static Logger error() {
-        return Logger(MessagePriority::error);
-    }
-
-    static Logger fatal() {
-        return Logger(MessagePriority::fatal);
-    }
-
     static void increaseVerbosity(int delta = 1);
 
 private:
@@ -85,4 +63,13 @@ private:
     bool flush_;
 };
 
-} // namespace cacos
+} // namespace detail
+
+detail::Logger debug();
+detail::Logger log();
+detail::Logger info();
+detail::Logger warning();
+detail::Logger error();
+detail::Logger fatal();
+
+} // namespace cacos::log

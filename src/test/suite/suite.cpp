@@ -67,7 +67,7 @@ void Suite::run(
                 ctx.result = res;
                 ctx.info = std::move(info);
 
-                Logger::log().print(
+                log::log().print(
                     "Checker = {}, exit status = {}, return code = {}, cpu time = {:.3f} s, max "
                     "rss = {:.3f} mb",
                     isChecker,
@@ -78,7 +78,7 @@ void Suite::run(
 
                 if (!isChecker) {
                     ++doneTests;
-                    Logger::log().print(
+                    log::log().print(
                         "Done {} / {} ({:.1f}%)\n",
                         doneTests,
                         totalTests,
@@ -125,13 +125,12 @@ void Suite::run(
             pushComputeDiff(test);
         }
     } else if (!tests_[Type::diff].empty()) {
-        Logger::warning().print(
-            "No checker specified; ignoring {} tests", tests_[Type::diff].size());
+        log::warning().print("No checker specified; ignoring {} tests", tests_[Type::diff].size());
     }
 
     pool.run();
 
-    Logger::log().print("Computing diffs");
+    log::log().print("Computing diffs");
 
     diffQueue.run();
     diffQueue.wait();

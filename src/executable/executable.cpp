@@ -100,7 +100,7 @@ void ExecPool::run() {
     auto pollInfo = [&] {
         for (auto&& [i, c] : running) {
             process::Info info = c.info();
-            Logger::debug().print(
+            log::debug().print(
                 "cpu time = {:.3f} s, real time = {:.3f} s, max rss = {:.3f} mb",
                 info.cpuTime.count(),
                 info.realTime.count(),
@@ -140,7 +140,7 @@ void ExecPool::run() {
     ctx.run();
 
     if (!running.empty()) {
-        Logger::error() << "Running tasks " << running.size() << " != 0: ";
+        log::error() << "Running tasks " << running.size() << " != 0: ";
     }
 
     tasks_.clear();
