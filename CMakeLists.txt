@@ -136,6 +136,7 @@ file(GLOB HEADERS
     include/cacos/ejudge/status.h
 
     include/cacos/version/git.h
+    include/cacos/version/id.h
     include/cacos/version/version.h
 
     include/cacos/task/opts.h
@@ -165,6 +166,7 @@ file(GLOB CONFIGS
 file(GLOB CONFIGURABLE_SOURCES
     src/config/default.cpp.in
     src/version/git.cpp.in
+    src/version/id.cpp.in
 )
 
 # Save configs to the binary
@@ -177,6 +179,12 @@ set(CONFIGS_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/config/default.cpp.in)
 set(CONFIGS_POST_CONFIGURE ${CMAKE_CURRENT_BINARY_DIR}/src/default.cpp)
 configure_file(${CONFIGS_PRE_CONFIGURE} ${CONFIGS_POST_CONFIGURE} @ONLY)
 list(APPEND SOURCES ${CONFIGS_POST_CONFIGURE})
+
+string(TIMESTAMP BUILD_TIMESTAMP)
+set(BUILD_ID_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/version/id.cpp.in)
+set(BUILD_ID_CONFIGURE ${CMAKE_CURRENT_BINARY_DIR}/src/id.cpp)
+configure_file(${BUILD_ID_PRE_CONFIGURE} ${BUILD_ID_CONFIGURE} @ONLY)
+list(APPEND SOURCES ${BUILD_ID_CONFIGURE})
 
 # Include git version
 set(_BUILD_TIME_CHECK_GIT ON)
