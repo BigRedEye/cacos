@@ -1,5 +1,5 @@
 [ejudge]
-url = "https://caos.ejudge.ru/ej/client?contest_id=config{contest_id}"
+url = "https://caos.ejudge.ru/ej/client"
 password = "password"
 login = "login"
 contest_id = 72

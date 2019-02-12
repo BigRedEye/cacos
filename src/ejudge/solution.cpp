@@ -14,7 +14,7 @@ int list(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge solution list");
     parser.title("List solutions");
 
-    config::Config cfg(parser, config::EJUDGE);
+    config::Config cfg(parser, config::EJUDGE_SESSION);
 
     std::string taskName;
     // clang-format off
@@ -47,7 +47,7 @@ int fetch(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge solution fetch");
     parser.title("Get solution code");
 
-    config::Config cfg(parser, config::EJUDGE);
+    config::Config cfg(parser, config::EJUDGE_SESSION);
 
     i32 id;
     // clang-format off
@@ -72,7 +72,7 @@ int diff(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge solution diff");
     parser.title("Compare solutions");
 
-    config::Config cfg(parser, config::EJUDGE);
+    config::Config cfg(parser, config::EJUDGE_SESSION);
 
     auto add = [&](auto name) -> auto& {
         // clang-format off

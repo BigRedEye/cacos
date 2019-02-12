@@ -20,7 +20,7 @@ int status(int argc, const char* argv[]) {
     cpparg::parser parser("cacos ejudge status");
     parser.title("Get ejudge contest status");
 
-    config::Config cfg(parser, config::EJUDGE);
+    config::Config cfg(parser, config::EJUDGE_SESSION);
 
     parser.parse(argc, argv);
 

@@ -53,7 +53,8 @@ enum class ConfigType {
 enum Mask : ui64 {
     NONE = 0,
     LANGS = ui64{1} << 1,
-    EJUDGE = ui64{1} << 2,
+    EJUDGE_SESSION = ui64{1} << 2,
+    EJUDGE_LOGIN = ui64{1} << 3,
     ALL = ~ui64{0},
 };
 

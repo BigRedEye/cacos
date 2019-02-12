@@ -43,7 +43,7 @@ private:
 
     template<typename Callback>
     auto getter(std::string_view base, std::string_view params, Callback&& callback) {
-        for (size_t i = 1; i < MAX_RETRIES; ++i) {
+        for (ui32 i = 1; i < MAX_RETRIES; ++i) {
             try {
                 return callback(base, params);
             } catch (const SessionError& err) {
@@ -52,13 +52,19 @@ private:
             } catch (const http::Error& err) {
                 log::log().print("http::Error {} / {}: {}", i, MAX_RETRIES - 1, err.what());
             }
+            std::this_thread::sleep_for(RETRY_DELAY);
         }
         return callback(base, params);
     }
 
 private:
-    static constexpr std::size_t TOKEN_SIZE = 17;
-    static constexpr std::size_t MAX_RETRIES = 5;
+    /*
+     *  https://caos.ejudge.ru/ej/client/main-page/Sa3b04b0224c2d708?lt=1
+     *                                        len('.................') == 17
+     */
+    static constexpr ui32 TOKEN_SIZE = 17;
+    static constexpr ui32 MAX_RETRIES = 5;
+    static constexpr auto RETRY_DELAY = std::chrono::milliseconds(100);
 
     const config::Config& config_;
     http::Client client_;

@@ -200,7 +200,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             });
     }
 
-    if (mask & EJUDGE) {
+    if (mask & EJUDGE_LOGIN) {
         parser
             .add("login")
             .optional()
@@ -216,7 +216,9 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .handle([&, this](auto sv) {
                 ejudge_.login.password = util::str(sv);
             });
+    }
 
+    if (mask & EJUDGE_SESSION) {
         parser
             .add("cookie")
             .optional()
@@ -232,7 +234,9 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .handle([&](auto sv) {
                 ejudge_.session.token = util::str(sv);
             });
+    }
 
+    if (mask & (EJUDGE_LOGIN | EJUDGE_SESSION)) {
         parser
             .add("contest_id")
             .optional()

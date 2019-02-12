@@ -57,11 +57,11 @@ public:
     Impl(const Impl&) = delete;
     Impl& operator=(const Impl&) = delete;
 
-    Impl(Impl&& other) {
+    Impl(Impl&& other) noexcept {
         *this = std::move(other);
     }
 
-    Impl& operator=(Impl&& other) {
+    Impl& operator=(Impl&& other) noexcept {
         std::swap(curl_, other.curl_);
         return *this;
     }
@@ -90,7 +90,8 @@ public:
         }
 
         for (auto&& c : overridenCookies_) {
-            curl_easy_setopt(curl_, CURLOPT_COOKIE, c.data());
+            log::debug().print("Overriden cookie: {}", c.data());
+            curl_easy_setopt(curl_, CURLOPT_COOKIELIST, c.data());
         }
 
         curl_easy_setopt(curl_, CURLOPT_SSL_VERIFYPEER, 0);
@@ -136,6 +137,7 @@ Client::Client(const fs::path& cookies)
 }
 
 Client::~Client() {
+    /* pimpl */
 }
 
 std::string Client::request(const request::Params<request::Type::GET>& params) const {

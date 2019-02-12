@@ -65,7 +65,7 @@ Session::~Session() {
 }
 
 void Session::setCookie(std::string_view cookie) const {
-    log::log().print("Savig cookies: domain = {}, EJSID = {}", domain(), cookie);
+    log::log().print("Savig cookies: EJSID = {}", cookie);
     client_.cookie(fmt::format("{}\tFALSE\t/\tFALSE\t0\tEJSID\t{}", domain(), cookie));
 }
 
