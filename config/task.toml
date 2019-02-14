@@ -1,3 +1,4 @@
 [exe]
-sources = [ "lib.c", "another_lib.s", "main.cpp" ]
-arch = "x64"
+    sources = [ "main.c" ]
+    arch = "x64"
+    build = "debug"

@@ -41,7 +41,17 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
     vars.set("arch", util::str(opts::serialize(options.archBits)));
 
     executable::Flags flags = common_;
-    flags.append(debug_);
+    switch (options.buildType) {
+    case opts::BuildType::debug:
+        flags.append(debug_);
+        break;
+    case opts::BuildType::release:
+        flags.append(release_);
+        break;
+    default:
+        throw std::runtime_error("Unknown build type");
+    }
+
     auto args = flags.build(vars);
 
     auto callback = [&, source](process::Result res, std::optional<process::Info>&&) {

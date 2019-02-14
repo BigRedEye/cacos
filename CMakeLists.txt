@@ -83,6 +83,7 @@ file(GLOB SOURCES
 
     src/util/inline_variables.cpp
     src/util/logger.cpp
+    src/util/map.cpp
     src/util/optional_ref.cpp
     src/util/split.cpp
     src/util/string.cpp
@@ -144,6 +145,7 @@ file(GLOB HEADERS
     include/cacos/util/inline_variables.h
     include/cacos/util/ints.h
     include/cacos/util/logger.h
+    include/cacos/util/map.h
     include/cacos/util/optional_ref.h
     include/cacos/util/ranges.h
     include/cacos/util/split.h

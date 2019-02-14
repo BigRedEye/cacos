@@ -30,6 +30,9 @@ public:
     html::Html getPage(std::string_view base, std::string_view params = "");
     std::string_view getRaw(std::string_view base, std::string_view params = "");
 
+public:
+    static constexpr auto CACHE_EXPIRATION = std::chrono::seconds(1);
+
 private:
     void reauth();
     void setCookie(std::string_view cookie) const;

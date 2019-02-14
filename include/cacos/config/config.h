@@ -76,6 +76,13 @@ public:
         setImpl(path, cpptoml::make_value(std::forward<T>(value)), type);
     }
 
+    void setBase(
+        std::string_view path,
+        const std::shared_ptr<cpptoml::base>& value,
+        ConfigType type = ConfigType::global) {
+        setImpl(path, value, type);
+    }
+
     void dump(ConfigType type) const;
 
 private:

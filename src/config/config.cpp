@@ -1,9 +1,10 @@
 #include "cacos/config/config.h"
 #include "cacos/config/default.h"
 
-#include <cpptoml.h>
-
 #include "cacos/util/logger.h"
+#include "cacos/util/map.h"
+
+#include <cpptoml.h>
 
 #include <cstdlib>
 #include <fstream>
@@ -337,6 +338,16 @@ void Config::parseConfig() {
                 task_.exe.compiler.archBits = opts::ArchBits::undefined;
             }
         }
+
+        if (auto node = taskConfig_->get_qualified_as<std::string>("exe.build")) {
+            // clang-format off
+            task_.exe.compiler.buildType =
+                util::map<std::string_view>
+                    ("debug", opts::BuildType::debug)
+                    ("release", opts::BuildType::release)
+                    .map(*node, opts::BuildType::undefined);
+            // clang-format on
+        }
     }
 }
 
@@ -359,7 +370,7 @@ void Config::dump(ConfigType type) const {
     }
 
     std::ofstream out(
-        dir(type == ConfigType::global ? DirType::config : DirType::task) / CONFIG_FILE);
+        dir(type == ConfigType::global ? DirType::config : DirType::workspace) / CONFIG_FILE);
     out << *cfg;
 }
 

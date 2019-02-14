@@ -1,5 +1,7 @@
 #include "cacos/task/opts.h"
 
+#include <stdexcept>
+
 namespace cacos::opts {
 
 std::string_view serialize(ArchBits bits) {
@@ -9,7 +11,7 @@ std::string_view serialize(ArchBits bits) {
     case ArchBits::x64:
         return "64";
     default:
-        return "undefined";
+        throw std::runtime_error("Unknown architecture");
     }
 }
 

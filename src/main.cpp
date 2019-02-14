@@ -7,6 +7,7 @@
 #include "windows.h"
 #endif // CACOS_OS_WINDOWS
 
+/* based on https://en.cppreference.com/w/cpp/error/throw_with_nested */
 void printException(const std::exception& e, size_t depth = 1) noexcept {
     cacos::log::error() << std::string(depth, '\t') << e.what();
     try {

@@ -32,8 +32,7 @@ public:
 
     std::string_view set(const std::string& key, const std::string& value) {
         auto [it, inserted] = cache_.emplace(
-            key,
-            Responce{value, std::chrono::high_resolution_clock::now() + std::chrono::seconds(1)});
+            key, Responce{value, std::chrono::high_resolution_clock::now() + CACHE_EXPIRATION});
         return it->second.data;
     }
 

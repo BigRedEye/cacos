@@ -28,6 +28,7 @@ inline constexpr ArchBits hostArch() {
 enum class BuildType {
     debug,
     release,
+    undefined,
 };
 
 struct CompilerOpts {
