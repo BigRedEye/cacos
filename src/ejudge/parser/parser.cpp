@@ -111,12 +111,12 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
 
     for (auto table : page.attrs("class", "table")) {
         auto tbody = table.child().value();
-        if (tbody.tag() != MyHTML_TAG_TBODY) {
+        if (tbody.tagId() != MyHTML_TAG_TBODY) {
             log::debug() << "tbody tag: " << tbody.tag();
         }
         for (auto row : util::skip(tbody, 1)) {
             log::debug() << std::hex << row.tag() << std::dec;
-            if (row.tag() != MyHTML_TAG_TR) {
+            if (row.tagId() != MyHTML_TAG_TR) {
                 continue;
             }
 
