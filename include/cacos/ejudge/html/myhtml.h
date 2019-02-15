@@ -48,6 +48,9 @@ public:
 
     Node(myhtml_tree_node_t* node = nullptr);
 
+    bool operator==(Node other) const;
+    bool operator!=(Node other) const;
+
     Iterator begin() const;
     Iterator end() const;
 

@@ -22,3 +22,6 @@
 [submodule "third-party/cmake-conan"]
 	path = third-party/cmake-conan
 	url = https://github.com/conan-io/cmake-conan.git
+[submodule "third-party/utfcpp"]
+	path = third-party/utfcpp
+	url = https://github.com/nemtrif/utfcpp

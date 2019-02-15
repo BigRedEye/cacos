@@ -91,7 +91,9 @@ int view(int argc, const char* argv[]) {
 
     if (auto task = client.task(taskName)) {
         auto [page, statement] = client.statement(task->id);
-        html::print(statement);
+        for (auto node = statement.begin(); node != statement.end(); node = node.next()) {
+            html::print(node);
+        }
     } else {
         throw std::runtime_error("Unknodwn task '" + taskName + "'");
     }

@@ -263,11 +263,17 @@ list(APPEND CACOS_LIBS dtl::dtl)
 set(MyHTML_BUILD_WITHOUT_THREADS OFF)
 set(MyCORE_BUILD_WITHOUT_THREADS OFF)
 if (WIN32)
-	set(MyHTML_BUILD_WITHOUT_THREADS ON)
-	set(MyCORE_BUILD_WITHOUT_THREADS ON)
+    set(MyHTML_BUILD_WITHOUT_THREADS ON)
+    set(MyCORE_BUILD_WITHOUT_THREADS ON)
 endif(WIN32)
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
+
+## utfcpp
+set(UTF8_TESTS OFF)
+set(UTF8_SAMPLES OFF)
+add_subdirectory(third-party/utfcpp)
+list(APPEND CACOS_LIBS utf8::cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_definitions(

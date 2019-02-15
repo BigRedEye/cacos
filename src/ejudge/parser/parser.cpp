@@ -165,22 +165,30 @@ std::string_view Parser::source(i32 solutionId) const {
     return result;
 }
 
-std::pair<html::Html, html::Node> Parser::statement(i32 taskId) const {
+std::pair<html::Html, util::Range<html::Node>> Parser::statement(i32 taskId) const {
     html::Html page = session_.getPage(
         "view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
 
-    std::optional<html::Node> root;
+    std::optional<html::Node> begin;
+    std::optional<html::Node> end;
+
+    auto value = [] (auto&& node) {
+        try {
+            return node.value();
+        } catch (const std::bad_optional_access&) {
+            std::throw_with_nested(std::runtime_error("Cannot find statement"));
+        }
+    };
+
     for (auto node : page.tags(MyHTML_TAG_H3)) {
         if (util::string::starts(node.innerText(), "Problem")) {
-            root = node.next();
+            begin = node.next();
+        } else if (util::string::starts(node.innerText(), "Submit a solution")) {
+            end = node;
         }
     }
 
-    if (!root) {
-        throw std::runtime_error("Cannot find statement");
-    }
-
-    return {std::move(page), root.value()};
+    return {std::move(page), {value(begin), value(end)}};
 }
 
 } // namespace cacos::ejudge::parser

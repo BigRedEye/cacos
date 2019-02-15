@@ -98,6 +98,14 @@ Node::Node(myhtml_tree_node_t* node)
     : node_(node) {
 }
 
+bool Node::operator==(Node other) const {
+    return other.node_ == node_;
+}
+
+bool Node::operator!=(Node other) const {
+    return !operator==(other);
+}
+
 Node::Iterator Node::begin() const {
     return myhtml_node_child(node_);
 }
