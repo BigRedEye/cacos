@@ -24,6 +24,7 @@ public:
     i32 score() const;
     std::vector<Solution> solutions(i32 taskId) const;
     std::string_view source(i32 solutionId) const;
+    std::pair<html::Html, html::Node> statement(i32 taskId) const;
 
 private:
     static constexpr std::string_view nbsp = "\xc2\xa0";

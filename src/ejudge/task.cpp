@@ -1,17 +1,18 @@
-#include "cacos/ejudge/solution.h"
+#include "cacos/ejudge/task.h"
+#include "cacos/ejudge/diff.h"
 #include "cacos/ejudge/parser/parser.h"
 #include "cacos/ejudge/session.h"
 
 #include "cacos/config/config.h"
 
-#include "cacos/util/diff/unified.h"
+#include "cacos/ejudge/html/printer.h"
 
 #include <cpparg/cpparg.h>
 
 namespace cacos::ejudge::commands {
 
 int list(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge solution list");
+    cpparg::parser parser("cacos task run list");
     parser.title("List solutions");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);
@@ -44,7 +45,7 @@ int list(int argc, const char* argv[]) {
 }
 
 int fetch(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge solution fetch");
+    cpparg::parser parser("cacos task run get");
     parser.title("Get solution code");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);
@@ -68,73 +69,74 @@ int fetch(int argc, const char* argv[]) {
     return 0;
 }
 
-int diff(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge solution diff");
-    parser.title("Compare solutions");
+int view(int argc, const char* argv[]) {
+    cpparg::parser parser("cacos task view");
+    parser.title("Print task statement");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);
 
-    auto add = [&](auto name) -> auto& {
-        // clang-format off
-        return parser
-            .positional(name)
-            .required()
-            .description("Ejudge run id or source file")
-            .value_type("SOURCE");
-        // clang-format on
-    };
-
-    std::string ids[2];
-    add("first").store(ids[0]);
-    add("second").store(ids[1]);
+    std::string taskName;
+    // clang-format off
+    parser
+        .positional("task")
+        .required()
+        .description("Ejudge task (sm02-3, for example)")
+        .value_type("TASK")
+        .store(taskName);
+    // clang-format on
 
     parser.parse(argc, argv);
 
     parser::Parser client(cfg);
 
-    std::string sources[2];
-
-    auto getSource = [&](std::string_view id) {
-        std::optional<i32> runId;
-        try {
-            runId = util::string::from<i32>(id);
-        } catch (...) {
-            // ¯\_(ツ)_/¯
-        }
-        if (runId) {
-            return util::str(client.source(runId.value()));
-        } else if (fs::exists(id)) {
-            return util::file::read(id);
-        } else {
-            throw std::runtime_error("Cannot find file " + util::str(id));
-        }
-    };
-
-    util::diff::Unified uni(getSource(ids[0]), getSource(ids[1]));
-    uni.print(std::cout);
+    if (auto task = client.task(taskName)) {
+        auto [page, statement] = client.statement(task->id);
+        html::print(statement);
+    } else {
+        throw std::runtime_error("Unknodwn task '" + taskName + "'");
+    }
 
     return 0;
 }
 
-int solution(int argc, const char* argv[]) {
-    cpparg::command_parser parser("cacos ejudge solution");
-    parser.title("Manage ejudge solutions");
+int run(int argc, const char* argv[]) {
+    cpparg::command_parser parser("cacos ejudge task");
+    parser.title("Manage ejudge tasks");
 
     // clang-format off
     parser
         .command("list")
-        .description("List solutions")
+        .description("List runs")
         .handle(list);
 
     parser
-        .command("fetch")
-        .description("Fetch solution")
+        .command("get")
+        .description("Download run code")
         .handle(fetch);
+    // clang-format on
+
+    return parser.parse(argc, argv);
+}
+
+int task(int argc, const char* argv[]) {
+    cpparg::command_parser parser("cacos ejudge task");
+    parser.title("Manage ejudge tasks");
+
+    // clang-format off
+    parser
+        .command("run")
+        .description("Manage runs")
+        .handle(run);
 
     parser
         .command("diff")
         .description("Compare solutions")
         .handle(diff);
+
+    parser
+        .command("view")
+        .description("View task statement")
+        .handle(view);
     // clang-format on
 
     return parser.parse(argc, argv);

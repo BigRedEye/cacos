@@ -114,7 +114,7 @@ void Session::reauth() {
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Permission deined");
+            throw AuthenticationError("Permission denied");
         }
     }
     html::Collection tags = page.attrs("href");
@@ -174,7 +174,7 @@ html::Html Session::getPageImpl(std::string_view base, std::string_view params) 
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Permission deined");
+            throw AuthenticationError("Permission denied");
         }
         if (node.child()->text().find("[]: Error: Invalid session") != std::string_view::npos) {
             throw SessionError("Invalid session");

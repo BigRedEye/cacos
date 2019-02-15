@@ -179,24 +179,23 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .optional()
             .description("Langs file")
             .value_type("FILE")
-			.default_value(file(FileType::langs).string())
+            .default_value(file(FileType::langs).string())
             .handle([this](std::string_view path) {
                 fs::path langs;
-				try {
-					langs = findConfig(
-						path,
-						file(FileType::langs),
-						"langs").value();
-				} catch (const std::bad_optional_access&) {
-					std::throw_with_nested(
-						ConfigError("Bad optional access")
-					);
+                try {
+                    langs = findConfig(
+                        path,
+                        file(FileType::langs),
+                        "langs").value();
+                } catch (const std::bad_optional_access&) {
+                    std::throw_with_nested(
+                        ConfigError("Bad optional access")
+                    );
                 } catch (...) {
                     std::throw_with_nested(
                         ConfigError("Cannot find langs file")
                     );
                 }
-
                 parseLangs(langs);
             });
     }

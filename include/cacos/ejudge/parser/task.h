@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cacos/ejudge/html/myhtml.h"
+
 #include "cacos/util/ints.h"
 
 #include <optional>

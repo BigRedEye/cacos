@@ -56,6 +56,7 @@ void ExecPool::push(ExecTaskPtr&& task) {
  * Сунул в лямбду лямбду Лямбда
  * Лямбда лямбда Лямбду лямбда
  */
+
 void ExecPool::run() {
     boost::asio::io_context ctx;
 

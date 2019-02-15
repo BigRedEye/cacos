@@ -70,12 +70,14 @@ file(GLOB SOURCES
     src/lang/linker.cpp
     src/lang/translator.cpp
 
+    src/ejudge/diff.cpp
     src/ejudge/html/myhtml.cpp
+    src/ejudge/html/printer.cpp
     src/ejudge/http/client.cpp
     src/ejudge/parser/parser.cpp
     src/ejudge/session.cpp
-    src/ejudge/solution.cpp
     src/ejudge/status.cpp
+    src/ejudge/task.cpp
 
     src/version/version.cpp
 
@@ -127,14 +129,16 @@ file(GLOB HEADERS
     include/cacos/lang/opts.h
     include/cacos/lang/translator.h
 
+    include/cacos/ejudge/diff.h
     include/cacos/ejudge/html/myhtml.h
+    include/cacos/ejudge/html/printer.h
     include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/opts.h
     include/cacos/ejudge/parser/parser.h
     include/cacos/ejudge/parser/task.h
-    include/cacos/ejudge/opts.h
     include/cacos/ejudge/session.h
-    include/cacos/ejudge/solution.h
     include/cacos/ejudge/status.h
+    include/cacos/ejudge/task.h
 
     include/cacos/version/git.h
     include/cacos/version/id.h

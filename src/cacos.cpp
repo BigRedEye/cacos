@@ -3,8 +3,8 @@
 
 #include "cacos/test/test.h"
 
-#include "cacos/ejudge/solution.h"
 #include "cacos/ejudge/status.h"
+#include "cacos/ejudge/task.h"
 
 #include "cacos/version/version.h"
 
@@ -43,9 +43,9 @@ int main(int argc, const char* argv[]) {
         .handle(cacos::ejudge::commands::status);
 
     parser
-        .command("solution")
-        .description("Manage ejudge solutions")
-        .handle(cacos::ejudge::commands::solution);
+        .command("task")
+        .description("Manage ejudge tasks")
+        .handle(cacos::ejudge::commands::task);
 
     parser
         .command("version")

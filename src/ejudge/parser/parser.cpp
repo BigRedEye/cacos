@@ -1,5 +1,7 @@
 #include "cacos/ejudge/parser/parser.h"
 
+#include "cacos/ejudge/html/printer.h"
+
 #include "cacos/util/ranges.h"
 
 namespace cacos::ejudge::parser {
@@ -19,7 +21,7 @@ std::vector<Task> Parser::tasks() const {
 
     for (auto table : summary.attrs("class", "table")) {
         for (auto row : util::skip(*util::select(table, 1).begin(), 1)) {
-            if (row.tag() != MyHTML_TAG_TR) {
+            if (row.tagId() != MyHTML_TAG_TR) {
                 continue;
             }
 
@@ -161,6 +163,24 @@ std::string_view Parser::source(i32 solutionId) const {
     }
 
     return result;
+}
+
+std::pair<html::Html, html::Node> Parser::statement(i32 taskId) const {
+    html::Html page = session_.getPage(
+        "view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
+
+    std::optional<html::Node> root;
+    for (auto node : page.tags(MyHTML_TAG_H3)) {
+        if (util::string::starts(node.innerText(), "Problem")) {
+            root = node.next();
+        }
+    }
+
+    if (!root) {
+        throw std::runtime_error("Cannot find statement");
+    }
+
+    return {std::move(page), root.value()};
 }
 
 } // namespace cacos::ejudge::parser

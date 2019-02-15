@@ -103,8 +103,11 @@ Node::Iterator Node::begin() const {
 }
 
 Node::Iterator Node::end() const {
+    return nullptr;
+    /*
     auto it = myhtml_node_last_child(node_);
     return it ? ++Iterator{it} : it;
+    */
 }
 
 std::optional<Node> Node::child() const {
@@ -114,8 +117,23 @@ std::optional<Node> Node::child() const {
     return {};
 }
 
-myhtml_tag_id_t Node::tag() const {
+myhtml_tag_id_t Node::tagId() const {
     return myhtml_node_tag_id(node_);
+}
+
+std::string_view Node::tag() const {
+    size_t length = 0;
+    myhtml_tree_t* tree = myhtml_node_tree(node_);
+    const char* ptr = myhtml_tag_name_by_id(tree, tagId(), &length);
+    return std::string_view{ptr, length};
+}
+
+Node Node::next() const {
+    return myhtml_node_next(node_);
+}
+
+Node Node::parent() const {
+    return myhtml_node_parent(node_);
 }
 
 std::optional<std::string_view> Node::attr(std::string_view key) {
@@ -234,11 +252,11 @@ Html::Html(std::string_view html)
     myhtml_parse(tree_, MyENCODING_UTF_8, html.data(), html.size());
 }
 
-Html::Html(Html&& other) {
+Html::Html(Html&& other) noexcept {
     *this = std::move(other);
 }
 
-Html& Html::operator=(Html&& other) {
+Html& Html::operator=(Html&& other) noexcept {
     std::swap(tree_, other.tree_);
     return *this;
 }
@@ -263,6 +281,10 @@ Collection Html::attrs(std::string_view name) const {
 Collection Html::attrs(std::string_view key, std::string_view value) const {
     return myhtml_get_nodes_by_attribute_value(
         tree_, nullptr, nullptr, true, key.data(), key.size(), value.data(), value.size(), nullptr);
+}
+
+Node Html::root() const {
+    return myhtml_tree_get_document(tree_);
 }
 
 } // namespace cacos::html
