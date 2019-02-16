@@ -11,8 +11,7 @@ namespace cacos::test {
 
 template<test::Type type>
 int add_impl(int argc, const char* argv[]) {
-    std::string descr = util::map(Type::diff, "diff")
-        (Type::canonical, "canonical").map(type);
+    std::string descr = util::map(Type::diff, "diff")(Type::canonical, "canonical").map(type);
 
     cpparg::parser parser("cacos test add " + descr);
     parser.title("Add new " + descr + " test");

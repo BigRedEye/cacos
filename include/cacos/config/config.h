@@ -55,6 +55,7 @@ enum Mask : ui64 {
     LANGS = ui64{1} << 1,
     EJUDGE_SESSION = ui64{1} << 2,
     EJUDGE_LOGIN = ui64{1} << 3,
+    TASK_EXE = ui64{1} << 4,
     ALL = ~ui64{0},
 };
 

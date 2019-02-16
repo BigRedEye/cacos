@@ -18,8 +18,8 @@ public:
     ProgressBar(Progress max = {}, std::ostream& os = std::cerr)
         : progress_{0}
         , max_{max}
-        , os_(os)
-    {}
+        , os_(os) {
+    }
 
     void reset(Progress progress) {
         max_ = progress;
@@ -29,10 +29,6 @@ public:
     void process(Progress delta) {
         progress_ += delta;
         redraw();
-    }
-
-    void finish() {
-        os_ << '\n';
     }
 
 private:
@@ -63,12 +59,14 @@ private:
         }
         size_t cells = progress_ * width / max_;
         std::string res(cells, '=');
-        res.push_back('>');
+        if (progress_ != max_) {
+            res.push_back('>');
+        }
         std::string empty;
         if (static_cast<i64>(width) - static_cast<i64>(cells) - 1 > 0) {
             empty = std::string(width - cells - 1, '.');
         }
-        os_ << "[" << res << empty << "]\r";
+        os_ << "[" << res << empty << "]" << (progress_ < max_ ? '\r' : '\n');
         os_.flush();
     }
 

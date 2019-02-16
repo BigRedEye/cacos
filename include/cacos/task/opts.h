@@ -14,6 +14,7 @@ enum class ArchBits {
 };
 
 std::string_view serialize(ArchBits bits);
+ArchBits parseArchBits(std::string_view);
 
 inline constexpr ArchBits hostArch() {
     if constexpr (sizeof(void*) == 8) {
@@ -30,6 +31,9 @@ enum class BuildType {
     release,
     undefined,
 };
+
+std::string_view serialize(BuildType type);
+BuildType parseBuildType(std::string_view);
 
 struct CompilerOpts {
     ArchBits archBits = hostArch();

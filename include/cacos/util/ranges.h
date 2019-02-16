@@ -11,8 +11,8 @@ class Range {
 public:
     Range(It begin, It end)
         : begin_(std::move(begin))
-        , end_(std::move(end))
-    {}
+        , end_(std::move(end)) {
+    }
 
     It begin() {
         return begin_;

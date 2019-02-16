@@ -2,8 +2,8 @@
 
 #include "cacos/util/terminfo/terminfo.h"
 
-#include <windows.h>
 #include <io.h>
+#include <windows.h>
 #include <cstdio>
 
 namespace cacos::util::terminfo {

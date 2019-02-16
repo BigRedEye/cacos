@@ -254,6 +254,20 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             });
     }
 
+    if (mask & TASK_EXE) {
+        parser
+            .add("build")
+            .optional()
+            .description("Build type")
+            .handle([&](auto sv) {
+                auto type = opts::parseBuildType(sv);
+                if (type == opts::BuildType::undefined) {
+                    throw ConfigError("Invalid build type");
+                }
+                task_.exe.compiler.buildType = type;
+            });
+    }
+
     parser
         .add('v')
         .optional()
@@ -339,13 +353,7 @@ void Config::parseConfig() {
         }
 
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.build")) {
-            // clang-format off
-            task_.exe.compiler.buildType =
-                util::map<std::string_view>
-                    ("debug", opts::BuildType::debug)
-                    ("release", opts::BuildType::release)
-                    .map(*node, opts::BuildType::undefined);
-            // clang-format on
+            task_.exe.compiler.buildType = opts::parseBuildType(*node);
         }
     }
 }

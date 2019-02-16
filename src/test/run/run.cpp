@@ -11,7 +11,7 @@ int run(int argc, const char* argv[]) {
     cpparg::parser parser("cacos test run");
     parser.title("Run tests");
 
-    config::Config cfg(parser, config::LANGS);
+    config::Config cfg(parser, config::LANGS | config::TASK_EXE);
 
     std::optional<std::vector<fs::path>> sources;
 

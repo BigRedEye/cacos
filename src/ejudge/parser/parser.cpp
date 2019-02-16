@@ -172,7 +172,7 @@ std::pair<html::Html, util::Range<html::Node>> Parser::statement(i32 taskId) con
     std::optional<html::Node> begin;
     std::optional<html::Node> end;
 
-    auto value = [] (auto&& node) {
+    auto value = [](auto&& node) {
         try {
             return node.value();
         } catch (const std::bad_optional_access&) {

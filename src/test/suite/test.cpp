@@ -101,7 +101,9 @@ void Test::serialize(const fs::path& workspace, bool force) {
         if (force) {
             fs::remove_all(dir);
         } else {
-            throw std::runtime_error("Cannot save test: directory " + dir.string() + " is not empty. Use '--force' to overwrite");
+            throw std::runtime_error(
+                "Cannot save test: directory " + dir.string() +
+                " is not empty. Use '--force' to overwrite");
         }
     }
 
