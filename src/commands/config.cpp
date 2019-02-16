@@ -93,7 +93,7 @@ int task(int argc, const char* argv[]) {
         .value_type("BUILD_TYPE")
         .description("Default build type, 'debug' or 'release'")
         .handle([&](auto type) {
-            cfg.set("exe.type", util::str(type), config::ConfigType::task);
+            cfg.set("exe.build", util::str(type), config::ConfigType::task);
         });
 
     parser

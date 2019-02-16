@@ -2,6 +2,8 @@
 
 #include "cacos/config/config.h"
 
+#include "cacos/test/suite/test.h"
+
 #include "cacos/util/inline_variables.h"
 
 #include <functional>
@@ -20,6 +22,7 @@ struct Range {
 struct GeneratorOptions {
     using Variables = std::map<std::string, Range<i64>>;
 
+    Type type;
     std::vector<fs::path> generatorSources;
     Variables vars;
     std::string input;

@@ -46,15 +46,15 @@ int run(int argc, const char* argv[]) {
             }
         });
 
-    std::string name;
-    parser.add("test")
+    std::string prefix;
+    parser.add("suite")
         .optional()
-        .value_type("Test name")
-        .description("Test name to run [default = ALL]")
-        .store(name);
+        .value_type("SUITE")
+        .description("Test name to run (name prefix) [default = \"\"]")
+        .store(prefix);
 
     RunOpts runOpts;
-    parser.add("info").optional().no_argument().description("Print run stats").handle([&](auto) {
+    parser.add("stats").optional().no_argument().description("Print run stats").handle([&](auto) {
         runOpts.printInfo = true;
     });
 
@@ -85,7 +85,7 @@ int run(int argc, const char* argv[]) {
     opts::CompilerOpts compilerOpts = cfg.task().exe.compiler;
     executable::Executable main = cfg.langs().runnable({sources.value(), compilerOpts});
 
-    test::Suite suite(cfg);
+    test::Suite suite(cfg, prefix);
 
     if (checkerSources) {
         executable::Executable checker =

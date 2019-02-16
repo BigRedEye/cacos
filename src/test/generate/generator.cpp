@@ -2,10 +2,12 @@
 
 #include "cacos/executable/executable.h"
 
+#include "cacos/lang/lang.h"
+
+#include "cacos/test/suite/test.h"
+
 #include "cacos/util/logger.h"
 #include "cacos/util/string.h"
-
-#include "cacos/lang/lang.h"
 
 #include <boost/asio.hpp>
 
@@ -53,7 +55,9 @@ void Generator::run() {
             } else {
                 success = true;
             }
-            if (!success) {
+
+            if (success) {
+            } else {
                 fs::remove(output[i]);
             }
 

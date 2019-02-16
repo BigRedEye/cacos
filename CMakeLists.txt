@@ -87,8 +87,13 @@ file(GLOB SOURCES
     src/util/logger.cpp
     src/util/map.cpp
     src/util/optional_ref.cpp
+    src/util/progress_bar.cpp
     src/util/split.cpp
     src/util/string.cpp
+
+    src/util/terminfo/posix.cpp
+    src/util/terminfo/windows.cpp
+    src/util/terminfo/default.cpp
 
     src/util/diff/unified.cpp
 
@@ -151,10 +156,13 @@ file(GLOB HEADERS
     include/cacos/util/logger.h
     include/cacos/util/map.h
     include/cacos/util/optional_ref.h
+    include/cacos/util/progress_bar.h
     include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
     include/cacos/util/util.h
+    include/cacos/util/terminfo/posix.h
+    include/cacos/util/terminfo/terminfo.h
 
     include/cacos/util/diff/unified.h
 
@@ -272,7 +280,7 @@ list(APPEND CACOS_LIBS myhtml_static)
 ## utfcpp
 set(UTF8_TESTS OFF)
 set(UTF8_SAMPLES OFF)
-add_subdirectory(third-party/utfcpp)
+add_subdirectory(third-party/utfcpp EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS utf8::cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")

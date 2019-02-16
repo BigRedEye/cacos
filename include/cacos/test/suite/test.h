@@ -49,7 +49,7 @@ public:
     Test() = default;
     Test(const fs::path& base, const fs::path& toml);
 
-    void serialize(const fs::path& workspace);
+    void serialize(const fs::path& workspace, bool force = false);
 
     Test& type(Type type);
     Test& name(const std::string& name);

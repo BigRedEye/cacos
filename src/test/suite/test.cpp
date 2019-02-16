@@ -94,14 +94,18 @@ Test::Test(const fs::path& base, const fs::path& toml) {
     }
 }
 
-void Test::serialize(const fs::path& workspace) {
+void Test::serialize(const fs::path& workspace, bool force) {
     fs::path dir = root(workspace);
 
-    fs::create_directories(dir);
-
-    if (!fs::is_empty(dir)) {
-        throw std::runtime_error("Cannot save test: directory " + dir.string() + " is not empty");
+    if (fs::exists(dir) && !fs::is_empty(dir)) {
+        if (force) {
+            fs::remove_all(dir);
+        } else {
+            throw std::runtime_error("Cannot save test: directory " + dir.string() + " is not empty. Use '--force' to overwrite");
+        }
     }
+
+    fs::create_directories(dir);
 
     std::ofstream ofs(dir / CONFIG_FILE);
 
@@ -221,7 +225,7 @@ TestingResult compareBlobs(const fs::path& outputFile, const fs::path& expectedO
 } // namespace
 
 TestingResult Test::compare(const fs::path& outputFile, const fs::path& expectedOutput) const {
-    static constexpr bytes diffThreshold = 1 << 20;
+    static constexpr bytes diffThreshold = 1 << 8;
     if (fs::file_size(outputFile) < diffThreshold &&
         fs::file_size(expectedOutput) < diffThreshold) {
         return compareInMemory(outputFile, expectedOutput);

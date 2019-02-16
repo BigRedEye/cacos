@@ -3,14 +3,19 @@
 #include "cacos/config/config.h"
 #include "cacos/test/suite/suite.h"
 
+#include "cacos/util/map.h"
+
 #include <cpparg/cpparg.h>
 
 namespace cacos::test {
 
 template<test::Type type>
 int add_impl(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos test add canonical");
-    parser.title("Add new canonical test");
+    std::string descr = util::map(Type::diff, "diff")
+        (Type::canonical, "canonical").map(type);
+
+    cpparg::parser parser("cacos test add " + descr);
+    parser.title("Add new " + descr + " test");
 
     Test test;
 
@@ -69,6 +74,14 @@ int add_impl(int argc, const char* argv[]) {
         .value_type("ARG")
         .description("Test arguments")
         .append(args);
+
+    bool force = false;
+    parser
+        .add("force")
+        .optional()
+        .no_argument()
+        .description("Overwrite existsing tests")
+        .handle([&](auto) {force = true;});
     // clang-format on
 
     config::Config cfg(parser);
@@ -77,7 +90,7 @@ int add_impl(int argc, const char* argv[]) {
 
     test.env(env);
 
-    test.serialize(cfg.dir(config::DirType::test));
+    test.serialize(cfg.dir(config::DirType::test), force);
 
     return 0;
 }

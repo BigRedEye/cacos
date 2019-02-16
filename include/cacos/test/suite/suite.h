@@ -20,7 +20,7 @@ struct RunOpts {
 
 class Suite {
 public:
-    Suite(const config::Config& cfg);
+    Suite(const config::Config& cfg, std::string_view prefix = "");
 
     void run(
         const RunOpts& opts,

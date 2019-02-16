@@ -1,6 +1,8 @@
 #include "cacos/test/generate/generate.h"
 #include "cacos/test/generate/generator.h"
 
+#include "cacos/test/suite/test.h"
+
 #include "cacos/config/config.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
@@ -12,7 +14,8 @@
 
 namespace cacos::test {
 
-int generate(int argc, const char* argv[]) {
+template<Type type>
+int generateImpl(int argc, const char* argv[]) {
     cpparg::parser parser("cacos test gen");
     parser.title("Generate new tests");
 
@@ -34,13 +37,13 @@ int generate(int argc, const char* argv[]) {
         });
 
     parser
-        .add("var")
+        .add("for")
         .optional()
         .repeatable()
         .value_type("VAR:FROM:TO:STEP")
-        .description("Variable")
+        .description("Declares variable VAR that can be used via @{VAR}")
         .handle([&](std::string_view s) {
-            std::vector<std::string_view> splitted = util::split(s, ":");
+            std::vector<std::string_view> splitted = util::split(s, ":,. ");
             if (splitted.empty()) {
                 throw std::runtime_error("Invalid range");
             }
@@ -85,6 +88,8 @@ int generate(int argc, const char* argv[]) {
         .store(opts.testName);
     // clang-format on
 
+    opts.type = type;
+
     config::Config cfg(parser, config::LANGS);
 
     parser.parse(argc, argv);
@@ -92,6 +97,25 @@ int generate(int argc, const char* argv[]) {
     generator.run();
 
     return 0;
+}
+
+int generate(int argc, const char* argv[]) {
+    cpparg::command_parser parser("cacos test generate");
+    parser.title("Test generation helper");
+
+    // clang-format off
+    parser
+        .command("canonical")
+        .description("Generate canonical tests")
+        .handle(generateImpl<Type::canonical>);
+
+    parser
+        .command("diff")
+        .description("Generate diff tests")
+        .handle(generateImpl<Type::diff>);
+    // clang-format on
+
+    return parser.parse(argc, argv);
 }
 
 } // namespace cacos::test
