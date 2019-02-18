@@ -69,8 +69,8 @@ int fetch(int argc, const char* argv[]) {
     return 0;
 }
 
-int view(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos task view");
+int statement(int argc, const char* argv[]) {
+    cpparg::parser parser("cacos task statement");
     parser.title("Print task statement");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);
@@ -136,9 +136,9 @@ int task(int argc, const char* argv[]) {
         .handle(diff);
 
     parser
-        .command("view")
+        .command("statement")
         .description("View task statement")
-        .handle(view);
+        .handle(statement);
     // clang-format on
 
     return parser.parse(argc, argv);

@@ -5,6 +5,8 @@
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
 
+#include "cacos/util/terminfo/terminfo.h"
+
 #include <termcolor/termcolor.hpp>
 
 #include <fmt/format.h>
@@ -127,8 +129,6 @@ public:
 
 class Text : public TagPrinter {
 public:
-    static constexpr i64 LINE_WIDTH_LIMIT = 80;
-
     void prefix(std::ostream& os, Node node, State& state) const override {
         std::string text = util::str(node.text());
         if (!state.flag(State::code)) {
@@ -148,8 +148,9 @@ public:
             i64 length = utf8::distance(text.begin(), text.end());
             for (auto word : util::skip(words, 1)) {
                 i64 wordLength = utf8::distance(word.begin(), word.end());
-                if (length + wordLength < LINE_WIDTH_LIMIT) {
+                if (length + wordLength + 1 < util::terminfo::get().width) {
                     text += " ";
+                    ++length;
                 } else {
                     text += "\n";
                     length = 0;
