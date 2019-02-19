@@ -283,6 +283,22 @@ set(UTF8_SAMPLES OFF)
 add_subdirectory(third-party/utfcpp EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS utf8::cpp)
 
+## boost.backtrace
+## https://www.boost.org/doc/libs/develop/doc/html/stacktrace/configuration_and_build.html
+if (UNIX)
+    find_program(ADDR2LINE_PATH addr2line)
+    if(NOT ADDR2LINE_PATH)
+        message(STATUS "Cannot find addr2line; falling back to default stacktrace provider")
+    else()
+        message(STATUS "Found addr2line, compiling with advanced backtrace support")
+        target_compile_definitions(
+            ${CACOS_LIB}
+            PUBLIC
+            BOOST_STACKTRACE_ADDR2LINE_LOCATION=${ADDR2LINE_PATH}
+            BOOST_STACKTRACE_USE_ADDR2LINE)
+    endif()
+endif()
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_definitions(
     ${CACOS_LIB}
@@ -290,6 +306,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
     _WIN32_WINNT=0x0601)
     target_compile_options(${CACOS_LIB} PUBLIC /utf-8)
+endif()
+
+## Warnings
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+    target_compile_options(${CACOS_LIB} PUBLIC -Wall -Wextra -Werror -Wpedantic)
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+    target_compile_options(${CACOS_LIB} PUBLIC /W4)
 endif()
 
 target_compile_definitions(

@@ -1,5 +1,11 @@
 #include "cacos/cacos.h"
 #include "cacos/util/logger.h"
+#include "cacos/util/util.h"
+
+#include <termcolor/termcolor.hpp>
+
+#include <boost/stacktrace.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <stdexcept>
 
@@ -45,10 +51,32 @@ private:
 
 #endif // CACOS_OS_WINDOWS
 
+[[noreturn]] void terminate_handler() {
+    std::cerr << termcolor::reset << termcolor::red << "Terminate called ";
+    if (std::current_exception()) {
+        std::cerr << "after throwing an exception:\n"
+                  << boost::current_exception_diagnostic_information() << '\n';
+    } else {
+        std::cerr << "without active exception\n";
+    }
+    try {
+        cacos::fs::path path = cacos::fs::temp_directory_path() / "cacos.stacktrace";
+        std::ofstream ofs(path);
+        ofs << boost::stacktrace::stacktrace();
+        std::cerr << "Stacktrace dumped to " << path.string() << '\n';
+    } catch (...) {
+        std::cerr << "Stacktrace dumping failed\n";
+    }
+    std::cerr << termcolor::reset;
+    std::abort();
+}
+
 int main(int argc, const char* argv[]) {
 #ifdef CACOS_OS_WINDOWS
     ConsoleCodePageSetter cp;
 #endif // CACOS_OS_WINDOWS
+
+    std::set_terminate(terminate_handler);
 
 #if CACOS_DEBUG
     return cacos::main(argc, argv);
