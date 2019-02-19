@@ -77,7 +77,7 @@ void Suite::run(
             ++totalTasks;
 
             std::string name = test.name() + (isChecker ? CHECKER_SUFFIX : "");
-            fs::path output = config_.dir(config::DirType::temp) / name;
+            fs::path output = config_.dir(config::DirType::temp) / name / "test.stdout";
 
             fs::create_directories(output.parent_path());
 
@@ -268,16 +268,16 @@ void Suite::run(
         passed * 100. / total);
     fmt::print(
         std::cout,
-        "[Crashed     ]: {} / {} tests ({:.1f}%)\n",
-        crashed,
-        total,
-        crashed * 100. / total);
-    fmt::print(
-        std::cout,
         "[Wrong answer]: {} / {} tests ({:.1f}%)\n",
         failed,
         total,
         failed * 100. / total);
+    fmt::print(
+        std::cout,
+        "[Crashed     ]: {} / {} tests ({:.1f}%)\n",
+        crashed,
+        total,
+        crashed * 100. / total);
 
     std::cout << termcolor::reset;
 }

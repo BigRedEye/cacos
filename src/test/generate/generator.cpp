@@ -7,6 +7,7 @@
 #include "cacos/test/suite/test.h"
 
 #include "cacos/util/logger.h"
+#include "cacos/util/progress_bar.h"
 #include "cacos/util/string.h"
 
 #include <boost/asio.hpp>
@@ -24,52 +25,63 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 
 void Generator::run() {
     executable::Executable exe =
-        config_.langs().runnable({opts_.generatorSources, config_.task().exe.compiler});
+        config_.langs().runnable({opts_.generatorSources, {opts::hostArch(), opts::BuildType::release}});
 
     InlineVariables vars;
 
-    executable::Flags flags(opts_.args);
     executable::ExecPool pool(
-        process::Limits{process::Limits::unlimited<bytes>, seconds(0.3), seconds(1.0)});
+        process::Limits{process::Limits::unlimited<bytes>, seconds(1.0), seconds(2.0)});
 
-    boost::container::stable_vector<std::string> input;
-    boost::container::stable_vector<fs::path> output;
+    boost::container::stable_vector<std::string> stdIn;
+    boost::container::stable_vector<fs::path> stdOut;
+    boost::container::stable_vector<fs::path> stdErr;
 
-    size_t doneTasks = 0;
     size_t totalTasks = 0;
 
+    util::ProgressBar<size_t> bar;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
         ++totalTasks;
 
-        auto res = flags.build(vars);
-        input.emplace_back(vars.parse(opts_.input));
-        output.emplace_back(config_.dir(config::DirType::test) / vars.parse(opts_.testName));
+        std::string name = vars.parse(opts_.name);
+        fs::path dir = config_.dir(config::DirType::temp) / name;
 
-        auto callback = [&, i = totalTasks - 1](
+        if (!fs::exists(dir)) {
+            fs::create_directories(dir);
+        }
+
+        stdIn.emplace_back(vars.parse(opts_.testIO.input));
+        stdOut.emplace_back(dir / "gen.stdout");
+        stdErr.emplace_back(dir / "gen.stderr");
+
+        auto callback = [&, dir, name, i = totalTasks - 1](
                             process::Result res, std::optional<process::Info>&& info) {
-            bool success = false;
             if (res.status != process::status::OK) {
                 log::warning().print("Exit status: {}", process::status::serialize(res.status));
             } else if (res.returnCode != 0) {
                 log::warning().print("Non zero exit code: {}", res.returnCode);
             } else {
-                success = true;
-            }
+                test::Test test;
+                test.name(name)
+                    .type(opts_.type)
+                    .args({})
+                    .input(dir / opts_.testIO.input);
+                if (opts_.type == Type::canonical) {
+                    test.output(dir / opts_.testIO.output);
+                }
 
-            if (success) {
-            } else {
-                fs::remove(output[i]);
+                test.serialize(config_.dir(config::DirType::test), opts_.force);
+                fs::remove_all(dir);
             }
 
             log::log().print(
-                "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                "Run {} / {}: Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                i,
+                totalTasks,
                 res.returnCode,
                 info->cpuTime.count(),
                 info->maxRss / (1024. * 1024.));
 
-            ++doneTasks;
-            log::info().print(
-                "Done {} / {} ({:.1f}%)", doneTasks, totalTasks, doneTasks * 100. / totalTasks);
+            bar.process(1);
         };
 
         std::vector<std::string> args;
@@ -78,16 +90,18 @@ void Generator::run() {
             args.push_back(vars.parse(s));
         }
 
-        executable::ExecTaskContext ctx{args, boost::this_process::environment(), callback};
+        executable::ExecTaskContext ctx{args, boost::this_process::environment(), dir, callback};
         auto task = executable::makeTask(
             exe,
             std::move(ctx),
-            bp::buffer(std::as_const(input.back())),
-            output.back().string(),
-            bp::null);
+            bp::buffer(std::as_const(stdIn.back())),
+            stdOut.back().string(),
+            stdErr.back().string());
 
         pool.push(std::move(task));
     });
+
+    bar.reset(totalTasks);
 
     pool.run();
 }

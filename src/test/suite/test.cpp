@@ -81,10 +81,10 @@ Test::Test(const fs::path& base, const fs::path& toml) {
     }
 
     if (auto env = table->get_table("env")) {
-        env_ = boost::process::environment{};
+        env_ = boost::this_process::environment();
         for (auto [k, t] : *env) {
             if (auto v = t->as<std::string>()) {
-                env_->emplace(k, v->get());
+                env_->set(k, v->get());
             }
         }
     }
@@ -201,6 +201,7 @@ executable::ExecTaskPtr Test::task(TaskContext&& context) const {
     executable::ExecTaskContext ctx{
         args_,
         env_.value_or(boost::this_process::environment()),
+        fs::current_path(),
         std::move(context.callback),
     };
 
@@ -230,9 +231,9 @@ TestingResult Test::compare(const fs::path& outputFile, const fs::path& expected
     static constexpr bytes diffThreshold = 1 << 8;
     if (fs::file_size(outputFile) < diffThreshold &&
         fs::file_size(expectedOutput) < diffThreshold) {
-        return compareInMemory(outputFile, expectedOutput);
+        return compareInMemory(expectedOutput, outputFile);
     } else {
-        return compareBlobs(outputFile, expectedOutput);
+        return compareBlobs(expectedOutput, outputFile);
     }
 }
 

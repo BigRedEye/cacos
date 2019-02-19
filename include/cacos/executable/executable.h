@@ -52,6 +52,7 @@ struct ExecTaskContext {
 
     std::vector<std::string> args{};
     bp::environment env = boost::this_process::environment();
+    fs::path workingDir = fs::current_path();
     Callback callback{};
 };
 
@@ -100,6 +101,7 @@ public:
             bp::std_out = stdout_,
             bp::std_err = stderr_,
             bp::on_exit = exitCallback,
+            bp::start_dir = ctx_.workingDir.string(),
             ioctx);
     }
 

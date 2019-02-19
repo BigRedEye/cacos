@@ -21,8 +21,8 @@ public:
         , os_(os) {
     }
 
-    void reset(Progress progress) {
-        max_ = progress;
+    void reset(Progress max) {
+        max_ = max;
         progress_ = 0;
     }
 

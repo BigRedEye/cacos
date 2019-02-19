@@ -23,6 +23,13 @@ int generateImpl(int argc, const char* argv[]) {
 
     // clang-format off
     parser
+        .add("name")
+        .required()
+        .value_type("STRING")
+        .description("Test name")
+        .store(opts.name);
+
+    parser
         .add("generator")
         .required()
         .value_type("SOURCE")
@@ -62,35 +69,67 @@ int generateImpl(int argc, const char* argv[]) {
         });
 
     parser
-        .add("args")
+        .add("gen.arg")
         .optional()
-        .value_type("ARGS")
-        .description("Arguments for generator, separated with spaces")
-        .handle([&] (std::string_view s) {
-            std::vector<std::string_view> splitted = util::split(s, " ");
-            for (auto&& sv : splitted) {
-                opts.args.push_back(util::str(sv));
+        .value_type("ARG")
+        .description("Argument for generator")
+        .repeatable()
+        .append(opts.args);
+
+    parser
+        .add("gen.env")
+        .optional()
+        .value_type("ENV")
+        .description("Environment variable for generator in form KEY=VALUE")
+        .repeatable()
+        .handle([&](std::string_view sv) {
+            size_t pos = sv.find('=');
+            if (pos == std::string_view::npos) {
+                throw std::runtime_error(util::string::join("Invalid environment variable ", sv));
             }
+            std::string_view key = sv.substr(0, pos);
+            std::string_view value = sv.substr(pos + 1);
+            opts.env.set(util::str(key), util::str(value));
         });
 
     parser
-        .add("stdin")
+        .add("gen.stdin")
         .optional()
         .value_type("STRING")
         .description("Stdin for generator")
-        .store(opts.input);
+        .store(opts.genIO.input);
 
     parser
-        .add("test")
-        .required()
-        .value_type("STRING")
-        .description("Test name")
-        .store(opts.testName);
+        .add("test.stdin")
+        .optional()
+        .value_type("FILE")
+        .description("Test stdin")
+        .default_value("gen.stdout")
+        .store(opts.testIO.input);
+
+    if constexpr (type == Type::canonical) {
+        parser
+            .add("test.stdout")
+            .optional()
+            .value_type("FILE")
+            .description("Canonical test stdout")
+            .default_value("gen.stderr")
+            .store(opts.testIO.output);
+    }
+
+    parser
+        .add("force")
+        .optional()
+        .no_argument()
+        .description("Overwrite existsing tests")
+        .handle([&](auto) {
+            opts.force = true;
+        });
     // clang-format on
 
     opts.type = type;
 
-    config::Config cfg(parser, config::LANGS);
+    config::Config cfg(parser, config::LANGS | config::TASK_EXE);
 
     parser.parse(argc, argv);
     Generator generator(cfg, opts);

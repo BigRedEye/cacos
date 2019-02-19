@@ -72,7 +72,7 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
     auto result = executable::makeTask(
         exe_,
         executable::ExecTaskContext{
-            std::move(args), boost::this_process::environment(), std::move(callback)},
+            std::move(args), boost::this_process::environment(), fs::current_path(), std::move(callback)},
         bp::null,
         std::ref(stdOut),
         std::ref(stdErr));
