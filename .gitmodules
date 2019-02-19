@@ -1,6 +1,7 @@
 [submodule "third-party/cpparg"]
 	path = third-party/cpparg
 	url = https://github.com/BigRedEye/cpparg.git
+	branch = dev
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
 	url = https://github.com/ikalnytskyi/termcolor.git
