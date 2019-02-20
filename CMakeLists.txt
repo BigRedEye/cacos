@@ -33,7 +33,7 @@ endif()
 
 # Detect platform
 set(CACOS_OS "CACOS_OS_UNDEFINED")
-if (WIN32)
+if (WIN32 OR WIN64)
     set(CACOS_OS "CACOS_OS_WINDOWS")
 elseif (APPLE)
     set(CACOS_OS "CACOS_OS_MACOS")
@@ -270,18 +270,22 @@ add_subdirectory(third-party/dtl EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS dtl::dtl)
 
 ## myhtml
-set(MyHTML_BUILD_WITHOUT_THREADS OFF)
-set(MyCORE_BUILD_WITHOUT_THREADS OFF)
-if (WIN32)
-    set(MyHTML_BUILD_WITHOUT_THREADS ON)
-    set(MyCORE_BUILD_WITHOUT_THREADS ON)
-endif(WIN32)
+find_package(Threads)
+set(MyHTML_BUILD_WITHOUT_THREADS ON CACHE BOOL "" FORCE)
+set(MyCORE_BUILD_WITHOUT_THREADS ON CACHE BOOL "" FORCE)
+if (CMAKE_USE_PTHREADS_INIT)
+    message(STATUS "Found pthread")
+    set(MyHTML_BUILD_WITHOUT_THREADS OFF CACHE BOOL "" FORCE)
+    set(MyCORE_BUILD_WITHOUT_THREADS OFF CACHE BOOL "" FORCE)
+else()
+    message(STATUS "pthread was not found")
+endif()
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
 
 ## utfcpp
-set(UTF8_TESTS OFF)
-set(UTF8_SAMPLES OFF)
+set(UTF8_TESTS OFF CACHE BOOL "" FORCE)
+set(UTF8_SAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(third-party/utfcpp EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS utf8::cpp)
 
@@ -308,6 +312,13 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
     _WIN32_WINNT=0x0601)
     target_compile_options(${CACOS_LIB} PUBLIC /utf-8)
+
+    ### Use all cores
+    include(ProcessorCount)
+    ProcessorCount(NPROC)
+    if(NOT NPROC EQUAL 0)
+        target_compile_options(${CACOS_LIB} PUBLIC /utf-8 "/MP${NPROC}")
+    endif()
 endif()
 
 ## Warnings

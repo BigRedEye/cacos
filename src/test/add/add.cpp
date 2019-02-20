@@ -3,15 +3,20 @@
 #include "cacos/config/config.h"
 #include "cacos/test/suite/suite.h"
 
-#include "cacos/util/map.h"
-
 #include <cpparg/cpparg.h>
 
 namespace cacos::test {
 
 template<test::Type type>
 int add_impl(int argc, const char* argv[]) {
-    std::string descr = util::map(Type::diff, "diff")(Type::canonical, "canonical").map(type);
+    std::string descr;
+    if constexpr (type == Type::diff) {
+        descr = "diff";
+    } else if constexpr (type == Type::canonical) {
+        descr = "canonical";
+    } else {
+        throw std::logic_error("Invalid type");
+    }
 
     cpparg::parser parser("cacos test add " + descr);
     parser.title("Add new " + descr + " test");

@@ -188,7 +188,8 @@ std::pair<html::Html, util::Range<html::Node>> Parser::statement(i32 taskId) con
         }
     }
 
-    return {std::move(page), {value(begin), value(end)}};
+    // msvc is weird
+    return {std::move(page), util::Range<html::Node>{value(begin), value(end)}};
 }
 
 } // namespace cacos::ejudge::parser

@@ -51,7 +51,7 @@ private:
 
 #endif // CACOS_OS_WINDOWS
 
-[[noreturn]] void terminate_handler() {
+[[noreturn]] void terminateHandler() {
     std::cerr << termcolor::reset << termcolor::red << "Terminate called ";
 
     std::exception_ptr ptr = std::current_exception();
@@ -86,7 +86,7 @@ int main(int argc, const char* argv[]) {
     ConsoleCodePageSetter cp;
 #endif // CACOS_OS_WINDOWS
 
-    std::set_terminate(terminate_handler);
+    std::set_terminate(terminateHandler);
 
 #if CACOS_DEBUG
     return cacos::main(argc, argv);
