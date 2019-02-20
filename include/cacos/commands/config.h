@@ -4,4 +4,4 @@ namespace cacos::commands {
 
 int config(int argc, const char* argv[]);
 
-}
+} // namespace cacos::commands

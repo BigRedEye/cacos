@@ -1,0 +1,12 @@
+#include "cacos/version/id.h"
+
+#include <string_view>
+
+namespace cacos::version::build {
+
+std::string_view timestamp() {
+    using namespace std::string_view_literals;
+    return "@BUILD_TIMESTAMP@"sv;
+}
+
+} // namespace cacos::version::build

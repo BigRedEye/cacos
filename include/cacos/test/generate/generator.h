@@ -2,6 +2,8 @@
 
 #include "cacos/config/config.h"
 
+#include "cacos/test/suite/test.h"
+
 #include "cacos/util/inline_variables.h"
 
 #include <functional>
@@ -17,14 +19,27 @@ struct Range {
     T step;
 };
 
+struct IO {
+    std::string input;
+    std::string output;
+};
+
 struct GeneratorOptions {
     using Variables = std::map<std::string, Range<i64>>;
 
-    std::vector<fs::path> generatorSources;
+    Type type = Type::canonical;
+    std::string name;
+
     Variables vars;
-    std::string input;
-    std::string testName;
+
+    std::vector<fs::path> generatorSources;
     std::vector<std::string> args;
+    bp::environment env = boost::this_process::environment();
+
+    IO genIO;
+    IO testIO;
+
+    bool force = false;
 };
 
 class Generator {

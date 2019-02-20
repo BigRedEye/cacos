@@ -1,5 +1,7 @@
 #include "cacos/ejudge/parser/parser.h"
 
+#include "cacos/ejudge/html/printer.h"
+
 #include "cacos/util/ranges.h"
 
 namespace cacos::ejudge::parser {
@@ -19,7 +21,7 @@ std::vector<Task> Parser::tasks() const {
 
     for (auto table : summary.attrs("class", "table")) {
         for (auto row : util::skip(*util::select(table, 1).begin(), 1)) {
-            if (row.tag() != MyHTML_TAG_TR) {
+            if (row.tagId() != MyHTML_TAG_TR) {
                 continue;
             }
 
@@ -30,7 +32,7 @@ std::vector<Task> Parser::tasks() const {
             if (children.size() != 13) {
                 throw ParserError(
                     "Cannot parse ejudge responce: weird summary table size " +
-                    util::to_string(children.size()));
+                    util::string::to(children.size()));
             }
 
             auto get = [](auto&& opt) -> auto& {
@@ -48,7 +50,7 @@ std::vector<Task> Parser::tasks() const {
                 auto tokens = util::split(link.substr(pos + 1), "=&");
                 for (auto [token, i] : util::enumerate(tokens)) {
                     if (token == "prob_id") {
-                        task.id = util::from_string<i32>(tokens[i + 1]);
+                        task.id = util::string::from<i32>(tokens[i + 1]);
                     }
                 }
             }
@@ -58,7 +60,7 @@ std::vector<Task> Parser::tasks() const {
             }
             auto score = children[9].child()->text();
             if (score != nbsp) {
-                get(task.result).score = util::from_string<i32>(score);
+                get(task.result).score = util::string::from<i32>(score);
             }
 
             result.push_back(std::move(task));
@@ -80,10 +82,10 @@ std::optional<Task> Parser::task(std::string_view key) const {
 i32 Parser::score() const {
     html::Html summary = session_.getPage("view-problem-summary");
     for (auto node : summary.tags(MyHTML_TAG__TEXT)) {
-        if (util::starts_with(node.text(), "Total score:")) {
+        if (util::string::starts(node.text(), "Total score:")) {
             std::string_view score = node.text().substr(std::string_view("Total score: ").size());
             try {
-                return util::from_string<i32>(score);
+                return util::string::from<i32>(score);
             } catch (const std::exception&) {
                 std::throw_with_nested(ParserError("Cannot find total score"));
             }
@@ -102,19 +104,19 @@ enum {
 }
 
 std::vector<Solution> Parser::solutions(i32 taskId) const {
-    html::Html page =
-        session_.getPage("view-problem-submit", util::join("prob_id=", util::to_string(taskId)));
+    html::Html page = session_.getPage(
+        "view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
 
     std::vector<Solution> result;
 
     for (auto table : page.attrs("class", "table")) {
         auto tbody = table.child().value();
-        if (tbody.tag() != MyHTML_TAG_TBODY) {
-            Logger::debug() << "tbody tag: " << tbody.tag();
+        if (tbody.tagId() != MyHTML_TAG_TBODY) {
+            log::debug() << "tbody tag: " << tbody.tag();
         }
         for (auto row : util::skip(tbody, 1)) {
-            Logger::debug() << std::hex << row.tag() << std::dec;
-            if (row.tag() != MyHTML_TAG_TR) {
+            log::debug() << std::hex << row.tag() << std::dec;
+            if (row.tagId() != MyHTML_TAG_TR) {
                 continue;
             }
 
@@ -122,20 +124,20 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
             for (auto [node, i] : util::enumerate(util::skip(row, 1))) {
                 switch (i) {
                 case view_solution::ID:
-                    solution.id = util::from_string<i32>(node.innerText());
+                    solution.id = util::string::from<i32>(node.innerText());
                     break;
                 case view_solution::RESULT:
                     solution.result.status = node.innerText();
                     break;
                 case view_solution::TESTS_PASSED:
                     try {
-                        solution.result.tests = util::from_string<i32>(node.innerText());
+                        solution.result.tests = util::string::from<i32>(node.innerText());
                     } catch (...) {
                     }
                     break;
                 case view_solution::SCORE:
                     try {
-                        solution.result.score = util::from_string<i32>(node.innerText());
+                        solution.result.score = util::string::from<i32>(node.innerText());
                     } catch (...) {
                     }
                     break;
@@ -150,8 +152,8 @@ std::vector<Solution> Parser::solutions(i32 taskId) const {
 }
 
 std::string_view Parser::source(i32 solutionId) const {
-    std::string_view result =
-        session_.getRaw("download-run", util::join("run_id=", util::to_string(solutionId)));
+    std::string_view result = session_.getRaw(
+        "download-run", util::string::join("run_id=", util::string::to(solutionId)));
 
     html::Html page(result);
     for (auto node : page.tags("title")) {
@@ -161,6 +163,33 @@ std::string_view Parser::source(i32 solutionId) const {
     }
 
     return result;
+}
+
+std::pair<html::Html, util::Range<html::Node>> Parser::statement(i32 taskId) const {
+    html::Html page = session_.getPage(
+        "view-problem-submit", util::string::join("prob_id=", util::string::to(taskId)));
+
+    std::optional<html::Node> begin;
+    std::optional<html::Node> end;
+
+    auto value = [](auto&& node) {
+        try {
+            return node.value();
+        } catch (const std::bad_optional_access&) {
+            std::throw_with_nested(std::runtime_error("Cannot find statement"));
+        }
+    };
+
+    for (auto node : page.tags(MyHTML_TAG_H3)) {
+        if (util::string::starts(node.innerText(), "Problem")) {
+            begin = node.next();
+        } else if (util::string::starts(node.innerText(), "Submit a solution")) {
+            end = node;
+        }
+    }
+
+    // msvc is weird
+    return {std::move(page), util::Range<html::Node>{value(begin), value(end)}};
 }
 
 } // namespace cacos::ejudge::parser

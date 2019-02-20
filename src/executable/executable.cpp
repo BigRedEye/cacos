@@ -50,6 +50,13 @@ void ExecPool::push(ExecTaskPtr&& task) {
     tasks_.push_back(std::move(task));
 }
 
+/*
+ * Ехал Лямбда через лямбду
+ * Видит Лямбда - в лямбде лямбда
+ * Сунул в лямбду лямбду Лямбда
+ * Лямбда лямбда Лямбду лямбда
+ */
+
 void ExecPool::run() {
     boost::asio::io_context ctx;
 
@@ -94,7 +101,7 @@ void ExecPool::run() {
     auto pollInfo = [&] {
         for (auto&& [i, c] : running) {
             process::Info info = c.info();
-            Logger::debug().print(
+            log::debug().print(
                 "cpu time = {:.3f} s, real time = {:.3f} s, max rss = {:.3f} mb",
                 info.cpuTime.count(),
                 info.realTime.count(),
@@ -133,8 +140,8 @@ void ExecPool::run() {
     ctx.restart();
     ctx.run();
 
-    if (running.size()) {
-        Logger::warning() << "Running tasks " << running.size() << " != 0: ";
+    if (!running.empty()) {
+        log::error() << "Running tasks " << running.size() << " != 0: ";
     }
 
     tasks_.clear();

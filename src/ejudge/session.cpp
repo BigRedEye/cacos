@@ -32,8 +32,7 @@ public:
 
     std::string_view set(const std::string& key, const std::string& value) {
         auto [it, inserted] = cache_.emplace(
-            key,
-            Responce{value, std::chrono::high_resolution_clock::now() + std::chrono::seconds(1)});
+            key, Responce{value, std::chrono::high_resolution_clock::now() + CACHE_EXPIRATION});
         return it->second.data;
     }
 
@@ -48,15 +47,15 @@ Session::Session(const config::Config& config)
     , cache_(std::make_unique<Cache>()) {
     auto& session = config.ejudge().session;
     if (session.ejsid && session.token) {
-        Logger::log().print(
+        log::log().print(
             "Found user-defined session (ejsid = {}, token = {})", *session.ejsid, *session.token);
         token_ = *session.token;
         setCookie(*session.ejsid);
     } else if (loadSession()) {
-        Logger::log().print("Found external session");
+        log::log().print("Found cached session");
         return;
     } else {
-        Logger::log().print("No external session was found; trying to reauth");
+        log::log().print("No cached session was found; trying to reauth");
         reauth();
     }
 }
@@ -65,12 +64,12 @@ Session::~Session() {
 }
 
 void Session::setCookie(std::string_view cookie) const {
-    Logger::log().print("Savig cookies: domain = {}, EJSID = {}", domain(), cookie);
+    log::log().print("Savig cookies: EJSID = {}", cookie);
     client_.cookie(fmt::format("{}\tFALSE\t/\tFALSE\t0\tEJSID\t{}", domain(), cookie));
 }
 
 void Session::saveSession() const {
-    Logger::log().print("Savig token: {}", domain(), token_);
+    log::log().print("Savig token: {}", domain(), token_);
     std::ofstream token(config_.file(config::FileType::token));
     fmt::print(token, "{}", token_);
 }
@@ -78,12 +77,12 @@ void Session::saveSession() const {
 bool Session::loadSession() {
     auto file = config_.file(config::FileType::token);
     if (fs::exists(file)) {
-        Logger::log().print("Found token at {}", file);
+        log::log().print("Found token at {}", file);
         std::ifstream ifs(file);
         std::getline(ifs, token_);
         return true;
     } else {
-        Logger::log().print("Cannot find token at {}", file);
+        log::log().print("Cannot find token at {}", file);
         return false;
     }
 }
@@ -91,7 +90,7 @@ bool Session::loadSession() {
 std::string_view Session::domain() const {
     auto tokens = util::split(prefix_, "/");
     auto view = prefix_;
-    if (util::starts_with(tokens[0], "http")) {
+    if (util::string::starts(tokens[0], "http")) {
         return tokens[2]; /* "http:" "" "caos.ejudge.ru" ... */
     } else {
         return tokens[0];
@@ -99,15 +98,13 @@ std::string_view Session::domain() const {
 }
 
 void Session::reauth() {
-    Logger::log().print("Trying to reauthenticate");
-    std::string clientUrl = util::join(
-        prefix_,
-        "?contest_id=",
-        util::to_string(config_.ejudge().contestId));
+    log::log().print("Trying to reauthenticate");
+    std::string clientUrl =
+        util::string::join(prefix_, "?contest_id=", util::string::to(config_.ejudge().contestId));
 
     std::string loginPage = client_.post(
         clientUrl,
-        util::join(
+        util::string::join(
             "login=",
             config_.ejudge().login.login.value(),
             "&password=",
@@ -117,7 +114,7 @@ void Session::reauth() {
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Permission deined");
+            throw AuthenticationError("Permission denied");
         }
     }
     html::Collection tags = page.attrs("href");
@@ -142,11 +139,11 @@ void Session::reauth() {
     }
 
     saveSession();
-    Logger::log().print("Sucessfuly parsed token");
+    log::log().print("Sucessfuly parsed token");
 }
 
 std::string Session::buildUrl(std::string_view base) {
-    return util::join(prefix_, "/", base, "/", token_);
+    return util::string::join(prefix_, "/", base, "/", token_);
 }
 
 html::Html Session::getPage(std::string_view base, std::string_view params) {
@@ -177,7 +174,7 @@ html::Html Session::getPageImpl(std::string_view base, std::string_view params) 
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Permission deined");
+            throw AuthenticationError("Permission denied");
         }
         if (node.child()->text().find("[]: Error: Invalid session") != std::string_view::npos) {
             throw SessionError("Invalid session");

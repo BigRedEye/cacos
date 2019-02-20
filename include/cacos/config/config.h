@@ -7,6 +7,7 @@
 #include "cacos/task/opts.h"
 
 #include "cacos/util/split.h"
+#include "cacos/util/temp_directory.h"
 
 #include <cpparg/cpparg.h>
 
@@ -51,15 +52,19 @@ enum class ConfigType {
 };
 
 enum Mask : ui64 {
+    NONE = 0,
     LANGS = ui64{1} << 1,
-    EJUDGE = ui64{1} << 2,
+    EJUDGE_SESSION = ui64{1} << 2,
+    EJUDGE_LOGIN = ui64{1} << 3,
+    TASK_EXE = ui64{1} << 4,
+    KEEP_WORKING_DIRS = ui64{1} << 5,
     ALL = ~ui64{0},
 };
 
 class Config {
 public:
     Config();
-    Config(cpparg::parser& parser, ui64 opts);
+    Config(cpparg::parser& parser, ui64 opts = NONE);
 
     fs::path dir(DirType type) const;
     fs::path file(FileType type) const;
@@ -72,6 +77,13 @@ public:
     template<typename T>
     void set(std::string_view path, T&& value, ConfigType type = ConfigType::global) {
         setImpl(path, cpptoml::make_value(std::forward<T>(value)), type);
+    }
+
+    void setBase(
+        std::string_view path,
+        const std::shared_ptr<cpptoml::base>& value,
+        ConfigType type = ConfigType::global) {
+        setImpl(path, value, type);
     }
 
     void dump(ConfigType type) const;
@@ -91,8 +103,11 @@ private:
 
 private:
     fs::path workspace_;
+    util::TempDirectory cache_;
+
     std::shared_ptr<cpptoml::table> globalConfig_;
     std::shared_ptr<cpptoml::table> taskConfig_;
+
     opts::LangOpts langs_;
     opts::EjudgeOpts ejudge_;
     opts::TaskOpts task_;

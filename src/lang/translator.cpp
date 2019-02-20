@@ -15,6 +15,14 @@ Translator::Translator(const cpptoml::table& table) {
     } else {
         throw std::runtime_error("Cannot find flags for " + *exe);
     }
+
+    if (auto debug = table.get_array_of<std::string>("debug")) {
+        debug_ = *debug;
+    }
+
+    if (auto release = table.get_array_of<std::string>("release")) {
+        release_ = *release;
+    }
 }
 
 bool Translator::operator==(const Translator& other) const {

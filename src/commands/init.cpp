@@ -16,26 +16,28 @@ namespace cacos::commands {
 int init(int argc, const char* argv[]) {
     fs::path dir;
 
-    cpparg::parser parser("cacos new");
+    cpparg::parser parser("cacos init");
     parser.title("Initialize new workspace");
 
-    fs::path workspace;
+    fs::path workspace = fs::current_path();
 
+    std::optional<std::string> task;
     // clang-format off
     parser
-        .positional("workspace")
+        .add("task")
         .optional()
-        .description("Path to workspace")
-        .value_type("DIR")
-        .default_value(".")
-        .handle([&](std::string_view path) {
-            workspace = path;
+        .description("Ejudge task name (sm07-5, kr03-2")
+        .value_type("TASK")
+        .handle([&](std::string_view sv) {
+            task = util::str(sv);
         });
     // clang-format on
 
+    parser.add_help('h', "help");
+
     parser.parse(argc, argv);
 
-    std::vector<std::string_view> required_dirs = {".cacos", "test"};
+    std::vector<std::string_view> required_dirs = {"test"};
 
     for (auto dir : required_dirs) {
         if (!fs::create_directories(workspace / dir)) {

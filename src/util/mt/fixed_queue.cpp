@@ -2,7 +2,14 @@
 
 #include <algorithm>
 
-namespace cacos::mt {
+namespace cacos::util::mt {
+
+class WorkerException : public std::runtime_error {
+public:
+    WorkerException()
+        : std::runtime_error("Exception from worker thread") {
+    }
+};
 
 FixedQueue::FixedQueue(size_t threads)
     : threads_(threads) {
@@ -16,10 +23,12 @@ void FixedQueue::add(Task&& task) {
     tasks_.push_back(std::move(task));
 }
 
-void FixedQueue::run() {
+void FixedQueue::start() {
     next_.store(0);
-    for (size_t i = 0; i < std::min(tasks_.size(), threads_); ++i) {
-        workers_.emplace_back([this] { worker(); });
+    size_t workers = std::min(tasks_.size(), threads_);
+    exceptions_.assign(workers, nullptr);
+    for (size_t i = 0; i < workers; ++i) {
+        workers_.emplace_back([this, i] { worker(i); });
     }
 }
 
@@ -32,17 +41,36 @@ void FixedQueue::wait() {
 
     workers_.clear();
     tasks_.clear();
+
+    for (auto& e : exceptions_) {
+        if (e) {
+            auto ptr = std::move(e);
+            e = nullptr;
+
+            try {
+                std::rethrow_exception(ptr);
+            } catch (...) {
+                std::throw_with_nested(WorkerException{});
+            }
+        }
+    }
+
+    exceptions_.clear();
 }
 
-void FixedQueue::worker() {
-    while (true) {
-        size_t cur = next_.fetch_add(1);
-        if (cur >= tasks_.size()) {
-            break;
-        }
+void FixedQueue::worker(size_t idx) {
+    try {
+        while (true) {
+            size_t cur = next_.fetch_add(1);
+            if (cur >= tasks_.size()) {
+                break;
+            }
 
-        tasks_[cur]();
+            tasks_[cur]();
+        }
+    } catch (...) {
+        exceptions_[idx] = std::current_exception();
     }
 }
 
-} // namespace cacos::mt
+} // namespace cacos::util::mt

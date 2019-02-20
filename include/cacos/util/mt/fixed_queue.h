@@ -1,13 +1,12 @@
 #pragma once
 
+#include <atomic>
+#include <exception>
+#include <functional>
+#include <thread>
 #include <vector>
 
-#include <atomic>
-#include <thread>
-
-#include <functional>
-
-namespace cacos::mt {
+namespace cacos::util::mt {
 
 using Task = std::function<void(void)>;
 
@@ -17,18 +16,25 @@ public:
 
     void add(const Task& task);
     void add(Task&& task);
-    void run();
+
+    void start();
     void wait();
 
+    void run() {
+        start();
+        wait();
+    }
+
 private:
-    void worker();
+    void worker(size_t idx);
 
 private:
     size_t threads_;
     std::vector<std::thread> workers_;
+    std::vector<std::exception_ptr> exceptions_;
 
     std::vector<Task> tasks_;
     std::atomic_size_t next_;
 };
 
-} // namespace cacos::mt
+} // namespace cacos::util::mt

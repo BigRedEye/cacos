@@ -64,11 +64,11 @@ script:
 - cd ..
 - build/bin/cacos_test
 
-- cacos config --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID
+- cacos config global --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID
   --url $CACOS_URL
 - cacos status
-- cacos solution list sm07-5
-- cacos solution diff 1068 1069 -v
+- cacos task run list sm07-5
+- cacos task diff 1068 1069 -v
 
 deploy:
   provider: releases

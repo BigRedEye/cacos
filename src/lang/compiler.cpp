@@ -41,7 +41,17 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
     vars.set("arch", util::str(opts::serialize(options.archBits)));
 
     executable::Flags flags = common_;
-    flags.append(debug_);
+    switch (options.buildType) {
+    case opts::BuildType::debug:
+        flags.append(debug_);
+        break;
+    case opts::BuildType::release:
+        flags.append(release_);
+        break;
+    default:
+        throw std::runtime_error("Unknown build type");
+    }
+
     auto args = flags.build(vars);
 
     auto callback = [&, source](process::Result res, std::optional<process::Info>&&) {
@@ -49,7 +59,7 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
             throw std::runtime_error("Compilation time out");
         }
         if (res.returnCode != 0) {
-            throw std::runtime_error(util::join(
+            throw std::runtime_error(util::string::join(
                 "Cannot compile ",
                 source.string(),
                 ":\n\nCompiler stdout:\n",
@@ -61,8 +71,10 @@ std::pair<fs::path, executable::ExecTaskPtr> Compiler::task(
 
     auto result = executable::makeTask(
         exe_,
-        executable::ExecTaskContext{
-            std::move(args), boost::this_process::environment(), std::move(callback)},
+        executable::ExecTaskContext{std::move(args),
+                                    boost::this_process::environment(),
+                                    fs::current_path(),
+                                    std::move(callback)},
         bp::null,
         std::ref(stdOut),
         std::ref(stdErr));

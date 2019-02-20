@@ -7,15 +7,30 @@
 namespace cacos::util {
 
 template<typename It>
-struct Range {
-    It begin() const {
+class Range {
+public:
+    Range(It begin, It end)
+        : begin_(std::move(begin))
+        , end_(std::move(end)) {
+    }
+
+    It begin() {
         return begin_;
     }
 
-    It end() const {
+    It end() {
         return end_;
     }
 
+    const It& begin() const {
+        return begin_;
+    }
+
+    const It& end() const {
+        return end_;
+    }
+
+private:
     It begin_;
     It end_;
 };

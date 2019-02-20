@@ -7,6 +7,8 @@
 
 namespace cacos::html {
 
+using TagId = myhtml_tag_id_t;
+
 struct Attribute {
     std::string_view key;
     std::string_view value;
@@ -31,7 +33,7 @@ public:
     Iterator(myhtml_tree_attr_t* attr);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     bool operator!=(Iterator other) const;
     Attribute operator*() const;
@@ -44,15 +46,22 @@ class Node {
 public:
     class Iterator;
 
-    Node(myhtml_tree_node_t* node);
+    Node(myhtml_tree_node_t* node = nullptr);
+
+    bool operator==(Node other) const;
+    bool operator!=(Node other) const;
 
     Iterator begin() const;
     Iterator end() const;
+
     std::optional<Node> child() const;
-    myhtml_tag_id_t tag() const;
+    Node next() const;
+    Node parent() const;
 
     std::optional<std::string_view> attr(std::string_view key);
 
+    myhtml_tag_id_t tagId() const;
+    std::string_view tag() const;
     std::string_view text() const;
     std::string innerText() const;
     Attributes attrs() const;
@@ -66,7 +75,7 @@ public:
     Iterator(myhtml_tree_node_t* node);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     bool operator!=(Iterator other) const;
     Node operator*() const;
@@ -104,7 +113,7 @@ public:
     Iterator(const myhtml_collection_t* base, size_t pos);
 
     Iterator& operator++();
-    Iterator operator++(int);
+    const Iterator operator++(int);
 
     Node operator*() const;
 
@@ -121,10 +130,10 @@ public:
     Html(std::string_view html);
 
     Html(const Html&) = delete;
-    Html(Html&&);
+    Html(Html&&) noexcept;
 
     Html& operator=(const Html&) = delete;
-    Html& operator=(Html&&);
+    Html& operator=(Html&&) noexcept;
 
     ~Html();
 
@@ -132,6 +141,8 @@ public:
     Collection tags(std::string_view name) const;
     Collection attrs(std::string_view key) const;
     Collection attrs(std::string_view key, std::string_view value) const;
+
+    Node root() const;
 
 private:
     myhtml_tree_t* tree_ = nullptr;

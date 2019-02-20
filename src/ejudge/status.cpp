@@ -17,10 +17,10 @@
 namespace cacos::ejudge::commands {
 
 int status(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge status");
+    cpparg::parser parser("cacos status");
     parser.title("Get ejudge contest status");
 
-    config::Config cfg(parser, config::EJUDGE);
+    config::Config cfg(parser, config::EJUDGE_SESSION);
 
     parser.parse(argc, argv);
 
@@ -46,7 +46,7 @@ int status(int argc, const char* argv[]) {
         } else {
             std::cout << task.name << ": --";
         }
-        std::cout << ", id = " << task.id << std::endl;
+        std::cout << std::endl;
     }
 
     std::cout << termcolor::bold << "Total score: " << client.score() << termcolor::reset

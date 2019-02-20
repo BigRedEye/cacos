@@ -10,6 +10,7 @@ enum Status {
     TL,
     IL,
     ML,
+    WA,
     UNDEFINED,
 };
 

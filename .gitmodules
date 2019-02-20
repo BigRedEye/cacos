@@ -1,6 +1,7 @@
 [submodule "third-party/cpparg"]
 	path = third-party/cpparg
 	url = https://github.com/BigRedEye/cpparg.git
+	branch = dev
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
 	url = https://github.com/ikalnytskyi/termcolor.git
@@ -22,3 +23,6 @@
 [submodule "third-party/cmake-conan"]
 	path = third-party/cmake-conan
 	url = https://github.com/conan-io/cmake-conan.git
+[submodule "third-party/utfcpp"]
+	path = third-party/utfcpp
+	url = https://github.com/nemtrif/utfcpp

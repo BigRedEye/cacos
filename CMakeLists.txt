@@ -33,7 +33,7 @@ endif()
 
 # Detect platform
 set(CACOS_OS "CACOS_OS_UNDEFINED")
-if (WIN32)
+if (WIN32 OR WIN64)
     set(CACOS_OS "CACOS_OS_WINDOWS")
 elseif (APPLE)
     set(CACOS_OS "CACOS_OS_MACOS")
@@ -52,10 +52,12 @@ file(GLOB SOURCES
     src/executable/flags.cpp
 
     src/test/test.cpp
-
     src/test/add/add.cpp
+    src/test/suite/suite.cpp
+    src/test/suite/test.cpp
     src/test/generate/generate.cpp
     src/test/generate/generator.cpp
+    src/test/run/run.cpp
 
     src/process/unix/info.cpp
     src/process/windows/info.cpp
@@ -68,12 +70,14 @@ file(GLOB SOURCES
     src/lang/linker.cpp
     src/lang/translator.cpp
 
+    src/ejudge/diff.cpp
     src/ejudge/html/myhtml.cpp
+    src/ejudge/html/printer.cpp
     src/ejudge/http/client.cpp
     src/ejudge/parser/parser.cpp
     src/ejudge/session.cpp
-    src/ejudge/solution.cpp
     src/ejudge/status.cpp
+    src/ejudge/task.cpp
 
     src/version/version.cpp
 
@@ -81,8 +85,18 @@ file(GLOB SOURCES
 
     src/util/inline_variables.cpp
     src/util/logger.cpp
+    src/util/map.cpp
     src/util/optional_ref.cpp
+    src/util/progress_bar.cpp
     src/util/split.cpp
+    src/util/string.cpp
+    src/util/temp_directory.cpp
+
+    src/util/terminfo/posix.cpp
+    src/util/terminfo/windows.cpp
+    src/util/terminfo/default.cpp
+
+    src/util/diff/unified.cpp
 
     src/util/mt/fixed_queue.cpp
 
@@ -103,8 +117,11 @@ file(GLOB HEADERS
 
     include/cacos/test/test.h
     include/cacos/test/add.h
+    include/cacos/test/suite/suite.h
+    include/cacos/test/suite/test.h
     include/cacos/test/generate/generate.h
     include/cacos/test/generate/generator.h
+    include/cacos/test/run/run.h
 
     include/cacos/process/info.h
     include/cacos/process/limits.h
@@ -118,16 +135,19 @@ file(GLOB HEADERS
     include/cacos/lang/opts.h
     include/cacos/lang/translator.h
 
+    include/cacos/ejudge/diff.h
     include/cacos/ejudge/html/myhtml.h
+    include/cacos/ejudge/html/printer.h
     include/cacos/ejudge/http/client.h
+    include/cacos/ejudge/opts.h
     include/cacos/ejudge/parser/parser.h
     include/cacos/ejudge/parser/task.h
-    include/cacos/ejudge/opts.h
     include/cacos/ejudge/session.h
-    include/cacos/ejudge/solution.h
     include/cacos/ejudge/status.h
+    include/cacos/ejudge/task.h
 
     include/cacos/version/git.h
+    include/cacos/version/id.h
     include/cacos/version/version.h
 
     include/cacos/task/opts.h
@@ -135,11 +155,18 @@ file(GLOB HEADERS
     include/cacos/util/inline_variables.h
     include/cacos/util/ints.h
     include/cacos/util/logger.h
+    include/cacos/util/map.h
     include/cacos/util/optional_ref.h
+    include/cacos/util/progress_bar.h
     include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
+    include/cacos/util/temp_directory.h
+    include/cacos/util/terminfo/posix.h
+    include/cacos/util/terminfo/terminfo.h
     include/cacos/util/util.h
+
+    include/cacos/util/diff/unified.h
 
     include/cacos/util/mt/fixed_queue.h
 
@@ -147,26 +174,33 @@ file(GLOB HEADERS
 )
 
 file(GLOB CONFIGS
-    cacos.toml
-    langs.toml
-    task.toml
+    config/cacos.toml
+    config/langs.toml
+    config/task.toml
 )
 
 file(GLOB CONFIGURABLE_SOURCES
     src/config/default.cpp.in
     src/version/git.cpp.in
+    src/version/id.cpp.in
 )
 
 # Save configs to the binary
 foreach(config ${CONFIGS})
     get_filename_component(sourcefile ${config} NAME)
-    file(READ ${sourcefile} CACOS_CONFIG_FILE_${sourcefile})
+    file(READ ${config} CACOS_CONFIG_FILE_${sourcefile})
 endforeach()
 
 set(CONFIGS_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/config/default.cpp.in)
 set(CONFIGS_POST_CONFIGURE ${CMAKE_CURRENT_BINARY_DIR}/src/default.cpp)
 configure_file(${CONFIGS_PRE_CONFIGURE} ${CONFIGS_POST_CONFIGURE} @ONLY)
 list(APPEND SOURCES ${CONFIGS_POST_CONFIGURE})
+
+string(TIMESTAMP BUILD_TIMESTAMP)
+set(BUILD_ID_PRE_CONFIGURE ${CMAKE_CURRENT_SOURCE_DIR}/src/version/id.cpp.in)
+set(BUILD_ID_CONFIGURE ${CMAKE_CURRENT_BINARY_DIR}/src/id.cpp)
+configure_file(${BUILD_ID_PRE_CONFIGURE} ${BUILD_ID_CONFIGURE} @ONLY)
+list(APPEND SOURCES ${BUILD_ID_CONFIGURE})
 
 # Include git version
 set(_BUILD_TIME_CHECK_GIT ON)
@@ -184,8 +218,13 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS} ${CONFIGURABLE_
 set(CACOS_LIBS)
 
 if(${CACOS_USE_CONAN})
+    set(CACHED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL Sanitizers)
+        set(CMAKE_BUILD_TYPE Debug)
+    endif()
     include(conan)
     conan_cmake_run(CONANFILE conanfile.txt BASIC_SETUP CMAKE_TARGETS BUILD missing)
+    set(CMAKE_BUILD_TYPE ${CACHED_BUILD_TYPE})
     list(APPEND CACOS_LIBS CONAN_PKG::boost CONAN_PKG::libcurl)
 else()
     ## CURL
@@ -231,14 +270,40 @@ add_subdirectory(third-party/dtl EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS dtl::dtl)
 
 ## myhtml
-set(MyHTML_BUILD_WITHOUT_THREADS OFF)
-set(MyCORE_BUILD_WITHOUT_THREADS OFF)
-if (WIN32)
-	set(MyHTML_BUILD_WITHOUT_THREADS ON)
-	set(MyCORE_BUILD_WITHOUT_THREADS ON)
-endif(WIN32)
+find_package(Threads)
+set(MyHTML_BUILD_WITHOUT_THREADS ON CACHE BOOL "" FORCE)
+set(MyCORE_BUILD_WITHOUT_THREADS ON CACHE BOOL "" FORCE)
+if (CMAKE_USE_PTHREADS_INIT)
+    message(STATUS "Found pthread")
+    set(MyHTML_BUILD_WITHOUT_THREADS OFF CACHE BOOL "" FORCE)
+    set(MyCORE_BUILD_WITHOUT_THREADS OFF CACHE BOOL "" FORCE)
+else()
+    message(STATUS "pthread was not found")
+endif()
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
+
+## utfcpp
+set(UTF8_TESTS OFF CACHE BOOL "" FORCE)
+set(UTF8_SAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory(third-party/utfcpp EXCLUDE_FROM_ALL)
+list(APPEND CACOS_LIBS utf8::cpp)
+
+## boost.backtrace
+## https://www.boost.org/doc/libs/develop/doc/html/stacktrace/configuration_and_build.html
+if (UNIX)
+    find_program(ADDR2LINE_PATH addr2line)
+    if(NOT ADDR2LINE_PATH)
+        message(STATUS "Cannot find addr2line; falling back to default stacktrace provider")
+    else()
+        message(STATUS "Found addr2line, compiling with advanced backtrace support")
+        target_compile_definitions(
+            ${CACOS_LIB}
+            PUBLIC
+            BOOST_STACKTRACE_ADDR2LINE_LOCATION=${ADDR2LINE_PATH}
+            BOOST_STACKTRACE_USE_ADDR2LINE)
+    endif()
+endif()
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_definitions(
@@ -246,6 +311,21 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     PUBLIC
     _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
     _WIN32_WINNT=0x0601)
+    target_compile_options(${CACOS_LIB} PUBLIC /utf-8)
+
+    ### Use all cores
+    include(ProcessorCount)
+    ProcessorCount(NPROC)
+    if(NOT NPROC EQUAL 0)
+        target_compile_options(${CACOS_LIB} PUBLIC /utf-8 "/MP${NPROC}")
+    endif()
+endif()
+
+## Warnings
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+    target_compile_options(${CACOS_LIB} PUBLIC -Wall -Wextra -Werror -Wpedantic)
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+    target_compile_options(${CACOS_LIB} PUBLIC /W4)
 endif()
 
 target_compile_definitions(
@@ -310,5 +390,5 @@ endif()
 
 if (${CACOS_BUILD_TESTS})
     enable_testing()
-    add_subdirectory(test)
+    add_subdirectory(test/unit)
 endif()

@@ -1,9 +1,10 @@
 #include "cacos/config/config.h"
 #include "cacos/config/default.h"
 
-#include <cpptoml.h>
-
 #include "cacos/util/logger.h"
+#include "cacos/util/map.h"
+
+#include <cpptoml.h>
 
 #include <cstdlib>
 #include <fstream>
@@ -32,7 +33,7 @@ fs::path homeDir() {
             return str;
         }
     }
-    Logger::warning() << "Unable to determine user home dir";
+    log::warning() << "Unable to determine user home dir";
     return fs::current_path();
 }
 
@@ -97,7 +98,7 @@ fs::path Config::dir(DirType type) const {
         result = workspace();
         break;
     case DirType::binary:
-        result = fs::temp_directory_path() / "cacos";
+        result = fs::temp_directory_path() / "cacos" / "bin";
         break;
     case DirType::test:
         result = workspace() / "test";
@@ -106,7 +107,7 @@ fs::path Config::dir(DirType type) const {
         result = userConfigDir();
         break;
     case DirType::cache:
-        result = workspace() / ".cacos" / "cache";
+        result = cache_.get();
         break;
     case DirType::task:
         result = workspace() / ".cacos";
@@ -178,29 +179,28 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .optional()
             .description("Langs file")
             .value_type("FILE")
-			.default_value(file(FileType::langs).string())
+            .default_value(file(FileType::langs).string())
             .handle([this](std::string_view path) {
                 fs::path langs;
-				try {
-					langs = findConfig(
-						path,
-						file(FileType::langs),
-						"langs").value();
-				} catch (const std::bad_optional_access&) {
-					std::throw_with_nested(
-						ConfigError("Bad optional access")
-					);
+                try {
+                    langs = findConfig(
+                        path,
+                        file(FileType::langs),
+                        "langs").value();
+                } catch (const std::bad_optional_access&) {
+                    std::throw_with_nested(
+                        ConfigError("Bad optional access")
+                    );
                 } catch (...) {
                     std::throw_with_nested(
                         ConfigError("Cannot find langs file")
                     );
                 }
-
                 parseLangs(langs);
             });
     }
 
-    if (mask & EJUDGE) {
+    if (mask & EJUDGE_LOGIN) {
         parser
             .add("login")
             .optional()
@@ -216,7 +216,9 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .handle([&, this](auto sv) {
                 ejudge_.login.password = util::str(sv);
             });
+    }
 
+    if (mask & EJUDGE_SESSION) {
         parser
             .add("cookie")
             .optional()
@@ -232,13 +234,15 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             .handle([&](auto sv) {
                 ejudge_.session.token = util::str(sv);
             });
+    }
 
+    if (mask & (EJUDGE_LOGIN | EJUDGE_SESSION)) {
         parser
             .add("contest_id")
             .optional()
             .description("Ejudge contest_id")
             .handle([&](auto sv) {
-                ejudge_.contestId = util::from_string<i32>(sv);
+                ejudge_.contestId = util::string::from<i32>(sv);
             });
 
         parser
@@ -250,6 +254,31 @@ Config::Config(cpparg::parser& parser, ui64 mask)
             });
     }
 
+    if (mask & TASK_EXE) {
+        parser
+            .add("build")
+            .optional()
+            .description("Build type")
+            .handle([&](auto sv) {
+                auto type = opts::parseBuildType(sv);
+                if (type == opts::BuildType::undefined) {
+                    throw ConfigError("Invalid build type");
+                }
+                task_.exe.compiler.buildType = type;
+            });
+    }
+
+    if (mask & KEEP_WORKING_DIRS) {
+        parser
+            .add("keep-working-dirs")
+            .optional()
+            .description("Keep executable working directories")
+            .no_argument()
+            .handle([this] {
+                cache_.keep(true);
+            });
+    }
+
     parser
         .add('v')
         .optional()
@@ -257,7 +286,7 @@ Config::Config(cpparg::parser& parser, ui64 mask)
         .description("Increase verbosity level")
         .no_argument()
         .handle([] (auto) {
-            Logger::increaseVerbosity();
+            log::detail::Logger::increaseVerbosity();
         });
 
     parser
@@ -325,13 +354,17 @@ void Config::parseConfig() {
         }
 
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.arch")) {
-            if (util::ends_with(*node, "32") || util::ends_with(*node, "86")) {
+            if (util::string::ends(*node, "32") || util::string::ends(*node, "86")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x32;
-            } else if (util::ends_with(*node, "64")) {
+            } else if (util::string::ends(*node, "64")) {
                 task_.exe.compiler.archBits = opts::ArchBits::x64;
             } else {
                 task_.exe.compiler.archBits = opts::ArchBits::undefined;
             }
+        }
+
+        if (auto node = taskConfig_->get_qualified_as<std::string>("exe.build")) {
+            task_.exe.compiler.buildType = opts::parseBuildType(*node);
         }
     }
 }
@@ -355,7 +388,7 @@ void Config::dump(ConfigType type) const {
     }
 
     std::ofstream out(
-        dir(type == ConfigType::global ? DirType::config : DirType::task) / CONFIG_FILE);
+        dir(type == ConfigType::global ? DirType::config : DirType::workspace) / CONFIG_FILE);
     out << *cfg;
 }
 

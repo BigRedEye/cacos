@@ -7,6 +7,7 @@ Linker::Linker(const cpptoml::table& table, const fs::path& binaryDir)
     , binaryDir_(binaryDir) {
 }
 
+/// TODO: remove copypaste from cacos::lang::Compiler::task
 fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpts& options) const {
     InlineVariables vars;
 
@@ -17,7 +18,16 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     vars.set("objs", "compiled");
 
     executable::Flags flags = common_;
-    flags.append(debug_);
+    switch (options.buildType) {
+    case opts::BuildType::debug:
+        flags.append(debug_);
+        break;
+    case opts::BuildType::release:
+        flags.append(release_);
+        break;
+    default:
+        throw std::runtime_error("Unknown build type");
+    }
     auto args = flags.build(vars);
 
     /* add all sources to args */
@@ -44,7 +54,7 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
     }
 
     if (child.exit_code() != 0) {
-        throw std::runtime_error(util::join(
+        throw std::runtime_error(util::string::join(
             "Cannot link object files: ",
             ":\n\nLinker stdout:\n",
             stdOut.get(),

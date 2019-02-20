@@ -2,10 +2,14 @@
 
 #include "cacos/executable/executable.h"
 
-#include "cacos/util/logger.h"
-#include "cacos/util/string.h"
-
 #include "cacos/lang/lang.h"
+
+#include "cacos/test/suite/test.h"
+
+#include "cacos/util/logger.h"
+#include "cacos/util/mt/fixed_queue.h"
+#include "cacos/util/progress_bar.h"
+#include "cacos/util/string.h"
 
 #include <boost/asio.hpp>
 
@@ -21,42 +25,63 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 }
 
 void Generator::run() {
-    executable::Executable exe =
-        config_.langs().runnable({opts_.generatorSources, config_.task().exe.compiler});
+    executable::Executable exe = config_.langs().runnable(
+        {opts_.generatorSources, {opts::hostArch(), opts::BuildType::release}});
 
     InlineVariables vars;
 
-    executable::Flags flags(opts_.args);
     executable::ExecPool pool(
-        process::Limits{process::Limits::unlimited<bytes>, seconds(0.3), seconds(1.0)});
+        process::Limits{process::Limits::unlimited<bytes>, seconds(1.0), seconds(2.0)});
 
-    boost::container::stable_vector<std::string> input;
-    boost::container::stable_vector<fs::path> output;
+    boost::container::stable_vector<std::string> stdIn;
+    boost::container::stable_vector<fs::path> stdOut;
+    boost::container::stable_vector<fs::path> stdErr;
+    std::vector<std::pair<Test, fs::path>> generatedTests;
 
-    size_t doneTasks = 0;
     size_t totalTasks = 0;
+    size_t crashedTasks = 0;
 
+    util::ProgressBar<size_t> bar;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
         ++totalTasks;
 
-        auto res = flags.build(vars);
-        input.emplace_back(vars.parse(opts_.input));
-        output.emplace_back(config_.dir(config::DirType::test) / vars.parse(opts_.testName));
+        std::string name = vars.parse(opts_.name);
+        fs::path dir = config_.dir(config::DirType::cache) / name;
 
-        auto callback = [&](process::Result res, std::optional<process::Info>&& info) {
-            if (res.status != process::status::OK) {
-                Logger::warning().print("Exit status: {}", process::status::serialize(res.status));
+        if (!fs::exists(dir)) {
+            fs::create_directories(dir);
+        }
+
+        stdIn.emplace_back(vars.parse(opts_.genIO.input));
+        stdOut.emplace_back(dir / "gen.stdout");
+        stdErr.emplace_back(dir / "gen.stderr");
+        log::log().print("{}", stdIn.back());
+
+        auto callback = [&, dir, name, i = totalTasks - 1](
+                            process::Result res, std::optional<process::Info>&& info) {
+            if (res.status != process::status::OK || res.returnCode != 0) {
+                ++crashedTasks;
+            } else {
+                test::Test test;
+                test.name(name).type(opts_.type).args({}).input(dir / opts_.testIO.input);
+                if (opts_.type == Type::canonical) {
+                    test.output(dir / opts_.testIO.output);
+                }
+
+                generatedTests.emplace_back(std::move(test), std::move(dir));
             }
 
-            Logger::log().print(
-                "Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+            log::log().print(
+                "Run {} / {}: Exit status: {}, return code = {}, cpu time = {:.3f} s, max rss = "
+                "{:.3f} mb",
+                i,
+                totalTasks,
+                process::status::serialize(res.status),
                 res.returnCode,
                 info->cpuTime.count(),
                 info->maxRss / (1024. * 1024.));
 
-            ++doneTasks;
-            Logger::info().print(
-                "Done {} / {} ({:.1f}%)", doneTasks, totalTasks, doneTasks * 100. / totalTasks);
+            bar.process(1);
         };
 
         std::vector<std::string> args;
@@ -65,18 +90,40 @@ void Generator::run() {
             args.push_back(vars.parse(s));
         }
 
-        executable::ExecTaskContext ctx{args, boost::this_process::environment(), callback};
+        executable::ExecTaskContext ctx{args, boost::this_process::environment(), dir, callback};
         auto task = executable::makeTask(
             exe,
             std::move(ctx),
-            bp::buffer(std::as_const(input.back())),
-            output.back().string(),
-            bp::null);
+            bp::buffer(std::as_const(stdIn.back())),
+            stdOut.back().string(),
+            stdErr.back().string());
 
         pool.push(std::move(task));
     });
 
+    bar.reset(totalTasks);
+
     pool.run();
+
+    util::mt::FixedQueue serializationPool;
+    for (auto& p : generatedTests) {
+        serializationPool.add([&p, this] {
+            auto& [test, dir] = p;
+            test.serialize(config_.dir(config::DirType::test), opts_.force);
+            fs::remove_all(dir);
+        });
+    }
+
+    serializationPool.run();
+
+    fmt::print(std::cout, "Generated {} / {} tests\n", totalTasks - crashedTasks, totalTasks);
+    if (crashedTasks > 0) {
+        fmt::print(std::cout, "Generator crashed in {} / {} tests\n", crashedTasks, totalTasks);
+        fmt::print(
+            std::cout,
+            "Working directories of crashed tests: {}.\nUse --keep-working-dirs to save them\n",
+            config_.dir(config::DirType::cache));
+    }
 }
 
 void Generator::traverse(
@@ -88,7 +135,7 @@ void Generator::traverse(
     } else {
         auto next = std::next(it);
         for (i64 i = it->second.from; i < it->second.to; i += it->second.step) {
-            vars.set(it->first, util::to_string(i));
+            vars.set(it->first, util::string::to(i));
             traverse(next, vars, callback);
         }
     }
