@@ -10,8 +10,8 @@
 namespace cacos::ejudge::commands {
 
 int diff(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge solution diff");
-    parser.title("Compare solutions");
+    cpparg::parser parser("cacos task diff");
+    parser.title("Compare solutions and local files");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);
 

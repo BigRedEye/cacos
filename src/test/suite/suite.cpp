@@ -77,7 +77,7 @@ void Suite::run(
             ++totalTasks;
 
             std::string name = test.name() + (isChecker ? CHECKER_SUFFIX : "");
-            fs::path output = config_.dir(config::DirType::temp) / name / "test.stdout";
+            fs::path output = config_.dir(config::DirType::cache) / name / "test.stdout";
 
             fs::create_directories(output.parent_path());
 
@@ -162,7 +162,7 @@ void Suite::run(
 
     log::log().print("Computing diffs");
 
-    diffQueue.run();
+    diffQueue.start();
     diffQueue.wait();
 
     ui64 crashed = 0;

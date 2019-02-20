@@ -7,6 +7,7 @@
 #include "cacos/task/opts.h"
 
 #include "cacos/util/split.h"
+#include "cacos/util/temp_directory.h"
 
 #include <cpparg/cpparg.h>
 
@@ -56,6 +57,7 @@ enum Mask : ui64 {
     EJUDGE_SESSION = ui64{1} << 2,
     EJUDGE_LOGIN = ui64{1} << 3,
     TASK_EXE = ui64{1} << 4,
+    KEEP_WORKING_DIRS = ui64{1} << 5,
     ALL = ~ui64{0},
 };
 
@@ -101,8 +103,11 @@ private:
 
 private:
     fs::path workspace_;
+    util::TempDirectory cache_;
+
     std::shared_ptr<cpptoml::table> globalConfig_;
     std::shared_ptr<cpptoml::table> taskConfig_;
+
     opts::LangOpts langs_;
     opts::EjudgeOpts ejudge_;
     opts::TaskOpts task_;

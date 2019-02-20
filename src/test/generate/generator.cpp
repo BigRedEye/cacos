@@ -7,6 +7,7 @@
 #include "cacos/test/suite/test.h"
 
 #include "cacos/util/logger.h"
+#include "cacos/util/mt/fixed_queue.h"
 #include "cacos/util/progress_bar.h"
 #include "cacos/util/string.h"
 
@@ -24,8 +25,8 @@ Generator::Generator(const config::Config& cfg, const GeneratorOptions& opts)
 }
 
 void Generator::run() {
-    executable::Executable exe =
-        config_.langs().runnable({opts_.generatorSources, {opts::hostArch(), opts::BuildType::release}});
+    executable::Executable exe = config_.langs().runnable(
+        {opts_.generatorSources, {opts::hostArch(), opts::BuildType::release}});
 
     InlineVariables vars;
 
@@ -35,48 +36,47 @@ void Generator::run() {
     boost::container::stable_vector<std::string> stdIn;
     boost::container::stable_vector<fs::path> stdOut;
     boost::container::stable_vector<fs::path> stdErr;
+    std::vector<std::pair<Test, fs::path>> generatedTests;
 
     size_t totalTasks = 0;
+    size_t crashedTasks = 0;
 
     util::ProgressBar<size_t> bar;
     traverse(opts_.vars.begin(), vars, [&](const InlineVariables& vars) {
         ++totalTasks;
 
         std::string name = vars.parse(opts_.name);
-        fs::path dir = config_.dir(config::DirType::temp) / name;
+        fs::path dir = config_.dir(config::DirType::cache) / name;
 
         if (!fs::exists(dir)) {
             fs::create_directories(dir);
         }
 
-        stdIn.emplace_back(vars.parse(opts_.testIO.input));
+        stdIn.emplace_back(vars.parse(opts_.genIO.input));
         stdOut.emplace_back(dir / "gen.stdout");
         stdErr.emplace_back(dir / "gen.stderr");
+        log::log().print("{}", stdIn.back());
 
         auto callback = [&, dir, name, i = totalTasks - 1](
                             process::Result res, std::optional<process::Info>&& info) {
-            if (res.status != process::status::OK) {
-                log::warning().print("Exit status: {}", process::status::serialize(res.status));
-            } else if (res.returnCode != 0) {
-                log::warning().print("Non zero exit code: {}", res.returnCode);
+            if (res.status != process::status::OK || res.returnCode != 0) {
+                ++crashedTasks;
             } else {
                 test::Test test;
-                test.name(name)
-                    .type(opts_.type)
-                    .args({})
-                    .input(dir / opts_.testIO.input);
+                test.name(name).type(opts_.type).args({}).input(dir / opts_.testIO.input);
                 if (opts_.type == Type::canonical) {
                     test.output(dir / opts_.testIO.output);
                 }
 
-                test.serialize(config_.dir(config::DirType::test), opts_.force);
-                fs::remove_all(dir);
+                generatedTests.emplace_back(std::move(test), std::move(dir));
             }
 
             log::log().print(
-                "Run {} / {}: Return code = {}, cpu time = {:.3f} s, max rss = {:.3f} mb",
+                "Run {} / {}: Exit status: {}, return code = {}, cpu time = {:.3f} s, max rss = "
+                "{:.3f} mb",
                 i,
                 totalTasks,
+                process::status::serialize(res.status),
                 res.returnCode,
                 info->cpuTime.count(),
                 info->maxRss / (1024. * 1024.));
@@ -104,6 +104,26 @@ void Generator::run() {
     bar.reset(totalTasks);
 
     pool.run();
+
+    util::mt::FixedQueue serializationPool;
+    for (auto& p : generatedTests) {
+        serializationPool.add([&p, this] {
+            auto& [test, dir] = p;
+            test.serialize(config_.dir(config::DirType::test), opts_.force);
+            fs::remove_all(dir);
+        });
+    }
+
+    serializationPool.run();
+
+    fmt::print(std::cout, "Generated {} / {} tests\n", totalTasks - crashedTasks, totalTasks);
+    if (crashedTasks > 0) {
+        fmt::print(std::cout, "Generator crashed in {} / {} tests\n", crashedTasks, totalTasks);
+        fmt::print(
+            std::cout,
+            "Working directories of crashed tests: {}.\nUse --keep-working-dirs to save them\n",
+            config_.dir(config::DirType::cache));
+    }
 }
 
 void Generator::traverse(

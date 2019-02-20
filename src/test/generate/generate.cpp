@@ -37,9 +37,17 @@ int generateImpl(int argc, const char* argv[]) {
         .handle([&](auto sv) {
             auto splitted = util::split(sv, ", ");
             for (auto&& path : splitted) {
-                if (!path.empty()) {
-                    opts.generatorSources.emplace_back(path);
+                if (path.empty()) {
+                    continue;
                 }
+                fs::path source = path;
+                if (source.is_relative()) {
+                    source = fs::absolute(source);
+                }
+                if (!fs::exists(source)) {
+                    throw std::runtime_error(util::string::join("File ", source.string(), " does not exist"));
+                }
+                opts.generatorSources.emplace_back(source);
             }
         });
 
@@ -94,7 +102,7 @@ int generateImpl(int argc, const char* argv[]) {
 
     parser
         .add("gen.stdin")
-        .optional()
+        .required()
         .value_type("STRING")
         .description("Stdin for generator")
         .store(opts.genIO.input);
@@ -129,7 +137,7 @@ int generateImpl(int argc, const char* argv[]) {
 
     opts.type = type;
 
-    config::Config cfg(parser, config::LANGS | config::TASK_EXE);
+    config::Config cfg(parser, config::LANGS | config::TASK_EXE | config::KEEP_WORKING_DIRS);
 
     parser.parse(argc, argv);
     Generator generator(cfg, opts);

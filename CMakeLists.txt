@@ -90,6 +90,7 @@ file(GLOB SOURCES
     src/util/progress_bar.cpp
     src/util/split.cpp
     src/util/string.cpp
+    src/util/temp_directory.cpp
 
     src/util/terminfo/posix.cpp
     src/util/terminfo/windows.cpp
@@ -160,9 +161,10 @@ file(GLOB HEADERS
     include/cacos/util/ranges.h
     include/cacos/util/split.h
     include/cacos/util/string.h
-    include/cacos/util/util.h
+    include/cacos/util/temp_directory.h
     include/cacos/util/terminfo/posix.h
     include/cacos/util/terminfo/terminfo.h
+    include/cacos/util/util.h
 
     include/cacos/util/diff/unified.h
 

@@ -4,8 +4,8 @@
 
 #include <termcolor/termcolor.hpp>
 
-#include <boost/stacktrace.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <boost/stacktrace.hpp>
 
 #include <stdexcept>
 
@@ -53,12 +53,21 @@ private:
 
 [[noreturn]] void terminate_handler() {
     std::cerr << termcolor::reset << termcolor::red << "Terminate called ";
-    if (std::current_exception()) {
-        std::cerr << "after throwing an exception:\n"
-                  << boost::current_exception_diagnostic_information() << '\n';
+
+    std::exception_ptr ptr = std::current_exception();
+    if (ptr) {
+        std::cerr << "after throwing an exception:\n";
+        try {
+            std::rethrow_exception(ptr);
+        } catch (const std::exception& e) {
+            printException(e);
+        } catch (...) {
+            std::cerr << boost::current_exception_diagnostic_information() << '\n';
+        }
     } else {
         std::cerr << "without active exception\n";
     }
+
     try {
         cacos::fs::path path = cacos::fs::temp_directory_path() / "cacos.stacktrace";
         std::ofstream ofs(path);
@@ -67,6 +76,7 @@ private:
     } catch (...) {
         std::cerr << "Stacktrace dumping failed\n";
     }
+
     std::cerr << termcolor::reset;
     std::abort();
 }

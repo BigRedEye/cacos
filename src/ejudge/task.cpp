@@ -102,8 +102,8 @@ int statement(int argc, const char* argv[]) {
 }
 
 int run(int argc, const char* argv[]) {
-    cpparg::command_parser parser("cacos ejudge task");
-    parser.title("Manage ejudge tasks");
+    cpparg::command_parser parser("cacos task run");
+    parser.title("Manage runs");
 
     // clang-format off
     parser
@@ -121,7 +121,7 @@ int run(int argc, const char* argv[]) {
 }
 
 int task(int argc, const char* argv[]) {
-    cpparg::command_parser parser("cacos ejudge task");
+    cpparg::command_parser parser("cacos task");
     parser.title("Manage ejudge tasks");
 
     // clang-format off

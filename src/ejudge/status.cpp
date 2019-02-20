@@ -17,7 +17,7 @@
 namespace cacos::ejudge::commands {
 
 int status(int argc, const char* argv[]) {
-    cpparg::parser parser("cacos ejudge status");
+    cpparg::parser parser("cacos status");
     parser.title("Get ejudge contest status");
 
     config::Config cfg(parser, config::EJUDGE_SESSION);

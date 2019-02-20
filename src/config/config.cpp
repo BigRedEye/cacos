@@ -98,7 +98,7 @@ fs::path Config::dir(DirType type) const {
         result = workspace();
         break;
     case DirType::binary:
-        result = fs::temp_directory_path() / "cacos";
+        result = fs::temp_directory_path() / "cacos" / "bin";
         break;
     case DirType::test:
         result = workspace() / "test";
@@ -107,7 +107,7 @@ fs::path Config::dir(DirType type) const {
         result = userConfigDir();
         break;
     case DirType::cache:
-        result = workspace() / ".cacos" / "cache";
+        result = cache_.get();
         break;
     case DirType::task:
         result = workspace() / ".cacos";
@@ -265,6 +265,17 @@ Config::Config(cpparg::parser& parser, ui64 mask)
                     throw ConfigError("Invalid build type");
                 }
                 task_.exe.compiler.buildType = type;
+            });
+    }
+
+    if (mask & KEEP_WORKING_DIRS) {
+        parser
+            .add("keep-working-dirs")
+            .optional()
+            .description("Keep executable working directories")
+            .no_argument()
+            .handle([this] {
+                cache_.keep(true);
             });
     }
 
