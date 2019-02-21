@@ -289,22 +289,6 @@ set(UTF8_SAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(third-party/utfcpp EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS utf8::cpp)
 
-## boost.backtrace
-## https://www.boost.org/doc/libs/develop/doc/html/stacktrace/configuration_and_build.html
-if (UNIX)
-    find_program(ADDR2LINE_PATH addr2line)
-    if(NOT ADDR2LINE_PATH)
-        message(STATUS "Cannot find addr2line; falling back to default stacktrace provider")
-    else()
-        message(STATUS "Found addr2line, compiling with advanced backtrace support")
-        target_compile_definitions(
-            ${CACOS_LIB}
-            PUBLIC
-            BOOST_STACKTRACE_ADDR2LINE_LOCATION=${ADDR2LINE_PATH}
-            BOOST_STACKTRACE_USE_ADDR2LINE)
-    endif()
-endif()
-
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     target_compile_definitions(
     ${CACOS_LIB}

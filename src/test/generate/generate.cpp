@@ -102,7 +102,8 @@ int generateImpl(int argc, const char* argv[]) {
 
     parser
         .add("gen.stdin")
-        .required()
+        .optional()
+        .default_value(" ")
         .value_type("STRING")
         .description("Stdin for generator")
         .store(opts.genIO.input);

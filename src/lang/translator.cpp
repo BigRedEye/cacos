@@ -7,7 +7,11 @@ Translator::Translator(const cpptoml::table& table) {
     if (!exe) {
         throw std::runtime_error("Cannot find executable");
     }
-    exe_ = executable::Executable(bp::search_path(*exe).string());
+    fs::path exePath = bp::search_path(*exe).string();
+    if (exePath.empty()) {
+        throw std::runtime_error("Cannot find executable " + *exe);
+    }
+    exe_ = executable::Executable(exePath);
 
     auto flags = table.get_array_of<std::string>("flags");
     if (flags) {

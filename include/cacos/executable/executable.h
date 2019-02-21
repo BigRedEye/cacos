@@ -139,7 +139,7 @@ public:
     }
 
 private:
-    static constexpr std::chrono::microseconds defaultTimeout = std::chrono::milliseconds(1);
+    static constexpr std::chrono::microseconds defaultTimeout = std::chrono::microseconds(100);
 
     size_t workers_;
     process::Limits limits_;

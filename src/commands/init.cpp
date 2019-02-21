@@ -41,7 +41,7 @@ int init(int argc, const char* argv[]) {
 
     for (auto dir : required_dirs) {
         if (!fs::create_directories(workspace / dir)) {
-            throw std::runtime_error("Cannot create directory");
+            throw std::runtime_error("Cannot create directory " + (workspace / dir).string());
         }
     }
 
