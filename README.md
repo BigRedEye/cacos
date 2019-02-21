@@ -1,7 +1,18 @@
 # cacos
 [![Build Status](https://travis-ci.com/BigRedEye/cacos.svg?token=HabA2F1p73cnpyrz3Jdj&branch=dev)](https://travis-ci.com/BigRedEye/cacos)
+[![Build status](https://ci.appveyor.com/api/projects/status/TODO/branch/dev?svg=true)](https://ci.appveyor.com/project/BigRedEye/cacos)
+[![GitHub tag](https://img.shields.io/github/tag/BigRedEye/cacos.svg)](https://semver.org)
+[![license](https://img.shields.io/github/license/BigRedEye/cacos.svg)](https://github.com/BigRedEye/cacos/blob/master/LICENSE)
 
 Клиент ejudge и локальная система тестирования.
+
+<a href="https://asciinema.org/a/eWHtvCZtt9fi4jWrBpEGsTNLV?autoplay=1&speed=1.5" target="_blank"><img src="https://asciinema.org/a/eWHtvCZtt9fi4jWrBpEGsTNLV.svg" alt="asciicast" width=600/></a>>
+
+## Оглавление
+* [Установка](#установка)
+  * [Зависимости](#зависимости)
+  * [Сборка](#сборка)
+* [Использование](#использование)
 
 ## Установка
 
@@ -24,6 +35,12 @@
 ```
 # pip install conan
 ```
+И проверить, доступен ли conan в PATH:
+```
+$ conan --version
+```
+
+В качестве альтернативы можно использовать системные библиотеки:
 
 ###### Arch Linux
 ```
@@ -44,12 +61,12 @@ $ cd cacos/build
 ###### С использованием conan:
 ```sh
 $ cmake .. -DCMAKE_BUILD_TYPE=Release -DCACOS_USE_CONAN=ON
-$ cmake --build . --parallel $(nproc)
+$ cmake --build . --parallel $(nproc) --config Release
 ```
 ###### С использованием системных библиотек:
 ```sh
 $ cmake .. -DCMAKE_BUILD_TYPE=Release -DCACOS_USE_CONAN=OFF
-$ cmake --build . --parallel $(nproc)
+$ cmake --build . --parallel $(nproc) --config Release
 ```
 
 #### Установка
