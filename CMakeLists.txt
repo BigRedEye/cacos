@@ -41,6 +41,14 @@ elseif (UNIX)
     set(CACOS_OS "CACOS_OS_UNIX")
 endif()
 
+# Static CRT
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG})
+    string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+    string(REPLACE "/MD" "/MT" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    string(REPLACE "/MD" "/MT" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+endif()
+
 # Sources
 file(GLOB SOURCES
     src/config/config.cpp
