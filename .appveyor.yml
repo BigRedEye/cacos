@@ -46,8 +46,8 @@ build_script:
 
   - bin\cacos config global --login %EJUDGE_USERNAME% --password %EJUDGE_PASSWORD% --url %EJUDGE_URL% --contest_id %EJUDGE_CONTEST_ID%
   - bin\cacos status -v -v
-  - cacos task run list sm07-5
-  - cacos task diff 1068 1069 -v
+  - bin\cacos task run list sm07-5
+  - bin\cacos task diff 1068 1069 -v
 
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - dumpbin /DEPENDENTS bin\cacos.exe
