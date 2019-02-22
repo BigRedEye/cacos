@@ -25,8 +25,8 @@ deploy:
     artifact: cacos-msvc
     prerelease: true
     on:
-      branch: master
-        appveyor_repo_tag: true
+      branch: dev
+      appveyor_repo_tag: true
 
 install:
   - git submodule update --init --recursive
