@@ -4,6 +4,8 @@
 
 #include "cacos/util/logger.h"
 
+#include <string>
+
 namespace cacos::ejudge {
 
 AuthenticationError::AuthenticationError(const std::string& what)
@@ -16,12 +18,12 @@ SessionError::SessionError(const std::string& what)
 
 class Session::Cache {
 public:
-    struct Responce {
+    struct Response {
         std::string data;
         std::chrono::high_resolution_clock::time_point expiration;
     };
 
-    std::optional<Responce*> get(const std::string& req) {
+    std::optional<Response*> get(const std::string& req) {
         auto it = cache_.find(req);
         if (it == cache_.end()) {
             return std::nullopt;
@@ -32,12 +34,12 @@ public:
 
     std::string_view set(const std::string& key, const std::string& value) {
         auto [it, inserted] = cache_.emplace(
-            key, Responce{value, std::chrono::high_resolution_clock::now() + CACHE_EXPIRATION});
+            key, Response{value, std::chrono::high_resolution_clock::now() + CACHE_EXPIRATION});
         return it->second.data;
     }
 
 private:
-    std::unordered_map<std::string, Responce> cache_;
+    std::unordered_map<std::string, Response> cache_;
 };
 
 Session::Session(const config::Config& config)
@@ -109,6 +111,7 @@ void Session::reauth() {
             config_.ejudge().login.login.value(),
             "&password=",
             config_.ejudge().login.password.value()));
+    log::debug().print("Login page:\n{}", loginPage);
 
     html::Html page(loginPage);
     html::Collection titles = page.tags("title");
@@ -117,6 +120,7 @@ void Session::reauth() {
             throw AuthenticationError("Permission denied");
         }
     }
+
     html::Collection tags = page.attrs("href");
     std::optional<std::string> url;
     for (auto node : tags) {
@@ -124,22 +128,30 @@ void Session::reauth() {
     }
 
     if (!url) {
-        throw AuthenticationError("Cannot parse ejudge responce: href not found");
+        throw AuthenticationError("Cannot parse ejudge response: href not found");
     }
 
     // https://caos.ejudge.ru/ej/client/main-page/Sa1a9fcc0f19fe4a1?lt=1
     //                                            ^^^^^^^^^^^^^^^^^
-    auto tokens = util::split(*url, "/?");
+    auto tokens = util::split(*url, "/?&");
     if (tokens.size() < 2) {
-        throw std::runtime_error("Cannot parse ejudge responce: weird link");
+        throw std::runtime_error("Cannot parse ejudge response: weird link");
     }
-    token_ = tokens[tokens.size() - 2];
-    if (token_.size() != TOKEN_SIZE) {
-        throw AuthenticationError("Cannot parse ejudge responce: weird token");
+
+    for (auto token : tokens) {
+        if (token.size() == TOKEN_SIZE && util::string::starts(token, "S")) {
+            token_ = token;
+        } else if (util::string::starts(token, "SID=")) {
+            throw AuthenticationError("Unsupported ejudge url");
+        }
+    }
+
+    if (token_.empty()) {
+        throw AuthenticationError("Cannot parse ejudge response: weird token");
     }
 
     saveSession();
-    log::log().print("Sucessfuly parsed token");
+    log::log().print("Successfully parsed token: {}", token_);
 }
 
 std::string Session::buildUrl(std::string_view base) {
@@ -162,10 +174,12 @@ std::string_view Session::getImpl(std::string_view base, std::string_view params
     }
     if (auto res = cache_->get(url)) {
         if ((*res)->expiration > std::chrono::high_resolution_clock::now()) {
+            log::debug().print("Found cached page: url {}", url);
             return (*res)->data;
         }
     }
     std::string result = client_.get(url);
+    log::debug().print("Get page impl: url {}, page:\n{}", url, result);
     return cache_->set(url, result);
 }
 
@@ -173,12 +187,15 @@ html::Html Session::getPageImpl(std::string_view base, std::string_view params) 
     html::Html page(getImpl(base, params));
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
-        if (node.child()->text().find("Permission denied") != std::string_view::npos) {
-            throw AuthenticationError("Permission denied");
-        }
-        if (node.child()->text().find("[]: Error: Invalid session") != std::string_view::npos) {
-            throw SessionError("Invalid session");
-        }
+        auto throwIfContains = [&](std::string_view s, auto dummy) {
+            using Error = std::decay_t<decltype(dummy)>;
+            if (node.child()->text().find(s) != std::string_view::npos) {
+                throw Error(util::str(s));
+            }
+        };
+        throwIfContains("Permission denied", AuthenticationError{""});
+        throwIfContains("[]: Error: Invalid session", SessionError{""});
+        throwIfContains("[]: Error: Invalid contest", SessionError{""});
     }
 
     return page;

@@ -67,7 +67,7 @@ private:
      */
     static constexpr ui32 TOKEN_SIZE = 17;
     static constexpr ui32 MAX_RETRIES = 5;
-    static constexpr auto RETRY_DELAY = std::chrono::milliseconds(100);
+    static constexpr auto RETRY_DELAY = std::chrono::milliseconds(1000);
 
     const config::Config& config_;
     http::Client client_;
