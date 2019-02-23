@@ -7,7 +7,6 @@
 
 #include <cpparg/cpparg.h>
 
-#include <filesystem>
 #include <fstream>
 #include <string>
 
