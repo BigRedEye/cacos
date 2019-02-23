@@ -224,6 +224,8 @@ add_library(${CACOS_LIB} STATIC ${HEADERS} ${SOURCES} ${CONFIGS} ${CONFIGURABLE_
 # Dependecies
 
 set(CACOS_LIBS)
+set(CACOS_INCLUDES)
+list(APPEND CACOS_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include/)
 
 if(${CACOS_USE_CONAN})
     set(CACHED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
@@ -238,7 +240,8 @@ else()
     ## CURL
     find_package(CURL)
     if (${CURL_FOUND})
-        list(APPEND CACOS_LIBS CURL::libcurl)
+        list(APPEND CACOS_LIBS ${CURL_LIBRARIES})
+        list(APPEND CACOS_INCLUDES ${CURL_INCLUDE_DIRS})
     else()
         message(STATUS " libcurl was not found; compiling without ejudge client")
     endif()
@@ -290,6 +293,7 @@ else()
 endif()
 add_subdirectory(third-party/myhtml EXCLUDE_FROM_ALL)
 list(APPEND CACOS_LIBS myhtml_static)
+list(APPEND CACOS_INCLUDES ${MYHTML_INCLUDE_DIRS})
 
 ## utfcpp
 set(UTF8_TESTS OFF CACHE BOOL "" FORCE)
@@ -336,11 +340,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STRE
 endif()
 
 target_link_libraries(${CACOS_LIB} PUBLIC ${CACOS_LIBS})
-
-target_include_directories(${CACOS_LIB} PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/
-    ${MYHTML_INCLUDE_DIRS}
-)
+target_include_directories(${CACOS_LIB} PUBLIC ${CACOS_INCLUDES})
 
 # Executable
 
