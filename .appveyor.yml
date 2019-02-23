@@ -16,14 +16,14 @@ cache:
 
 artifacts:
   - path: release
-    name: cacos-msvc
+    name: cacos-windows-x64
     type: zip
 
 deploy:
   - provider: GitHub
     auth_token:
-      secure:
-    artifact: cacos-msvc
+      secure: sWX4wYH0ZYhsKcO3KuQfsIg46ToY2A7YsRjmumo2PugdMdEtAWxr/yqMQGIOci9S
+    artifact: cacos-windows-x64
     prerelease: true
     on:
       branch: dev
