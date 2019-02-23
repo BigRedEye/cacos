@@ -51,8 +51,8 @@ install:
 
 - wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz -O ~/cmake-3.8.0.tar.gz
 - mkdir ~/cmake-3.8.0
-- tar -zxvf ~/cmake-3.8.0.tar.gz -C ~/cmake-3.8.0
-- CMAKE=~/cmake-3.8.0/bin/cmake
+- tar -zxvf ~/cmake-3.8.0.tar.gz -C ~
+- CMAKE=~/cmake-3.8.0-Linux-x86_64/bin/cmake
 - $CMAKE --version
 
 script:
