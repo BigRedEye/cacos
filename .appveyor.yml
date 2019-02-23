@@ -9,6 +9,7 @@ environment:
     secure: nKhqrii9GfKi0FUt28RSKaSRk80W/svbthuxhMOEcXB/RZI2h7eDMBT61shSfV7C
   EJUDGE_CONTEST_ID:
     secure: hYfweu2dQ+uwPKhugg1peA==
+  APPVEYOR_RDP_PASSWORD: theBestPasswordEver_228
 
 cache:
   - C:\.conan -> conanfile.txt
@@ -43,6 +44,8 @@ build_script:
 
   - cmake .. -DCACOS_USE_CONAN=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64"
   - cmake --build . --config Release
+
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
   - bin\cacos config global --login "%EJUDGE_USERNAME%" --password "%EJUDGE_PASSWORD%" --url "%EJUDGE_URL%" --contest_id "%EJUDGE_CONTEST_ID%"
   - bin\cacos status
