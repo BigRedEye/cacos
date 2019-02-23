@@ -12,7 +12,6 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-8
-    - cmake
 
 cache:
   directories:
@@ -25,10 +24,6 @@ matrix:
     python: '3.7'
     env: CACOS_DEPLOY=ON
 
-    install:
-    - pip install -U pip
-    - pip install conan
-
     before_script:
     - export CXX="clang++" CC="clang"
     - pip --version
@@ -40,29 +35,35 @@ matrix:
     python: '3.7'
     env: CACOS_DEPLOY=OFF
 
-    install:
-    - pip install -U pip
-    - pip install conan
-
     before_script:
     - export CXX="g++-8" CC="gcc-8"
     - pip --version
     - conan --version
     - conan user
 
-
 before_install:
 - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
 - git submodule update --init --recursive
 
+install:
+- pip install -U pip
+- pip install conan
+
+- wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz -O ~/cmake-3.8.0.tar.gz -o /dev/null
+- mkdir ~/cmake-3.8.0
+- tar -zxvf ~/cmake-3.8.0.tar.gz -C ~ > /dev/null
+- CMAKE=~/cmake-3.8.0-Linux-x86_64/bin/cmake
+- $CMAKE --version
+
 script:
 - mkdir build
 - cd build
-- cmake .. -DCMAKE_BUILD_TYPE=Release -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
-- cmake --build . --parallel $(nproc)
-- sudo cmake --build . --target install
+- $CMAKE .. -DCMAKE_BUILD_TYPE=Release -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
+- $CMAKE --build .
+- sudo $CMAKE --build . --target install
 - cd ..
 - build/bin/cacos_test
+- cp build/bin/cacos build/bin/cacos-linux-x64
 
 - cacos config global --login $CACOS_LOGIN --password $CACOS_PASSWORD --contest_id $CACOS_CONTEST_ID
   --url $CACOS_URL
@@ -75,7 +76,7 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: IlcahBhty7IkU/UKtZAlv/tF4tWek2hXQxeHPhQdXSYe36OSkrf9gqRnTR+3S5auvbj52k4Acxp4qC0TkPifjxzTV+04e8Y87DuhUIa8xfK5l8SbkaA0jexD7pWgIhgV3/vvUyr82awBEZUgP2cGSdI5X78q0OJXWWWzJTAgIuieE0ih0j7tJtp91Cd+EHI2eIC4Mjs4HKcAC2m+ngl1hu4dGdUuPHasX+FXWkthXbdAPLhfPbX0p6/fnkPRBevyzHoRLZ5m+o02VlTzNtrVpbKM/QTb61p43NVpRsJhE+ceQHAJynnRjVDGf1J+Y943mLCKc0rbIkw9LjDUO6M19YvToLCqkq34LiJROv8nUkLciDlHiz3ZfCdw5JMuMXC6uhc5NI2cyWCivHAVENcQl6TfwLDa1yXwcnL6qV+CH0YX9jY3Tt4fgdWoiEX5vaV8yjiBQAZe6bK1FiYz/hRrkWLD4wN6eCFslDCAeRpiFZs+Z0jpJNyg/9EUFDAvdbhQlJieQDZOPEGU1bG5yv85W5avQNnjybtcfrDNp4BtntCZRt90XAbdoY/Q6Oe+U9670lSOOv4K8xj17maGl6mfnZi4gJSz/1D6xDpNk+sClS+sVVm9BMdzcSRoQruS3hy3m3Tr6M8+B+CU+TN1Xu4BCTlNM9Z5Zb/21UqdYQgSUMw=
-  file: build/bin/cacos
+  file: build/bin/cacos-linux-x64
   draft: true
   on:
     condition: $CACOS_DEPLOY = ON

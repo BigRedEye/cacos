@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.8)
 
 project(cacos)
 
@@ -349,16 +349,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${CACOS_LIB})
 
 
 # LTO
-
-cmake_policy(SET CMP0069 NEW)
-include(CheckIPOSupported)
-check_ipo_supported(RESULT result OUTPUT output)
-if(result)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+if(CMAKE_VERSION LESS "3.9.0")
+    message(STATUS "Old cmake version; LTO is not supported.")
 else()
-    message(WARNING "LTO is not supported: ${output}")
+    cmake_policy(SET CMP0069 NEW)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT output)
+    if(result)
+        set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    else()
+        message(WARNING "LTO is not supported: ${output}")
+    endif()
 endif()
-
 
 # Installation
 
