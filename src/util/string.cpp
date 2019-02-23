@@ -14,7 +14,7 @@ std::string escape(std::string_view s) {
     std::string result;
     result.reserve(s.size());
 
-    for (char c : s) {
+    for (unsigned char c : s) {
         if (std::isprint(c)) {
             result.push_back(c);
         } else if (std::isspace(c)) {

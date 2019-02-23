@@ -1,6 +1,6 @@
 # cacos
 [![Build Status](https://travis-ci.com/BigRedEye/cacos.svg?token=HabA2F1p73cnpyrz3Jdj&branch=dev)](https://travis-ci.com/BigRedEye/cacos)
-[![Build status](https://ci.appveyor.com/api/projects/status/TODO/branch/dev?svg=true)](https://ci.appveyor.com/project/BigRedEye/cacos)
+[![Build status](https://ci.appveyor.com/api/projects/status/11f6fl01ikur01ts/branch/dev?svg=true)](https://ci.appveyor.com/project/BigRedEye/cacos/branch/dev)
 [![GitHub tag](https://img.shields.io/github/tag/BigRedEye/cacos.svg)](https://semver.org)
 [![license](https://img.shields.io/github/license/BigRedEye/cacos.svg)](https://github.com/BigRedEye/cacos/blob/master/LICENSE)
 
@@ -19,7 +19,7 @@
     * [Условия](#просмотр-условий)
     * [Посылки](#список-посылок-по-задаче)
     * [Сравнение посылок](#сравнение-посылок)
-  * [Тестирование](тестирование)
+  * [Тестирование](#тестирование)
     * [Добавление тестов](#добавление-тестов)
     * [Генерация тестов](#генерация-тестов)
     * [Запуск тестов](#запуск-тестов)

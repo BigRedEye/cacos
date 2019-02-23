@@ -31,7 +31,7 @@ std::vector<Task> Parser::tasks() const {
             }
             if (children.size() != 13) {
                 throw ParserError(
-                    "Cannot parse ejudge responce: weird summary table size " +
+                    "Cannot parse ejudge response: weird summary table size " +
                     util::string::to(children.size()));
             }
 

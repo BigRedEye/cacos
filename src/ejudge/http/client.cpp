@@ -5,7 +5,7 @@
 #include "cacos/util/logger.h"
 #include "cacos/util/string.h"
 
-#include "curl/curl.h"
+#include <curl/curl.h>
 
 #include <stdexcept>
 
@@ -85,8 +85,9 @@ public:
             if (!fs::exists(cookies_)) {
                 std::ofstream ofs(cookies_);
             }
-            curl_easy_setopt(curl_, CURLOPT_COOKIEJAR, cookies_.c_str());
+            log::debug().print("Cookie file: {}", cookies_.string());
             curl_easy_setopt(curl_, CURLOPT_COOKIEFILE, cookies_.c_str());
+            curl_easy_setopt(curl_, CURLOPT_COOKIEJAR, cookies_.c_str());
         }
 
         for (auto&& c : overridenCookies_) {
@@ -101,7 +102,7 @@ public:
         if constexpr (type == request::Type::POST) {
             curl_easy_setopt(curl_, CURLOPT_POSTFIELDS, params.data.data());
         }
-        curl_easy_setopt(curl_, CURLOPT_COOKIE, "FLUSH");
+        curl_easy_setopt(curl_, CURLOPT_COOKIELIST, "FLUSH");
 
         perform();
 
