@@ -59,7 +59,7 @@ script:
 - mkdir build
 - cd build
 - $CMAKE .. -DCMAKE_BUILD_TYPE=Release -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
-- $CMAKE --build . --parallel $(nproc)
+- $CMAKE --build .
 - sudo $CMAKE --build . --target install
 - cd ..
 - build/bin/cacos_test
