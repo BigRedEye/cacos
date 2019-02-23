@@ -4,7 +4,7 @@ environment:
   EJUDGE_USERNAME:
     secure: Yc8Fl+yuMK2kOv5h4K2ZKg==
   EJUDGE_PASSWORD:
-    secure: gFn3C2bhfAV2QVsHhiVWwzBw00LFoRb75hega9l982RnfYkjjQXRvyajXD6qeqFj
+    secure: Lu1HkbqgKr4y3G034W3UNQtkDJQIEJfT2Uk2bVf6Y5BpwaRdMVnV1xp5l2xfmetj
   EJUDGE_URL:
     secure: nKhqrii9GfKi0FUt28RSKaSRk80W/svbthuxhMOEcXB/RZI2h7eDMBT61shSfV7C
   EJUDGE_CONTEST_ID:
