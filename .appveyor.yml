@@ -37,6 +37,7 @@ install:
   - pip.exe install conan
   - conan user
   - conan --version
+  - cmake --version
 
 build_script:
   - mkdir %APPVEYOR_BUILD_FOLDER%\build
