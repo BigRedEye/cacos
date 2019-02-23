@@ -12,7 +12,6 @@ addons:
     - ubuntu-toolchain-r-test
     packages:
     - g++-8
-    - cmake
 
 cache:
   directories:
@@ -25,10 +24,6 @@ matrix:
     python: '3.7'
     env: CACOS_DEPLOY=ON
 
-    install:
-    - pip install -U pip
-    - pip install conan
-
     before_script:
     - export CXX="clang++" CC="clang"
     - pip --version
@@ -40,28 +35,32 @@ matrix:
     python: '3.7'
     env: CACOS_DEPLOY=OFF
 
-    install:
-    - pip install -U pip
-    - pip install conan
-
     before_script:
     - export CXX="g++-8" CC="gcc-8"
     - pip --version
     - conan --version
     - conan user
 
-
 before_install:
 - echo -e "machine github.com\n  login $GITHUB_TOKEN" > ~/.netrc
 - git submodule update --init --recursive
-- cmake --version
+
+install:
+- pip install -U pip
+- pip install conan
+
+- wget https://cmake.org/files/v3.8/cmake-3.8.0-Linux-x86_64.tar.gz -O ~/cmake-3.8.0.tar.gz
+- mkdir ~/cmake-3.8.0
+- tar -zxvf ~/cmake-3.8.0.tar.gz -C ~/cmake-3.8.0
+- CMAKE=~/cmake-3.8.0/bin/cmake
+- $CMAKE --version
 
 script:
 - mkdir build
 - cd build
-- cmake .. -DCMAKE_BUILD_TYPE=Release -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
-- cmake --build . --parallel $(nproc)
-- sudo cmake --build . --target install
+- $CMAKE .. -DCMAKE_BUILD_TYPE=Release -DCACOS_BUILD_TESTS=ON -DCACOS_USE_CONAN=ON
+- $CMAKE --build . --parallel $(nproc)
+- sudo $CMAKE --build . --target install
 - cd ..
 - build/bin/cacos_test
 - cp build/bin/cacos build/bin/cacos-linux-x64
