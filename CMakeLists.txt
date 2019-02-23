@@ -307,7 +307,7 @@ endif()
 
 ## Warnings
 if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang" OR ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
-    target_compile_options(${CACOS_LIB} PUBLIC -Wall -Wextra -Werror -Wpedantic)
+    target_compile_options(${CACOS_LIB} PUBLIC -Wall -Wextra -Wpedantic)
 elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
     target_compile_options(${CACOS_LIB} PUBLIC /W4)
 endif()
