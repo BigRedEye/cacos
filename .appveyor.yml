@@ -12,6 +12,7 @@ environment:
 
 cache:
   - C:\.conan -> conanfile.txt
+  - C:\Users\appveyor\.conan -> conanfile.txt
 
 artifacts:
   - path: release
