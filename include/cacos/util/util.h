@@ -10,7 +10,7 @@
 #if __has_include(<filesystem>)
 #include <filesystem>
 namespace stdfs = std::filesystem;
-#elif __has_include(<expiremental/filesystem>)
+#elif __has_include(<experimental/filesystem>)
 #include <experimental/filesystem>
 namespace stdfs = std::experimental::filesystem;
 #elif __has_include(<boost/filesystem.hpp>)
