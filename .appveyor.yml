@@ -4,12 +4,11 @@ environment:
   EJUDGE_USERNAME:
     secure: Yc8Fl+yuMK2kOv5h4K2ZKg==
   EJUDGE_PASSWORD:
-    secure: Lu1HkbqgKr4y3G034W3UNQtkDJQIEJfT2Uk2bVf6Y5BpwaRdMVnV1xp5l2xfmetj
+    secure: v5a6OOMcJQgQzUMV7Zkt80uplW31soKKP+5et92dmnEdo6UqTnZt2lBwBMezCBiuoBnpB+WYu9eIIbydIYRXLIWbHbmrypAbwX8ToQiNMfI=
   EJUDGE_URL:
     secure: nKhqrii9GfKi0FUt28RSKaSRk80W/svbthuxhMOEcXB/RZI2h7eDMBT61shSfV7C
   EJUDGE_CONTEST_ID:
     secure: hYfweu2dQ+uwPKhugg1peA==
-  APPVEYOR_RDP_PASSWORD: theBestPasswordEver_228
 
 cache:
   - C:\.conan -> conanfile.txt
@@ -46,13 +45,12 @@ build_script:
   - cmake --build . --config Release
 
   - bin\cacos config global --login "%EJUDGE_USERNAME%" --password "%EJUDGE_PASSWORD%" --url "%EJUDGE_URL%" --contest_id "%EJUDGE_CONTEST_ID%"
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-#  - bin\cacos status
-#  - bin\cacos task run list sm07-5
-#  - bin\cacos task diff 1068 1069 -v
+  - bin\cacos status
+  - bin\cacos task run list sm07-5
+  - bin\cacos task diff 1068 1069 -v
 
-#  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-#  - dumpbin /DEPENDENTS bin\cacos.exe
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - dumpbin /DEPENDENTS bin\cacos.exe
 
 after_build:
   - mkdir release
