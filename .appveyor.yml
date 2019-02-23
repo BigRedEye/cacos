@@ -45,10 +45,8 @@ build_script:
   - cmake .. -DCACOS_USE_CONAN=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64"
   - cmake --build . --config Release
 
-on_finish:
+  - bin\cacos config global --login "%EJUDGE_USERNAME%" --password "%EJUDGE_PASSWORD%" --url "%EJUDGE_URL%" --contest_id "%EJUDGE_CONTEST_ID%"
   - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-#  - bin\cacos config global --login "%EJUDGE_USERNAME%" --password "%EJUDGE_PASSWORD%" --url "%EJUDGE_URL%" --contest_id "%EJUDGE_CONTEST_ID%"
 #  - bin\cacos status
 #  - bin\cacos task run list sm07-5
 #  - bin\cacos task diff 1068 1069 -v
