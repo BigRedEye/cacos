@@ -27,7 +27,7 @@ void Unified::print(std::ostream& os) const {
         fmt::print(os, "@@ -{},{} +{},{} @@\n", hunk.a, hunk.b, hunk.c, hunk.d);
         os << termcolor::reset;
         for (auto&& line : hunk.common[0]) {
-            fmt::print(os, " {}\n", line.first);
+            fmt::print(os, " {}\n", util::string::escape(line.first));
         }
         for (auto&& line : hunk.change) {
             switch (line.second.type) {
@@ -41,11 +41,11 @@ void Unified::print(std::ostream& os) const {
                 std::cout << termcolor::red << "-";
                 break;
             }
-            fmt::print(os, "{}\n", line.first);
+            fmt::print(os, "{}\n", util::string::escape(line.first));
         }
         os << termcolor::reset;
         for (auto&& line : hunk.common[1]) {
-            fmt::print(os, " {}\n", line.first);
+            fmt::print(os, " {}\n", util::string::escape(line.first));
         }
     }
 }

@@ -65,7 +65,7 @@ int run(int argc, const char* argv[]) {
         .default_value(1.0)
         .handle<double>([&](double s) {
             runOpts.limits.cpu = seconds(s);
-            runOpts.limits.real = seconds(s);
+            runOpts.limits.real = seconds(s) * 2;
         });
 
     parser.add("ml")
