@@ -64,7 +64,7 @@ int fetch(int argc, const char* argv[]) {
 
     parser::Parser client(cfg);
 
-    std::cout << client.source(id) << std::endl;
+    std::cout << client.source(id);
 
     return 0;
 }
