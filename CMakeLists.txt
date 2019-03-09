@@ -248,7 +248,7 @@ else()
 
     ## Boost
     set(Boost_USE_MULTITHREAD ON)
-    set(Boost_USE_STATIC_LIBS ON)
+    set(Boost_USE_STATIC_LIBS ${BUILD_STATIC_LIBS})
     find_package(Boost COMPONENTS system thread filesystem REQUIRED)
     list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 endif()
