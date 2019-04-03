@@ -66,12 +66,12 @@ Session::~Session() {
 }
 
 void Session::setCookie(std::string_view cookie) const {
-    log::log().print("Savig cookies: EJSID = {}", cookie);
+    log::log().print("Saving cookies: EJSID = {}", cookie);
     client_.cookie(fmt::format("{}\tFALSE\t/\tFALSE\t0\tEJSID\t{}", domain(), cookie));
 }
 
 void Session::saveSession() const {
-    log::log().print("Savig token: {}", domain(), token_);
+    log::log().print("Saving token: {}", domain(), token_);
     std::ofstream token(config_.file(config::FileType::token));
     fmt::print(token, "{}", token_);
 }
@@ -160,14 +160,15 @@ std::string Session::buildUrl(std::string_view base) {
 
 html::Html Session::getPage(std::string_view base, std::string_view params) {
     return getter(
-        base, params, [this](auto base, auto params) { return getPageImpl(base, params); });
+        base, params, [this](auto base, auto params) { return getImpl(base, params).second; });
 }
 
 std::string_view Session::getRaw(std::string_view base, std::string_view params) {
-    return getter(base, params, [this](auto base, auto params) { return getImpl(base, params); });
+    return getter(
+        base, params, [this](auto base, auto params) { return getImpl(base, params).first; });
 }
 
-std::string_view Session::getImpl(std::string_view base, std::string_view params) {
+std::string_view Session::rawGetter(std::string_view base, std::string_view params) {
     std::string url = buildUrl(base);
     if (!params.empty()) {
         url += "?" + util::str(params);
@@ -183,8 +184,11 @@ std::string_view Session::getImpl(std::string_view base, std::string_view params
     return cache_->set(url, result);
 }
 
-html::Html Session::getPageImpl(std::string_view base, std::string_view params) {
-    html::Html page(getImpl(base, params));
+std::pair<std::string_view, html::Html> Session::getImpl(
+    std::string_view base,
+    std::string_view params) {
+    std::string_view raw = rawGetter(base, params);
+    html::Html page(raw);
     html::Collection titles = page.tags("title");
     for (auto node : titles) {
         auto throwIfContains = [&](std::string_view s, auto dummy) {
@@ -198,7 +202,7 @@ html::Html Session::getPageImpl(std::string_view base, std::string_view params) 
         throwIfContains("[]: Error: Invalid contest", SessionError{""});
     }
 
-    return page;
+    return {raw, std::move(page)};
 }
 
 } // namespace cacos::ejudge

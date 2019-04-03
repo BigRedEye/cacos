@@ -183,9 +183,12 @@ void Suite::run(
                 ++crashed;
 
                 std::cout << termcolor::red;
-                std::string status =
-                    process::status::serialize(checkerCtx.result.status);
-                fmt::print(std::cout, " Checker failure: {}, exit code = {}\n", status, checkerCtx.result.returnCode);
+                std::string status = process::status::serialize(checkerCtx.result.status);
+                fmt::print(
+                    std::cout,
+                    " Checker failure: {}, exit code = {}\n",
+                    status,
+                    checkerCtx.result.returnCode);
                 std::cout << termcolor::reset;
                 continue;
             }

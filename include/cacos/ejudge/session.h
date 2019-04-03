@@ -41,8 +41,10 @@ private:
 
     std::string_view domain() const;
 
-    html::Html getPageImpl(std::string_view base, std::string_view params = "");
-    std::string_view getImpl(std::string_view base, std::string_view params);
+    std::pair<std::string_view, html::Html> getImpl(
+        std::string_view base,
+        std::string_view params = "");
+    std::string_view rawGetter(std::string_view base, std::string_view params);
 
     template<typename Callback>
     auto getter(std::string_view base, std::string_view params, Callback&& callback) {
