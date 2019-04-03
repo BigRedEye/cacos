@@ -344,15 +344,17 @@ target_include_directories(${CACOS_LIB} PUBLIC ${CACOS_INCLUDES})
 
 # Executable
 
+if(POLICY CMP0069)
+    cmake_policy(SET CMP0069 NEW)
+endif()
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${CACOS_LIB})
 
 
 # LTO
-if(CMAKE_VERSION LESS "3.9.0")
-    message(STATUS "Old cmake version; LTO is not supported.")
+if(CMAKE_VERSION VERSION_LESS "3.9.0")
+    message(STATUS "Old cmake version (${CMAKE_VERSION}); LTO is not supported.")
 else()
-    cmake_policy(SET CMP0069 NEW)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT result OUTPUT output)
     if(result)

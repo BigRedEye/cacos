@@ -127,6 +127,14 @@ int generateImpl(int argc, const char* argv[]) {
     }
 
     parser
+        .add("test.arg")
+        .optional()
+        .value_type("ARG")
+        .description("Argument for test")
+        .repeatable()
+        .append(opts.testArgs);
+
+    parser
         .add("force")
         .optional()
         .no_argument()

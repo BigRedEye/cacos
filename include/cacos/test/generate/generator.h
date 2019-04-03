@@ -39,6 +39,8 @@ struct GeneratorOptions {
     IO genIO;
     IO testIO;
 
+    std::vector<std::string> testArgs;
+
     bool force = false;
 };
 

@@ -178,13 +178,14 @@ void Suite::run(
         for (auto&& test : tests_[type]) {
             fmt::print(std::cout, "[{:<{}}]", test.name(), namesWidth);
 
-            if (checker && !success(test, context[test.name() + CHECKER_SUFFIX])) {
+            auto& checkerCtx = context[test.name() + CHECKER_SUFFIX];
+            if (checker && !success(test, checkerCtx)) {
                 ++crashed;
 
                 std::cout << termcolor::red;
                 std::string status =
-                    process::status::serialize(context[test.name() + CHECKER_SUFFIX].result.status);
-                fmt::print(std::cout, " Checker failure: {}\n", status);
+                    process::status::serialize(checkerCtx.result.status);
+                fmt::print(std::cout, " Checker failure: {}, exit code = {}\n", status, checkerCtx.result.returnCode);
                 std::cout << termcolor::reset;
                 continue;
             }

@@ -57,13 +57,19 @@ void Generator::run() {
         stdErr.emplace_back(dir / "gen.stderr");
         log::log().print("{}", stdIn.back());
 
-        auto callback = [&, dir, name, i = totalTasks - 1](
+        std::vector<std::string> testArgs;
+        testArgs.reserve(opts_.testArgs.size());
+        for (auto&& arg : opts_.testArgs) {
+            testArgs.push_back(vars.parse(arg));
+        }
+
+        auto callback = [&, dir, name, testArgs, i = totalTasks - 1](
                             process::Result res, std::optional<process::Info>&& info) {
             if (res.status != process::status::OK || res.returnCode != 0) {
                 ++crashedTasks;
             } else {
                 test::Test test;
-                test.name(name).type(opts_.type).args({}).input(dir / opts_.testIO.input);
+                test.name(name).type(opts_.type).args(testArgs).input(dir / opts_.testIO.input);
                 if (opts_.type == Type::canonical) {
                     test.output(dir / opts_.testIO.output);
                 }
