@@ -1,0 +1,166 @@
+[[lang]]
+name = "c"
+extensions = [ ".c" ]
+
+[lang.compiler]
+exe = "clang++"
+flags = [
+    "-xc",
+    "-c",
+    "@{source}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-std=gnu11",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wshadow",
+    "-Werror",
+]
+release = [
+    "-O3",
+    "-march=native"
+]
+debug = [
+    "-O0",
+    "-ggdb",
+    "-fsanitize=address,undefined",
+]
+
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-fsanitize=address,undefined",
+]
+release = [
+    "-O3",
+    "-march=native",
+]
+
+
+[[lang]]
+name = "c++"
+extensions = [ ".cpp", ".cxx", ".cc" ]
+
+[lang.compiler]
+exe = "clang++"
+flags = [
+    "-xc++",
+    "-c",
+    "@{source}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wshadow",
+    "-Werror",
+]
+release = [
+    "-O3",
+    "-march=native",
+]
+debug = [
+    "-O0",
+    "-ggdb",
+    "-fsanitize=address,undefined",
+]
+
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-fsanitize=address,undefined",
+]
+release = [
+    "-O3",
+    "-march=native",
+]
+
+
+[[lang]]
+name = "asm"
+extensions = [ ".s", ".S" ]
+
+[lang.compiler]
+exe = "clang++"
+flags = [
+    "-c",
+    "@{source}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+]
+
+
+[lang.linker]
+exe = "clang++"
+flags = [
+    "@{objs}",
+    "-o",
+    "@{binary}",
+    "-m@{arch}",
+    "-lm",
+]
+debug = [
+    "-fsanitize=address,undefined",
+]
+release = [
+    "-O3",
+    "-march=native",
+]
+
+
+[[lang]]
+name = "rust"
+extensions = [ ".rs" ]
+
+[lang.compiler]
+exe = "rustc"
+flags = [
+    "@{source}",
+    "-o",
+    "@{binary}",
+]
+release = [
+    "-O",
+]
+
+
+[[lang]]
+name = "bash"
+extensions = [ ".sh" ]
+
+[lang.interpreter]
+exe = "bash"
+flags = [
+    "-e",
+    "@{source}",
+]
+
+
+[[lang]]
+name = "python"
+extensions = [ ".py" ]
+
+[lang.interpreter]
+exe = "python3"
+flags = [
+    "@{source}",
+]

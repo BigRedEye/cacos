@@ -1,0 +1,4 @@
+[exe]
+    sources = [ "main.c" ]
+    arch = "x86"
+    build = "debug"

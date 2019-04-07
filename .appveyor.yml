@@ -1,0 +1,61 @@
+os: Visual Studio 2017
+
+environment:
+  EJUDGE_USERNAME:
+    secure: Yc8Fl+yuMK2kOv5h4K2ZKg==
+  EJUDGE_PASSWORD:
+    secure: v5a6OOMcJQgQzUMV7Zkt80uplW31soKKP+5et92dmnEdo6UqTnZt2lBwBMezCBiuoBnpB+WYu9eIIbydIYRXLIWbHbmrypAbwX8ToQiNMfI=
+  EJUDGE_URL:
+    secure: nKhqrii9GfKi0FUt28RSKaSRk80W/svbthuxhMOEcXB/RZI2h7eDMBT61shSfV7C
+  EJUDGE_CONTEST_ID:
+    secure: hYfweu2dQ+uwPKhugg1peA==
+
+cache:
+  - C:\.conan -> conanfile.txt
+  - C:\Users\appveyor\.conan -> conanfile.txt
+
+artifacts:
+  - path: release
+    name: cacos-windows-x64
+    type: zip
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: sWX4wYH0ZYhsKcO3KuQfsIg46ToY2A7YsRjmumo2PugdMdEtAWxr/yqMQGIOci9S
+    artifact: cacos-windows-x64
+    prerelease: true
+    on:
+      branch: dev
+      appveyor_repo_tag: true
+
+install:
+  - git submodule update --init --recursive
+
+  - echo "Downloading conan..."
+  - set PATH=%PATH%;%PYTHON%/Scripts/
+  - pip.exe install conan
+  - conan user
+  - conan --version
+  - cmake --version
+
+build_script:
+  - mkdir %APPVEYOR_BUILD_FOLDER%\build
+  - cd %APPVEYOR_BUILD_FOLDER%\build
+
+  - cmake .. -DCACOS_USE_CONAN=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64"
+  - cmake --build . --config Release
+
+  - bin\cacos config global --login "%EJUDGE_USERNAME%" --password "%EJUDGE_PASSWORD%" --url "%EJUDGE_URL%" --contest_id "%EJUDGE_CONTEST_ID%"
+  - bin\cacos status
+  - bin\cacos task run list sm07-5
+  - bin\cacos task diff 1068 1069 -v
+
+  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  - dumpbin /DEPENDENTS bin\cacos.exe
+
+  - cd ..
+
+after_build:
+  - mkdir release
+  - copy build\bin\cacos.exe release\

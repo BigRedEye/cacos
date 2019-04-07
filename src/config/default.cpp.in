@@ -1,0 +1,30 @@
+#include "cacos/config/default.h"
+
+#include <optional>
+#include <string_view>
+#include <unordered_map>
+
+namespace {
+
+using namespace std::literals;
+
+static std::unordered_map<std::string_view, std::string_view> storage {
+    {"config", R"!(@CACOS_CONFIG_FILE_cacos.toml@)!"sv},
+    {"langs",  R"!(@CACOS_CONFIG_FILE_langs.toml@)!"sv},
+    {"task",   R"!(@CACOS_CONFIG_FILE_task.toml@)!"sv },
+};
+
+}
+
+namespace cacos::config::defaults {
+
+std::optional<std::string_view> find(std::string_view key) {
+    auto it = storage.find(key);
+    if (it == storage.end()) {
+        return std::nullopt;
+    } else {
+        return it->second;
+    }
+}
+
+}

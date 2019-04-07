@@ -1,9 +1,28 @@
 [submodule "third-party/cpparg"]
 	path = third-party/cpparg
-	url = git@github.com:BigRedEye/cpparg.git
-[submodule "third-party/json"]
-	path = third-party/json
-	url = git@github.com:nlohmann/json.git
+	url = https://github.com/BigRedEye/cpparg.git
+	branch = dev
 [submodule "third-party/termcolor"]
 	path = third-party/termcolor
-	url = git@github.com:ikalnytskyi/termcolor.git
+	url = https://github.com/ikalnytskyi/termcolor.git
+[submodule "third-party/toml"]
+	path = third-party/toml
+	url = https://github.com/skystrife/cpptoml.git
+[submodule "third-party/fmt"]
+	path = third-party/fmt
+	url = https://github.com/fmtlib/fmt.git
+[submodule "third-party/myhtml"]
+	path = third-party/myhtml
+	url = https://github.com/lexborisov/myhtml.git
+[submodule "third-party/dtl/dtl"]
+	path = third-party/dtl/dtl
+	url = https://github.com/cubicdaiya/dtl.git
+[submodule "third-party/cmake-git-version-tracking"]
+	path = third-party/cmake-git-version-tracking
+	url = https://github.com/andrew-hardin/cmake-git-version-tracking.git
+[submodule "third-party/cmake-conan"]
+	path = third-party/cmake-conan
+	url = https://github.com/conan-io/cmake-conan.git
+[submodule "third-party/utfcpp"]
+	path = third-party/utfcpp
+	url = https://github.com/nemtrif/utfcpp
