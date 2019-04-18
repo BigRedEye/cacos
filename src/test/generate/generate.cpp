@@ -116,6 +116,13 @@ int generateImpl(int argc, const char* argv[]) {
         .default_value("gen.stdout")
         .store(opts.testIO.input);
 
+    parser
+        .add("threads")
+        .optional()
+        .description("Process limit")
+        .default_value(util::string::to(std::thread::hardware_concurrency()))
+        .handle<size_t>([&](size_t threads) { opts.threads = threads; });
+
     if constexpr (type == Type::canonical) {
         parser
             .add("test.stdout")

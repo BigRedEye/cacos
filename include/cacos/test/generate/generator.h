@@ -42,6 +42,8 @@ struct GeneratorOptions {
     std::vector<std::string> testArgs;
 
     bool force = false;
+
+    size_t threads{std::thread::hardware_concurrency()};
 };
 
 class Generator {

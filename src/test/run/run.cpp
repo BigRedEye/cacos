@@ -58,6 +58,12 @@ int run(int argc, const char* argv[]) {
         runOpts.printInfo = true;
     });
 
+    parser.add("threads")
+        .optional()
+        .description("Process limit")
+        .default_value(util::string::to(std::thread::hardware_concurrency()))
+        .handle<size_t>([&](size_t workers) { runOpts.workers = workers; });
+
     parser.add("tl")
         .optional()
         .value_type("SECONDS")

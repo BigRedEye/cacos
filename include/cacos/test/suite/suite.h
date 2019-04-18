@@ -16,6 +16,7 @@ namespace cacos::test {
 struct RunOpts {
     process::Limits limits;
     bool printInfo{false};
+    size_t workers{std::thread::hardware_concurrency()};
 };
 
 class Suite {

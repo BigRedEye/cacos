@@ -31,7 +31,8 @@ void Generator::run() {
     InlineVariables vars;
 
     executable::ExecPool pool(
-        process::Limits{process::Limits::unlimited<bytes>, seconds(1.0), seconds(2.0)});
+        process::Limits{process::Limits::unlimited<bytes>, seconds(1.0), seconds(2.0)},
+        opts_.threads);
 
     boost::container::stable_vector<std::string> stdIn;
     boost::container::stable_vector<fs::path> stdOut;

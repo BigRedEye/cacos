@@ -57,7 +57,7 @@ void Suite::run(
     util::optional_ref<const executable::Executable> checker) {
     static const std::string CHECKER_SUFFIX = "_check";
 
-    executable::ExecPool pool(opts.limits);
+    executable::ExecPool pool(opts.limits, opts.workers);
 
     size_t doneTests = 0;
     size_t totalTests = 0;
