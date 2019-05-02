@@ -40,6 +40,7 @@ Test::Test(const fs::path& base, const fs::path& toml) {
         throw std::runtime_error("Cannot load test file " + toml.string());
     }
 
+    workingDirectory_ = toml.parent_path();
     name_ = fs::relative(toml.parent_path(), base).string();
 
     auto table = cpptoml::parse_file(toml.string());
