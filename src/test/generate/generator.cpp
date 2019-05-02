@@ -70,7 +70,7 @@ void Generator::run() {
                 ++crashedTasks;
             } else {
                 test::Test test;
-                test.name(name).type(opts_.type).args(testArgs).input(dir / opts_.testIO.input);
+                test.name(name).type(opts_.type).args(testArgs).input(dir / opts_.testIO.input).workingDirectory(dir);
                 if (opts_.type == Type::canonical) {
                     test.output(dir / opts_.testIO.output);
                 }

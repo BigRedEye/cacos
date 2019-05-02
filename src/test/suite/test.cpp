@@ -111,6 +111,18 @@ void Test::serialize(const fs::path& workspace, bool force) {
 
     std::ofstream ofs(dir / CONFIG_FILE);
 
+    if (workingDirectory_) {
+        for (auto ent: fs::directory_iterator(*workingDirectory_)) {
+            fs::path oldp = ent.path();
+            if (fs::equivalent(oldp, input_) || (output_ && fs::equivalent(oldp, output_.value()))) {
+                continue;
+            }
+            fs::path newp = dir / fs::relative(oldp, *workingDirectory_);
+            fs::rename(oldp, newp);
+        }
+    }
+    workingDirectory_ = dir;
+
     auto copyIO = [&](fs::path& old, const fs::path& path) {
         fs::copy(old, path);
         old = fs::relative(path, dir);
@@ -174,6 +186,11 @@ Test& Test::output(const fs::path& output) {
     return *this;
 }
 
+Test& Test::workingDirectory(const fs::path& dir) {
+    workingDirectory_ = dir;
+    return *this;
+}
+
 Test& Test::env(const bp::environment& env) {
     env_ = env;
     return *this;
@@ -201,7 +218,7 @@ executable::ExecTaskPtr Test::task(TaskContext&& context) const {
     executable::ExecTaskContext ctx{
         args_,
         env_.value_or(boost::this_process::environment()),
-        fs::current_path(),
+        workingDirectory_.value_or(fs::current_path()),
         std::move(context.callback),
     };
 

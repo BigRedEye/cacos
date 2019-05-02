@@ -55,6 +55,7 @@ public:
     Test& name(const std::string& name);
     Test& input(const fs::path& stdIn);
     Test& output(const fs::path& stdOut);
+    Test& workingDirectory(const fs::path& dir);
     Test& env(const bp::environment& env);
     Test& args(const std::vector<std::string>& args);
 
@@ -79,8 +80,10 @@ private:
     std::string name_;
 
     fs::path input_;
-    std::optional<fs::path> output_ = std::nullopt;
-    std::optional<bp::environment> env_ = std::nullopt;
+    std::optional<fs::path> output_{};
+    std::optional<fs::path> workingDirectory_{};
+
+    std::optional<bp::environment> env_{};
     std::vector<std::string> args_ = {};
 };
 

@@ -38,6 +38,10 @@ private:
             return;
         }
 
+        if (getenv("CACOS_DISABLE_PROGRESS_BAR")) {
+            return;
+        }
+
         size_t width = term.width - 2;
         if constexpr (util::string::detail::is_convertible_from_string_v<Progress>) {
             if (width > VERBOSE_WIDTH_TRESHOLD) {

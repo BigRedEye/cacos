@@ -253,6 +253,9 @@ else()
     list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 endif()
 
+if (UNIX)
+    list(APPEND CACOS_LIBS ${CMAKE_DL_LIBS})
+endif()
 
 ## Threads
 find_package(Threads REQUIRED)
