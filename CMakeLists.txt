@@ -250,6 +250,11 @@ else()
     set(Boost_USE_MULTITHREAD ON)
     set(Boost_USE_STATIC_LIBS ${BUILD_STATIC_LIBS})
     find_package(Boost COMPONENTS system thread filesystem REQUIRED)
+    ## 1.69 and 1.70 have problems with leaking file descriptors
+    if (Boost_MAJOR_VERSION EQUAL 1 AND Boost_MINOR_VERSION GREATER 68)
+        message(FATAL_ERROR "Boost versions 1.69 and 1.70 are not supported")
+    endif()
+
     list(APPEND CACOS_LIBS Boost::boost Boost::filesystem)
 endif()
 
