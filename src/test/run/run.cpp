@@ -40,8 +40,12 @@ int run(int argc, const char* argv[]) {
             auto splitted = util::split(sv, ", ");
             checkerSources = std::vector<fs::path>{};
             for (auto&& path : splitted) {
-                if (fs::exists(path)) {
-                    checkerSources->emplace_back(path);
+                fs::path p{path};
+                if (!p.is_absolute()) {
+                    p = fs::absolute(path);
+                }
+                if (fs::exists(p)) {
+                    checkerSources->emplace_back(p);
                 }
             }
         });
