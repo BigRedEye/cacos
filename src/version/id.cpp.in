@@ -6,7 +6,7 @@ namespace cacos::version::build {
 
 std::string_view timestamp() {
     using namespace std::string_view_literals;
-    return "@BUILD_TIMESTAMP@"sv;
+    return "@BUILD_TIMESTAMP@ (@CMAKE_BUILD_TYPE@)"sv;
 }
 
 } // namespace cacos::version::build
