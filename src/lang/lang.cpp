@@ -87,6 +87,9 @@ LanguageTable::LanguageTable(const cpptoml::table& table, const fs::path& binary
 }
 
 executable::Executable LanguageTable::runnable(const opts::ExeOpts& opts) const {
+    if (opts.sources.empty()) {
+        throw std::runtime_error{"No sources given"};
+    }
     if (opts.sources.size() == 1) {
         const auto& path = opts.sources[0];
         bool isExecutable = !bp::search_path(path.filename().string()).empty();
