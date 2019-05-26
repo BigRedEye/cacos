@@ -113,9 +113,10 @@ void Test::serialize(const fs::path& workspace, bool force) {
     std::ofstream ofs(dir / CONFIG_FILE);
 
     if (workingDirectory_) {
-        for (auto ent: fs::directory_iterator(*workingDirectory_)) {
+        for (auto ent : fs::directory_iterator(*workingDirectory_)) {
             fs::path oldp = ent.path();
-            if (fs::equivalent(oldp, input_) || (output_ && fs::equivalent(oldp, output_.value()))) {
+            if (fs::equivalent(oldp, input_) ||
+                (output_ && fs::equivalent(oldp, output_.value()))) {
                 continue;
             }
             fs::path newp = dir / fs::relative(oldp, *workingDirectory_);

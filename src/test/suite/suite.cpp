@@ -62,6 +62,7 @@ void Suite::run(
     size_t doneTests = 0;
     size_t totalTests = 0;
     size_t totalTasks = 0;
+    size_t crashedRuns = 0;
 
     std::unordered_map<std::string, RunResult> context;
 
@@ -106,7 +107,12 @@ void Suite::run(
                         totalTests,
                         doneTests * 100. / totalTests);
                 }
-                bar.process(1);
+
+                if (res.status != process::status::OK) {
+                    ++crashedRuns;
+                }
+
+                bar.process(1, fmt::format("Crashed runs: {}", crashedRuns));
             };
 
             TaskContext taskContext{exe, std::move(callback), output};

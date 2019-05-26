@@ -70,7 +70,11 @@ void Generator::run() {
                 ++crashedTasks;
             } else {
                 test::Test test;
-                test.name(name).type(opts_.type).args(testArgs).input(dir / opts_.testIO.input).workingDirectory(dir);
+                test.name(name)
+                    .type(opts_.type)
+                    .args(testArgs)
+                    .input(dir / opts_.testIO.input)
+                    .workingDirectory(dir);
                 if (opts_.type == Type::canonical) {
                     test.output(dir / opts_.testIO.output);
                 }
@@ -88,7 +92,7 @@ void Generator::run() {
                 info->cpuTime.count(),
                 info->maxRss / (1024. * 1024.));
 
-            bar.process(1);
+            bar.process(1, fmt::format("Crashed tasks: {}", crashedTasks));
         };
 
         std::vector<std::string> args;
