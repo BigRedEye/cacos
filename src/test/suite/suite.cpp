@@ -108,7 +108,7 @@ void Suite::run(
                         doneTests * 100. / totalTests);
                 }
 
-                if (res.status != process::status::OK) {
+                if (res.status != process::status::OK || (res.returnCode != 0 && !opts.allowNonZeroReturnCodes)) {
                     ++crashedRuns;
                 }
 

@@ -86,6 +86,14 @@ int run(int argc, const char* argv[]) {
         .handle<double>(
             [&](double ram) { runOpts.limits.ml = static_cast<bytes>(ram * 1024. * 1024.); });
 
+    parser.add('z', "allow-nonzero-return-codes")
+        .optional()
+        .description("Allow nonzero return codes")
+        .no_argument()
+        .handle([&] {
+            runOpts.allowNonZeroReturnCodes = true;
+        });
+
     parser.parse(argc, argv);
 
     if (!sources) {
