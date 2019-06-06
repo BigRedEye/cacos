@@ -392,4 +392,9 @@ void Config::dump(ConfigType type) const {
     out << *cfg;
 }
 
+void Config::ensureWorkspaceExistence() const {
+    // workspace() method checks for workspace existence inside
+    workspace();
+}
+
 } // namespace cacos::config

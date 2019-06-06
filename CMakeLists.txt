@@ -9,7 +9,7 @@ option(BUILD_STATIC_LIBS "Prefer static linkage" ON)
 option(CACOS_USE_CONAN "Use conan" OFF)
 option(CACOS_BUILD_TESTS "Build tests" OFF)
 
-set(CACOS_VERSION "0.1.0" CACHE "" INTERNAL)
+set(CACOS_VERSION "0.1.8" CACHE "" INTERNAL)
 
 # Modules
 list(APPEND CMAKE_MODULE_PATH

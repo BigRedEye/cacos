@@ -89,6 +89,7 @@ int add_impl(int argc, const char* argv[]) {
     // clang-format on
 
     config::Config cfg(parser);
+    cfg.ensureWorkspaceExistence();
 
     parser.parse(argc, argv);
 

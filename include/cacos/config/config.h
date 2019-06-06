@@ -87,6 +87,7 @@ public:
     }
 
     void dump(ConfigType type) const;
+    void ensureWorkspaceExistence() const;
 
 private:
     void setImpl(

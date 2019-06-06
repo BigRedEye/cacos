@@ -12,6 +12,7 @@ int run(int argc, const char* argv[]) {
     parser.title("Run tests");
 
     config::Config cfg(parser, config::LANGS | config::TASK_EXE);
+    cfg.ensureWorkspaceExistence();
 
     std::optional<std::vector<fs::path>> sources;
 

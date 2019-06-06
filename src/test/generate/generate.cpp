@@ -154,6 +154,7 @@ int generateImpl(int argc, const char* argv[]) {
     opts.type = type;
 
     config::Config cfg(parser, config::LANGS | config::TASK_EXE | config::KEEP_WORKING_DIRS);
+    cfg.ensureWorkspaceExistence();
 
     parser.parse(argc, argv);
     Generator generator(cfg, opts);
