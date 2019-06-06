@@ -78,6 +78,7 @@ Logger::Logger(Logger::MessagePriority priority)
     if (static_cast<int>(priority) <= static_cast<int>(Logger::MessagePriority::debug)) {
         *this << "[ 0x" << std::hex << std::this_thread::get_id() << std::dec << " ] ";
     }
+    *this << termcolor::reset;
 }
 
 Logger::~Logger() {
