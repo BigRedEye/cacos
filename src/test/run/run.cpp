@@ -12,7 +12,6 @@ int run(int argc, const char* argv[]) {
     parser.title("Run tests");
 
     config::Config cfg(parser, config::LANGS | config::TASK_EXE);
-    cfg.ensureWorkspaceExistence();
 
     std::optional<std::vector<fs::path>> sources;
 
@@ -47,6 +46,25 @@ int run(int argc, const char* argv[]) {
                 }
                 if (fs::exists(p)) {
                     checkerSources->emplace_back(p);
+                }
+            }
+        });
+
+    std::optional<std::vector<fs::path>> diffSources;
+    parser.add("diff")
+        .optional()
+        .value_type("SOURCES")
+        .description("Diff tool source files / executable, separated with commas or spaces")
+        .handle([&](auto sv) {
+            auto splitted = util::split(sv, ", ");
+            diffSources = std::vector<fs::path>{};
+            for (auto&& path : splitted) {
+                fs::path p{path};
+                if (!p.is_absolute()) {
+                    p = fs::absolute(path);
+                }
+                if (fs::exists(p)) {
+                    diffSources->emplace_back(p);
                 }
             }
         });
@@ -91,11 +109,11 @@ int run(int argc, const char* argv[]) {
         .optional()
         .description("Allow nonzero return codes")
         .no_argument()
-        .handle([&] {
-            runOpts.allowNonZeroReturnCodes = true;
-        });
+        .handle([&] { runOpts.allowNonZeroReturnCodes = true; });
 
     parser.parse(argc, argv);
+
+    cfg.ensureWorkspaceExistence();
 
     if (!sources) {
         sources = cfg.task().exe.sources;
@@ -106,13 +124,16 @@ int run(int argc, const char* argv[]) {
 
     test::Suite suite(cfg, prefix);
 
-    if (checkerSources) {
-        executable::Executable checker =
-            cfg.langs().runnable({checkerSources.value(), compilerOpts});
-        suite.run(runOpts, main, checker);
-    } else {
-        suite.run(runOpts, main);
+    std::optional<executable::Executable> diff;
+    if (diffSources) {
+        diff = cfg.langs().runnable({diffSources.value(), compilerOpts});
     }
+
+    std::optional<executable::Executable> checker;
+    if (checkerSources) {
+        checker = cfg.langs().runnable({checkerSources.value(), compilerOpts});
+    }
+    suite.run(runOpts, main, diff, checker);
 
     return 0;
 }

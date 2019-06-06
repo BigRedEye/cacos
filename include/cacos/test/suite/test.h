@@ -31,10 +31,16 @@ private:
     std::string right_;
 };
 
+struct ExternalDiff {
+    int exitCode;
+    std::string stdOut;
+    std::string stdErr;
+};
+
 struct NoDiff {};
 
 struct TestingResult {
-    std::variant<NoDiff, BlobDiff, util::diff::Unified> diff;
+    std::variant<NoDiff, BlobDiff, ExternalDiff, util::diff::Unified> diff;
 };
 
 struct TaskContext {
@@ -65,8 +71,14 @@ public:
 
     executable::ExecTaskPtr task(TaskContext&& context) const;
 
-    TestingResult compare(const fs::path& output) const;
-    TestingResult compare(const fs::path& output, const fs::path& expected) const;
+    TestingResult compare(const fs::path& output, const std::optional<fs::path>& expected) const;
+    executable::ExecTaskPtr compareExternal(
+        const executable::Executable& diff,
+        const fs::path& output,
+        const std::optional<fs::path>& expected,
+        int& exitCode,
+        std::future<std::string>& stdOut,
+        std::future<std::string>& stdErr) const;
 
     static constexpr std::string_view CONFIG_FILE = "test.toml";
     static constexpr std::string_view INPUT_FILE = "input";

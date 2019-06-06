@@ -27,7 +27,8 @@ public:
     void run(
         const RunOpts& opts,
         const executable::Executable& exe,
-        util::optional_ref<const executable::Executable> checker = util::nullref);
+        const std::optional<const executable::Executable>& diff,
+        const std::optional<const executable::Executable>& checker = std::nullopt);
 
 private:
     fs::path workspace_;

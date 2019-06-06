@@ -1,13 +1,10 @@
 #include "cacos/test/suite/suite.h"
-
 #include "cacos/executable/executable.h"
-
 #include "cacos/util/logger.h"
-
 #include "cacos/util/mt/fixed_queue.h"
-
 #include "cacos/util/progress_bar.h"
 
+#include <boost/container/stable_vector.hpp>
 #include <termcolor/termcolor.hpp>
 
 /**
@@ -51,10 +48,72 @@ struct RunResult {
     TestingResult diff;
 };
 
+class DiffComputer {
+public:
+    DiffComputer(bool hasExternalDiff) {
+        if (hasExternalDiff) {
+            workers_.emplace<executable::ExecPool>();
+        } else {
+            workers_.emplace<util::mt::FixedQueue>();
+        }
+    }
+
+    void push(
+        const Test& test,
+        const std::optional<const executable::Executable>& diff,
+        TestingResult& result,
+        fs::path out,
+        std::optional<fs::path> expected = std::nullopt) {
+        if (diff) {
+            // TODO: struct CompareResult { stdout, stderr, exitcode };
+            stdouts_.emplace_back();
+            stderrs_.emplace_back();
+            exitCodes_.emplace_back();
+            results_.emplace_back(result);
+
+            auto task = test.compareExternal(
+                diff.value(), out, expected, exitCodes_.back(), stdouts_.back(), stderrs_.back());
+            std::get<executable::ExecPool>(workers_).push(std::move(task));
+        } else {
+            std::get<util::mt::FixedQueue>(workers_).add(
+                [&result, &test, out, expected] { result = test.compare(out, expected); });
+        }
+    }
+
+    void run() {
+        std::visit([](auto&& value) { value.run(); }, workers_);
+
+        collect();
+    }
+
+private:
+    void collect() {
+        for (size_t i = 0; i < results_.size(); ++i) {
+            std::string stdOut = stdouts_[i].get();
+            std::string stdErr = stderrs_[i].get();
+            if (exitCodes_[i] != 0 || !stdOut.empty() || !stdErr.empty()) {
+                results_[i].get().diff.emplace<ExternalDiff>(
+                    ExternalDiff{exitCodes_[i], std::move(stdOut), std::move(stdErr)});
+            } else {
+                results_[i].get().diff.emplace<NoDiff>();
+            }
+        }
+    }
+
+private:
+    std::variant<executable::ExecPool, util::mt::FixedQueue> workers_;
+
+    boost::container::stable_vector<std::future<std::string>> stdouts_;
+    boost::container::stable_vector<std::future<std::string>> stderrs_;
+    boost::container::stable_vector<int> exitCodes_;
+    std::vector<std::reference_wrapper<TestingResult>> results_;
+};
+
 void Suite::run(
     const RunOpts& opts,
     const executable::Executable& exe,
-    util::optional_ref<const executable::Executable> checker) {
+    const std::optional<const executable::Executable>& diff,
+    const std::optional<const executable::Executable>& checker) {
     static const std::string CHECKER_SUFFIX = "_check";
 
     executable::ExecPool pool(opts.limits, opts.workers);
@@ -108,7 +167,8 @@ void Suite::run(
                         doneTests * 100. / totalTests);
                 }
 
-                if (res.status != process::status::OK || (res.returnCode != 0 && !opts.allowNonZeroReturnCodes)) {
+                if (res.status != process::status::OK ||
+                    (res.returnCode != 0 && !opts.allowNonZeroReturnCodes)) {
                     ++crashedRuns;
                 }
 
@@ -125,33 +185,14 @@ void Suite::run(
                result.result.returnCode == test.returnCode();
     };
 
-    auto pushComputeDiff = [&](const Test& test) {
-        diffQueue.add([&] {
-            auto& ctx = context[test.name()];
-            if (ctx.result.status == process::status::OK) {
-                if (test.type() == Type::canonical) {
-                    ctx.diff = test.compare(ctx.output);
-                } else {
-                    auto checker = context.at(test.name() + CHECKER_SUFFIX);
-                    if (success(test, checker)) {
-                        ctx.diff = test.compare(
-                            ctx.output, context.at(test.name() + CHECKER_SUFFIX).output);
-                    }
-                }
-            }
-        });
-    };
-
     for (auto&& test : tests_[Type::canonical]) {
         pushTest(exe, test);
-        pushComputeDiff(test);
     }
 
     if (checker) {
         for (auto&& test : tests_[Type::diff]) {
             pushTest(exe, test, false);
             pushTest(checker.value(), test, true);
-            pushComputeDiff(test);
         }
     } else if (!tests_[Type::diff].empty()) {
         log::warning().print("No checker specified; ignoring {} tests", tests_[Type::diff].size());
@@ -168,8 +209,37 @@ void Suite::run(
 
     log::log().print("Computing diffs");
 
-    diffQueue.start();
-    diffQueue.wait();
+    DiffComputer diffs{diff.has_value()};
+
+    auto pushComputeDiff = [&](const Test& test) {
+        auto& ctx = context[test.name()];
+        if (ctx.result.status == process::status::OK) {
+            if (test.type() == Type::canonical) {
+                diffs.push(test, diff, ctx.diff, ctx.output);
+            } else {
+                auto checker = context.at(test.name() + CHECKER_SUFFIX);
+                if (success(test, checker)) {
+                    diffs.push(
+                        test,
+                        diff,
+                        ctx.diff,
+                        ctx.output,
+                        context.at(test.name() + CHECKER_SUFFIX).output);
+                }
+            }
+        }
+    };
+
+    for (auto&& test : tests_[Type::canonical]) {
+        pushComputeDiff(test);
+    }
+    if (checker) {
+        for (auto&& test : tests_[Type::diff]) {
+            pushComputeDiff(test);
+        }
+    }
+
+    diffs.run();
 
     ui64 crashed = 0;
     ui64 failed = 0;
@@ -247,6 +317,19 @@ void Suite::run(
                                   << std::endl;
                         std::cout << termcolor::green << value.right() << termcolor::reset
                                   << std::endl;
+                    } else if constexpr (std::is_same_v<T, ExternalDiff>) {
+                        if (value.exitCode != 0) {
+                            std::cout << termcolor::red << "diff exit code: " << termcolor::reset
+                                      << value.exitCode << std::endl;
+                        }
+                        if (!value.stdOut.empty()) {
+                            std::cout << termcolor::red << "diff stdout: " << termcolor::reset
+                                      << value.stdOut << std::endl;
+                        }
+                        if (!value.stdErr.empty()) {
+                            std::cout << termcolor::red << "diff stderr: " << termcolor::reset
+                                      << value.stdErr << std::endl;
+                        }
                     }
                 },
                 ctx.diff.diff);

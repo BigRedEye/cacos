@@ -52,6 +52,7 @@ fs::path Linker::link(const std::vector<fs::path>& objs, const opts::CompilerOpt
         child.terminate();
         throw std::runtime_error("Linkage time out");
     }
+    child.join();
 
     if (child.exit_code() != 0) {
         throw std::runtime_error(util::string::join(

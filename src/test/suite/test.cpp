@@ -2,6 +2,7 @@
 
 #include "cacos/util/diff/unified.h"
 
+#include "cacos/util/logger.h"
 #include "cacos/util/split.h"
 #include "cacos/util/string.h"
 
@@ -232,13 +233,6 @@ executable::ExecTaskPtr Test::task(TaskContext&& context) const {
     }
 }
 
-TestingResult Test::compare(const fs::path& output_file) const {
-    if (type_ != Type::canonical) {
-        throw std::logic_error("Invalid test type");
-    }
-    return compare(output_file, output_.value());
-}
-
 namespace {
 
 TestingResult compareInMemory(const fs::path& outputFile, const fs::path& expectedOutput);
@@ -246,7 +240,20 @@ TestingResult compareBlobs(const fs::path& outputFile, const fs::path& expectedO
 
 } // namespace
 
-TestingResult Test::compare(const fs::path& outputFile, const fs::path& expectedOutput) const {
+TestingResult Test::compare(
+    const fs::path& outputFile,
+    const std::optional<fs::path>& expectedOptional) const {
+    fs::path expectedOutput;
+    if (expectedOptional) {
+        expectedOutput = expectedOptional.value();
+    } else {
+        try {
+            expectedOutput = output_.value();
+        } catch (const std::bad_optional_access&) {
+            std::throw_with_nested(std::logic_error{"Invalid test type"});
+        }
+    }
+
     static constexpr bytes diffThreshold = 1 << 8;
     if (fs::file_size(outputFile) < diffThreshold &&
         fs::file_size(expectedOutput) < diffThreshold) {
@@ -256,8 +263,44 @@ TestingResult Test::compare(const fs::path& outputFile, const fs::path& expected
     }
 }
 
+executable::ExecTaskPtr Test::compareExternal(
+    const executable::Executable& diff,
+    const fs::path& output,
+    const std::optional<fs::path>& expectedOptional,
+    int& exitCode,
+    std::future<std::string>& stdOut,
+    std::future<std::string>& stdErr) const {
+    fs::path expected;
+    if (expectedOptional) {
+        expected = expectedOptional.value();
+    } else {
+        try {
+            expected = output_.value();
+        } catch (const std::bad_optional_access&) {
+            std::throw_with_nested(std::logic_error{"Invalid test type"});
+        }
+    }
+    const fs::path a = fs::absolute(output);
+    const fs::path b = fs::absolute(expected);
+
+    auto callback = [&](process::Result res, std::optional<process::Info>&&) {
+        if (res.status == process::status::IL || res.status == process::status::TL) {
+            throw std::runtime_error("Diff computation time out");
+        }
+        exitCode = res.returnCode;
+    };
+
+    executable::ExecTaskContext ctx{
+        {a, b}, boost::this_process::environment(), fs::current_path(), std::move(callback)};
+    auto task =
+        executable::makeTask(diff, std::move(ctx), bp::null, std::ref(stdOut), std::ref(stdErr));
+
+    return task;
+}
+
 fs::path Test::root(const fs::path& workspace) {
     auto path = util::split(name_, "/");
+
     fs::path result = workspace;
     for (auto&& part : path) {
         result /= part;
