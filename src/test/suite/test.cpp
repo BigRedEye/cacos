@@ -290,8 +290,10 @@ executable::ExecTaskPtr Test::compareExternal(
         exitCode = res.returnCode;
     };
 
-    executable::ExecTaskContext ctx{
-        {a, b}, boost::this_process::environment(), fs::current_path(), std::move(callback)};
+    executable::ExecTaskContext ctx{{a.c_str(), b.c_str()},
+                                    boost::this_process::environment(),
+                                    fs::current_path(),
+                                    std::move(callback)};
     auto task =
         executable::makeTask(diff, std::move(ctx), bp::null, std::ref(stdOut), std::ref(stdErr));
 
