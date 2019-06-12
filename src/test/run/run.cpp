@@ -76,7 +76,10 @@ int run(int argc, const char* argv[]) {
         .description("Test name to run (name prefix) [default = \"\"]")
         .store(prefix);
 
-    RunOpts runOpts;
+    RunOpts runOpts{
+        cfg.task().limits
+    };
+
     parser.add("stats").optional().no_argument().description("Print run stats").handle([&](auto) {
         runOpts.printInfo = true;
     });
@@ -91,17 +94,15 @@ int run(int argc, const char* argv[]) {
         .optional()
         .value_type("SECONDS")
         .description("Time limit")
-        .default_value(1.0)
         .handle<double>([&](double s) {
             runOpts.limits.cpu = seconds(s);
-            runOpts.limits.real = seconds(s) * 2;
+            runOpts.limits.real = seconds(s);
         });
 
     parser.add("ml")
         .optional()
         .value_type("MiB")
         .description("Memory limit")
-        .default_value(64.0)
         .handle<double>(
             [&](double ram) { runOpts.limits.ml = static_cast<bytes>(ram * 1024. * 1024.); });
 

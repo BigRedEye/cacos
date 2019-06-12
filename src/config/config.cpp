@@ -366,6 +366,16 @@ void Config::parseConfig() {
         if (auto node = taskConfig_->get_qualified_as<std::string>("exe.build")) {
             task_.exe.compiler.buildType = opts::parseBuildType(*node);
         }
+
+        /* limits */
+        if (auto node = taskConfig_->get_qualified_as<double>("limits.time")) {
+            task_.limits.cpu = seconds{*node};
+            task_.limits.real = seconds{*node};
+        }
+        if (auto node = taskConfig_->get_qualified_as<double>("limits.memory")) {
+            static constexpr bytes MIBYTE = 1024 * 1024;
+            task_.limits.ml = *node * MIBYTE;
+        }
     }
 }
 

@@ -2,6 +2,8 @@
 
 #include "cacos/util/util.h"
 
+#include "cacos/process/limits.h"
+
 #include <string_view>
 #include <vector>
 
@@ -47,6 +49,7 @@ struct ExeOpts {
 
 struct TaskOpts {
     ExeOpts exe;
+    process::Limits limits;
 };
 
 } // namespace cacos::opts
