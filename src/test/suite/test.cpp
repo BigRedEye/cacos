@@ -290,7 +290,7 @@ executable::ExecTaskPtr Test::compareExternal(
         exitCode = res.returnCode;
     };
 
-    executable::ExecTaskContext ctx{{a.c_str(), b.c_str()},
+    executable::ExecTaskContext ctx{std::vector{a.string(), b.string()},
                                     boost::this_process::environment(),
                                     fs::current_path(),
                                     std::move(callback)};
