@@ -69,6 +69,50 @@ int fetch(int argc, const char* argv[]) {
     return 0;
 }
 
+int dump(int argc, const char* argv[]) {
+    cpparg::parser parser("cacos task run dump");
+    parser.title("Download all solutions");
+
+    config::Config cfg(parser, config::EJUDGE_SESSION);
+
+    fs::path output;
+    // clang-format off
+    parser
+        .add('o', "output")
+        .required()
+        .description("Path to output directory")
+        .value_type("DIR")
+        .store(output);
+    // clang-format on
+
+    parser.parse(argc, argv);
+
+    if (fs::exists(output)) {
+        if (!fs::is_directory(output)) {
+            throw std::runtime_error{"Output path already exists"};
+        }
+        if (!fs::is_empty(output)) {
+            throw std::runtime_error{"Output path is not empty"};
+        }
+    } else {
+        fs::create_directories(output);
+    }
+
+    parser::Parser client(cfg);
+
+    auto tasks = client.tasks();
+    for (auto&& task : tasks) {
+        fs::create_directory(output / task.name);
+        auto submits = client.solutions(task.id);
+        for (auto&& submit : submits) {
+            std::ofstream ofs{output / task.name / util::string::join(submit.result.status, '_', submit.id)};
+            ofs << client.source(submit.id);
+        }
+    }
+
+    return 0;
+}
+
 int statement(int argc, const char* argv[]) {
     cpparg::parser parser("cacos task statement");
     parser.title("Print task statement");
@@ -115,6 +159,11 @@ int run(int argc, const char* argv[]) {
         .command("get")
         .description("Download run code")
         .handle(fetch);
+
+    parser
+        .command("dump")
+        .description("Download all solutions")
+        .handle(dump);
     // clang-format on
 
     return parser.parse(argc, argv);
