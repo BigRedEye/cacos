@@ -105,7 +105,7 @@ int dump(int argc, const char* argv[]) {
         fs::create_directory(output / task.name);
         auto submits = client.solutions(task.id);
         for (auto&& submit : submits) {
-            std::ofstream ofs{output / task.name / util::string::join(submit.result.status, '_', submit.id)};
+            std::ofstream ofs{output / task.name / util::string::join(submit.id, '_', submit.result.status)};
             ofs << client.source(submit.id);
         }
     }
