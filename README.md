@@ -123,6 +123,12 @@ $ cacos task run get <RUN_ID>
 ```
 где `RUN_ID` — номер посылки из `task run list`.
 
+###### Загрузка всех посылок
+```
+$ cacos task run dump --output <PATH>
+```
+где `PATH` — путь для сохранения.
+
 ###### Сравнение посылок
 ```
 $ cacos task diff <FIRST> <SECOND>
